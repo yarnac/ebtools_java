@@ -61,9 +61,9 @@ public class VlcVideoCtrl {
         guiDecorator.addToolbarButton("MainToolbar", "Select next files", IC.MALE_USER, e -> ShuffleFiles());
         guiDecorator.addToolbarButton("MainToolbar", "Refresh", IC.REFRESHPAGE, e -> DeleteShowedFiles());
 
-        guiDecorator.addMouseListener(vlcVideoForm.getLstFiles(), this::playSelectedFiles);
-        guiDecorator.addKeyHandler(vlcVideoForm.getLstFiles(),"N",()->SelectAndPlayNextFiles(1));
-        guiDecorator.addKeyHandler(vlcVideoForm.getLstFiles(),"P",()->SelectAndPlayNextFiles(-1));
+        guiDecorator.addMouseDoubleClickAction(vlcVideoForm.getLstFiles(), this::playSelectedFiles);
+        guiDecorator.addKeyPressAction(vlcVideoForm.getLstFiles(),"N",()->SelectAndPlayNextFiles(1));
+        guiDecorator.addKeyPressAction(vlcVideoForm.getLstFiles(),"P",()->SelectAndPlayNextFiles(-1));
 
         toolBar.invalidate();
         toolBar.repaint();

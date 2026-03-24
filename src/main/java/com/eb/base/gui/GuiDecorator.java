@@ -186,16 +186,14 @@ public class GuiDecorator {
 	public void addToolbarSeparator(String toolbarName) {
 		Container container = fetchContainer(toolbarName);
 
-		if (!(container instanceof JToolBar)	)
-			return;
+		if (!(container instanceof JToolBar)) return;
 
-		JToolBar toolbar = (JToolBar) container;
 		JSeparator seo = new JSeparator();
 		seo.setMaximumSize(new Dimension(20,200));
 		seo.setOpaque(true);
 		seo.setSize(202,20);				
 		seo.getInsets().left = 4;
-		toolbar.add(seo);			
+		container.add(seo);
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -259,7 +257,7 @@ public class GuiDecorator {
 		return ic.getCachedImage();
 	}
 
-	public void addMouseListener(Component list, Runnable action) {
+	public void addMouseDoubleClickAction(JComponent list, Runnable action) {
 		list.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent e) {
@@ -270,7 +268,7 @@ public class GuiDecorator {
 		});
 	}
 
-	public void addKeyHandler(JComponent list, String key, Runnable action) {
+	public void addKeyPressAction(JComponent list, String key, Runnable action) {
 		InputMap inputMap = list.getInputMap(JComponent.WHEN_FOCUSED);
 		ActionMap actionMap = list.getActionMap();
 		String upperCaseKey = key.toUpperCase();
