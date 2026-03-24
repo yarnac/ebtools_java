@@ -6,14 +6,15 @@ import com.eb.base.inifile.api.IniFile;
 import com.eb.base.inifile.api.IniFileProvider;
 import com.eb.base.io.FileUtil;
 import com.eb.ebmusic.tobj.MusicPlayer;
+import lombok.Getter;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import static java.lang.System.out;
@@ -21,11 +22,18 @@ import static java.lang.System.out;
 public class VlcVideoCtrl {
 
     public static final String C_DATA_SHOWED_FILES_TXT = "c:\\data\\ShowedFiles.txt";
+
+    @Getter
     private static JFrame frame;
+
+    @Getter
     private final Container toolBar;
+
+    @Getter
     private final IniFile iniFile;
-    private final GuiDecorator decorator;
-    private VlcVideoForm vlcVideoForm;
+    @Getter
+    private final GuiDecorator guiDecorator;
+    private final VlcVideoForm vlcVideoForm;
     List<String> allFileNames;
 
     public static void main(String[] args) {
@@ -43,19 +51,19 @@ public class VlcVideoCtrl {
         toolBar = vlcVideoForm.getToolBar();
         frame = vlcVideoForm.getFrame();
 
-        decorator = new GuiDecorator(frame, iniFile, "Einstellungen");
-        frame.setIconImage(decorator.getImage(IC.Triangle_Red));
+        guiDecorator = new GuiDecorator(frame, iniFile, "Einstellungen");
+        frame.setIconImage(guiDecorator.getImage(IC.Triangle_Red));
 
-        decorator.addContainer("MainToolbar", toolBar);
-        decorator.addToolbarButton("MainToolbar", "Play files", IC.MB_PLAY, e -> playSelectedFiles());
-        decorator.addToolbarButton("MainToolbar", "Select previous files", IC.PREV, e -> SelectAndPlayNextFiles(-1));
-        decorator.addToolbarButton("MainToolbar", "Select next files", IC.NEXT, e -> SelectAndPlayNextFiles(1));
-        decorator.addToolbarButton("MainToolbar", "Select next files", IC.MALE_USER, e -> ShuffleFiles());
-        decorator.addToolbarButton("MainToolbar", "Refresh", IC.REFRESHPAGE, e -> DeleteShowedFiles());
+        guiDecorator.addContainer("MainToolbar", toolBar);
+        guiDecorator.addToolbarButton("MainToolbar", "Play files", IC.MB_PLAY, e -> playSelectedFiles());
+        guiDecorator.addToolbarButton("MainToolbar", "Select previous files", IC.PREV, e -> SelectAndPlayNextFiles(-1));
+        guiDecorator.addToolbarButton("MainToolbar", "Select next files", IC.NEXT, e -> SelectAndPlayNextFiles(1));
+        guiDecorator.addToolbarButton("MainToolbar", "Select next files", IC.MALE_USER, e -> ShuffleFiles());
+        guiDecorator.addToolbarButton("MainToolbar", "Refresh", IC.REFRESHPAGE, e -> DeleteShowedFiles());
 
-        decorator.addMouseListener(vlcVideoForm.getLstFiles(), this::playSelectedFiles);
-        decorator.addKeyHandler(vlcVideoForm.getLstFiles(),"N",()->SelectAndPlayNextFiles(1));
-        decorator.addKeyHandler(vlcVideoForm.getLstFiles(),"P",()->SelectAndPlayNextFiles(-1));
+        guiDecorator.addMouseListener(vlcVideoForm.getLstFiles(), this::playSelectedFiles);
+        guiDecorator.addKeyHandler(vlcVideoForm.getLstFiles(),"N",()->SelectAndPlayNextFiles(1));
+        guiDecorator.addKeyHandler(vlcVideoForm.getLstFiles(),"P",()->SelectAndPlayNextFiles(-1));
 
         toolBar.invalidate();
         toolBar.repaint();
@@ -82,7 +90,7 @@ public class VlcVideoCtrl {
     List<String> showedFiles = null;
     private void loadVideoFiles() {
         List<String> temp = FileUtil.getFileNamesAll("d:\\Medien\\dwhelper2\\dwhelper");
-        temp.sort((o1, o2) -> o1.compareTo(o2));
+        temp.sort(Comparator.naturalOrder());
 
 
         try {
@@ -103,9 +111,8 @@ public class VlcVideoCtrl {
         String lowerCase = s.toLowerCase();
         if (lowerCase.endsWith(".ebindex"))
             return false;
-        if (lowerCase.endsWith(".ini"))
-            return false;
-        return true;
+
+        return !lowerCase.endsWith(".ini");
     }
 
 

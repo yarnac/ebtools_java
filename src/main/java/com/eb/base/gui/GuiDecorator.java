@@ -2,6 +2,8 @@ package com.eb.base.gui;
 
 import com.eb.base.inifile.api.IniFile;
 import com.eb.base.io.FileUtil;
+import lombok.Getter;
+import lombok.Setter;
 
 import javax.swing.*;
 import java.awt.*;
@@ -9,19 +11,25 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.net.URL;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.function.Consumer;
 
+import static java.lang.System.out;
+
 
 public class GuiDecorator {
 	private final IniFile iniFile;
-	private JFrame frame;
-	private JMenuBar menuBar;
-	private JFrame Container;
-	private Dictionary<String, JMenu> nameToMenuBarDictionary = new Hashtable<>();
-	private Dictionary<String, Container> nameToContainerDictionary = new Hashtable<>();
+	@Setter
+    @Getter
+    private JFrame frame;
+	@Setter
+    private JMenuBar menuBar;
+
+	private final Dictionary<String, JMenu> nameToMenuBarDictionary = new Hashtable<>();
+	private final Dictionary<String, Container> nameToContainerDictionary = new Hashtable<>();
 	private String currentMenuName;
 
 	public GuiDecorator() {
@@ -62,7 +70,7 @@ public class GuiDecorator {
         try {
 			btn.setIcon(ic.getImageIcon());
         } catch (Exception e) {
-			System.out.println("Image nicht gefunden: " + ic);
+			out.println("Image nicht gefunden: " + ic);
         }
         btn.setToolTipText(tooltipText);
 		toolbar.add(btn);
@@ -83,7 +91,15 @@ public class GuiDecorator {
 		Container toolbar = fetchContainer(toolbarName);
 		
 		JButton btn = new JButton("");
-		btn.setIcon(new ImageIcon(GuiDecorator.class.getResource("/gr24/" + image + ".gif")));
+
+		URL resourceUrl = GuiDecorator.class.getResource("/gr24/" + image + ".gif");
+		if (resourceUrl != null) {
+			ImageIcon icon = new ImageIcon(resourceUrl);
+			btn.setIcon(icon);
+		}
+		else
+			out.println("Image nicht gefunden: " + image);
+
 		btn.setToolTipText(tooltipText);
 		toolbar.add(btn);
 		btn.addActionListener(listener);
@@ -119,11 +135,7 @@ public class GuiDecorator {
 		return menuBar;
 	}
 
-	public void setMenuBar(JMenuBar menu) {
-		this.menuBar = menu;
-	}
-
-	public void addContainer(String string, Container toolbarVokabeln) {
+    public void addContainer(String string, Container toolbarVokabeln) {
 		nameToContainerDictionary.put(string, toolbarVokabeln);
 	}
 
@@ -150,15 +162,7 @@ public class GuiDecorator {
 		
 	}
 
-	public JFrame getFrame() {
-		return frame;
-	}
-
-	public void setFrame(JFrame frame) {
-		this.frame = frame;
-	}
-
-	public JToggleButton addToggleButton(String toolbarName, String tooltipText, IC pinOrange, IC pinRed,
+    public JToggleButton addToggleButton(String toolbarName, String tooltipText, IC pinOrange, IC pinRed,
 			Consumer<Boolean> listener) {
 
 		Container toolbar = nameToContainerDictionary.get(toolbarName);
@@ -175,21 +179,23 @@ public class GuiDecorator {
 
 		btn.setToolTipText(tooltipText);
 		toolbar.add(btn);
-		btn.addActionListener(x->listener.accept(Boolean.valueOf(btn.isSelected())));
+		btn.addActionListener(x->listener.accept(btn.isSelected()));
 		return btn;
 	}
 
 	public void addToolbarSeparator(String toolbarName) {
-		Container toolbar = fetchContainer(toolbarName);
+		Container container = fetchContainer(toolbarName);
 
-		/*
+		if (!(container instanceof JToolBar)	)
+			return;
+
+		JToolBar toolbar = (JToolBar) container;
 		JSeparator seo = new JSeparator();
 		seo.setMaximumSize(new Dimension(20,200));
 		seo.setOpaque(true);
 		seo.setSize(202,20);				
 		seo.getInsets().left = 4;
-		toolbar.add(seo);
-		*/					
+		toolbar.add(seo);			
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -197,8 +203,9 @@ public class GuiDecorator {
 	{
 		JComboBox<T> comboBox = new JComboBox<>();
 		comboBox.setFont(new Font("Arial", Font.PLAIN, 20));
-		DefaultComboBoxModel<T> model = new DefaultComboBoxModel<T>();
-		elements.stream().forEach(x->model.addElement(x));
+		comboBox.setToolTipText(tooltipText);
+		DefaultComboBoxModel<T> model = new DefaultComboBoxModel<>();
+		elements.forEach(model::addElement);
 		comboBox.setModel(model);
 		fetchContainer(toolbarName).add(comboBox);
 		comboBox.addActionListener(x->consumer.accept((T)comboBox.getSelectedItem()));
@@ -209,8 +216,9 @@ public class GuiDecorator {
 	public  <T> JComboBox<T> addToolbarComboBox(String toolbarName, String tooltipText, T[] elements, Consumer<T> consumer)
 	{
 		JComboBox<T> comboBox = new JComboBox<>();
+		comboBox.setToolTipText(tooltipText);
 		comboBox.setFont(new Font("Arial", Font.PLAIN, 10));
-		DefaultComboBoxModel<T> model = new DefaultComboBoxModel<T>(elements);		
+		DefaultComboBoxModel<T> model = new DefaultComboBoxModel<>(elements);
 		comboBox.setModel(model);
 		fetchContainer(toolbarName).add(comboBox);
 		comboBox.addActionListener(x->consumer.accept((T)comboBox.getSelectedItem()));
@@ -221,9 +229,11 @@ public class GuiDecorator {
 		addToggleButton(toolBarName,  "Topmost", IC.PIN_ORANGE, IC.PIN_RED, x->switchTopMost(jFrame));
 	}
 
+	/*
 	public void addWatchClipboardButton(String toolBarName, JFrame jFrame, Consumer<Boolean> handleWatchClipboardChanged) {
 		addToggleButton(toolBarName,  "Watch Clipboard", IC.CLIPBOARD_DEL, IC.CLIPBOARD_UP, x->switchTopMost(jFrame));
 	}
+	*/
 
 	private void switchTopMost(JFrame jFrame) {
 		jFrame.setAlwaysOnTop(!jFrame.isAlwaysOnTop());
