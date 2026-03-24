@@ -55,6 +55,10 @@ public class VlcVideoCtrl {
         frame.setIconImage(guiDecorator.getImage(IC.Triangle_Red));
 
         guiDecorator.addContainer("MainToolbar", toolBar);
+
+        guiDecorator.addEditIniFileButton("MainToolbar");
+        List<String> verzeichnisse = iniFile.getSectionValues("Verzeichnisse");
+        guiDecorator.addToolbarComboBox("MainToolbar", "Verzeichnisse", verzeichnisse, x -> handleChangedVerzeichnis(x));
         guiDecorator.addToolbarButton("MainToolbar", "Play files", IC.MB_PLAY, e -> playSelectedFiles());
         guiDecorator.addToolbarButton("MainToolbar", "Select previous files", IC.PREV, e -> SelectAndPlayNextFiles(-1));
         guiDecorator.addToolbarButton("MainToolbar", "Select next files", IC.NEXT, e -> SelectAndPlayNextFiles(1));
@@ -67,6 +71,9 @@ public class VlcVideoCtrl {
 
         toolBar.invalidate();
         toolBar.repaint();
+    }
+
+    private void handleChangedVerzeichnis(String x) {
     }
 
     private void DeleteShowedFiles() {

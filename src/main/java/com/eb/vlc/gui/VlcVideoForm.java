@@ -51,14 +51,12 @@ public class VlcVideoForm {
         edit.add(new JMenuItem("Paste File"));
         frame.setJMenuBar(menuBar);
 
-
         toolBar = new JToolBar();
         toolBar.setName("MainToolbar");
         toolBar.setLayout(new FlowLayout(FlowLayout.LEFT));
         frame.getContentPane().add(toolBar, BorderLayout.NORTH);
         toolBar.revalidate();
         toolBar.repaint();
-
 
         JPanel panel1 = new JPanel();
         panel1.setLayout(new BorderLayout());

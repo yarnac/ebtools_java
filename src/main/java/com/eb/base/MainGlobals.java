@@ -22,6 +22,21 @@ public class MainGlobals {
         return tempDir + fileName;
     }
 
+    public static String getDataFileName()
+    {
+        if (isWindows())
+            return "d:/Develop/Java/wsjava_ij/Data";
+        else
+            return "/Users/ekkart/Data/Develop/Java/wsjava_ij/Data";
+    }
+
+    public static String getDataFileName(String fileName)
+    {
+        if (fileName.contains("/")||fileName.contains("\\"))
+            return fileName;
+        return getDataFileName() + "/" + fileName;
+    }
+
     public static boolean isWindows() {
         return System.getProperty("os.name").toLowerCase().contains("windows");
     }

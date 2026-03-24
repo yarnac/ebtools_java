@@ -1,5 +1,6 @@
 package com.eb.base.inifile.api;
 
+import com.eb.base.MainGlobals;
 import com.eb.base.inifile.implementation.IFFactory;
 
 public class IniFileProvider {
@@ -8,6 +9,7 @@ public class IniFileProvider {
 
     public static IniFile createIniFile(String fileName)
     {
-        return factory.createIniFile(fileName);
+        String dataFileName = MainGlobals.getDataFileName(fileName);
+        return factory.createIniFile(dataFileName);
     }
 }

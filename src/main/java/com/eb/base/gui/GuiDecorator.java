@@ -200,7 +200,7 @@ public class GuiDecorator {
 	public  <T> JComboBox<T> addToolbarComboBox(String toolbarName, String tooltipText, List<T>elements, Consumer<T> consumer)
 	{
 		JComboBox<T> comboBox = new JComboBox<>();
-		comboBox.setFont(new Font("Arial", Font.PLAIN, 20));
+		comboBox.setFont(new Font("Arial", Font.PLAIN, 14));
 		comboBox.setToolTipText(tooltipText);
 		DefaultComboBoxModel<T> model = new DefaultComboBoxModel<>();
 		elements.forEach(model::addElement);
