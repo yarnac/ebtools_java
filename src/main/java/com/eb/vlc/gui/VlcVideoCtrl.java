@@ -1,0 +1,169 @@
+package com.eb.vlc.gui;
+
+import com.eb.base.gui.GuiDecorator;
+import com.eb.base.gui.IC;
+import com.eb.base.inifile.api.IniFile;
+import com.eb.base.inifile.api.IniFileProvider;
+import com.eb.base.io.FileUtil;
+import com.eb.ebmusic.tobj.MusicPlayer;
+import com.sun.javafx.collections.ElementObservableListDecorator;
+
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
+import static java.lang.System.out;
+
+public class VlcVideoCtrl {
+
+    public static final String C_DATA_SHOWED_FILES_TXT = "c:\\data\\ShowedFiles.txt";
+    private static JFrame frame;
+    private final Container toolBar;
+    private final IniFile iniFile;
+    private VlcVideoForm vlcVideoForm;
+    List<String> allFileNames;
+
+    public static void main(String[] args) {
+
+        new VlcVideoCtrl();
+    }
+
+    public VlcVideoCtrl() {
+        vlcVideoForm = new VlcVideoForm();
+        iniFile = IniFileProvider.createIniFile("VlcVideos.ini");
+
+        loadVideoFiles();
+        ShuffleFiles();
+        // vlcVideoForm.setFileNames(allFileNames);
+        toolBar = vlcVideoForm.getToolBar();
+        frame = vlcVideoForm.getFrame();
+
+        GuiDecorator decorator = new GuiDecorator(frame, iniFile, "Einstellungen");
+        frame.setIconImage(decorator.getImage(IC.Triangle_Red));
+
+        decorator.addContainer("MainToolbar", toolBar);
+        decorator.addToolbarButton("MainToolbar", "Play files", IC.MB_PLAY, e -> playSelectedFiles());
+        decorator.addToolbarButton("MainToolbar", "Select previous files", IC.PREV, e -> SelectAndPlayNextFiles(-1));
+        decorator.addToolbarButton("MainToolbar", "Select next files", IC.NEXT, e -> SelectAndPlayNextFiles(1));
+        decorator.addToolbarButton("MainToolbar", "Select next files", IC.MALE_USER, e -> ShuffleFiles());
+        decorator.addToolbarButton("MainToolbar", "Refresh", IC.REFRESHPAGE, e -> DeleteShowedFiles());
+
+        addDoubleClickHandler(vlcVideoForm.getLstFiles(), this::playSelectedFiles);
+        addNKeyHandler(vlcVideoForm.getLstFiles());
+
+        toolBar.invalidate();
+        toolBar.repaint();
+    }
+
+    private void DeleteShowedFiles() {
+        File file = new File(C_DATA_SHOWED_FILES_TXT);
+        if (file.exists()) {
+            file.delete();
+        }
+    }
+
+    private void ShuffleFiles() {
+        ArrayList<String> shuffledFiles = new ArrayList<>(allFileNames);
+        Collections.shuffle(shuffledFiles);
+        vlcVideoForm.setFileNames(shuffledFiles);
+    }
+
+    private void SelectAndPlayNextFiles(int i) {
+        JListUtils.selectNextBlock(vlcVideoForm.getLstFiles(), i);
+        playSelectedFiles();
+    }
+
+    List<String> showedFiles = null;
+    private void loadVideoFiles() {
+        List<String> temp = FileUtil.getFileNamesAll("d:\\Medien\\dwhelper2\\dwhelper");
+        temp.sort((o1, o2) -> o1.compareTo(o2));
+
+
+        try {
+            showedFiles = FileUtil.readLines("UTF-8", C_DATA_SHOWED_FILES_TXT);
+        } catch (IOException e) {
+            showedFiles = new ArrayList<>();
+        }
+
+        allFileNames = temp
+                .stream()
+                .filter(this::isAllowdVideo)
+                .filter(x -> !(showedFiles.contains(x)))
+                .toList();
+        out.println("Loaded " + allFileNames.size() + " files");
+    }
+
+    private boolean isAllowdVideo(String s) {
+        String lowerCase = s.toLowerCase();
+        if (lowerCase.endsWith(".ebindex"))
+            return false;
+        if (lowerCase.endsWith(".ini"))
+            return false;
+        return true;
+    }
+
+
+    private void playSelectedFiles() {
+        List<String> selectedFileNames = vlcVideoForm.getSelectedFiles();
+        if (selectedFileNames.size()<=1)
+        {
+            JListUtils.selectLineInterval(vlcVideoForm.getLstFiles(), 8);
+            selectedFileNames = vlcVideoForm.getSelectedFiles();
+        }
+
+        saveShowedFiles(selectedFileNames);
+        new MusicPlayer().play(selectedFileNames);
+    }
+
+    private void saveShowedFiles(List<String> selectedFileNames) {
+        StringBuilder builder = new StringBuilder();
+        for(String s : selectedFileNames) {
+            builder.append(s);
+            builder.append("\r\n");
+        }
+        FileUtil.appendLine(C_DATA_SHOWED_FILES_TXT, builder.toString());
+    }
+
+    public void addDoubleClickHandler(JList<String> list, Runnable action) {
+        list.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                if (e.getClickCount() == 2) {
+                    action.run();
+                }
+            }
+        });
+    }
+
+    public void addNKeyHandler(JList<?> list) {
+        InputMap inputMap = list.getInputMap(JComponent.WHEN_FOCUSED);
+        ActionMap actionMap = list.getActionMap();
+
+        // Taste "n" registrieren
+        inputMap.put(KeyStroke.getKeyStroke("N"), "pressedN");
+        inputMap.put(KeyStroke.getKeyStroke("P"), "pressedP");
+
+        actionMap.put("pressedN", new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                SelectAndPlayNextFiles(1);
+            }
+        });
+
+        actionMap.put("pressedP", new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                SelectAndPlayNextFiles(-1);
+            }
+        });
+    }
+
+
+}

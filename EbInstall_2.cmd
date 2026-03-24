@@ -1,0 +1,1 @@
+copy target\EbTools-0.0.1-SNAPSHOT.jar z:\PortableSSD\Develop\Transfer

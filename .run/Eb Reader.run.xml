@@ -1,0 +1,18 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="Eb Reader" type="Application" factoryName="Application">
+    <classpathModifications>
+      <entry path="D:\Develop\Java\wsjava_intellij\EbTools\rsc.jar" />
+    </classpathModifications>
+    <option name="MAIN_CLASS_NAME" value="com.eb.ebookreader.app.EbReaderApp" />
+    <module name="EbTools" />
+    <extension name="coverage">
+      <pattern>
+        <option name="PATTERN" value="ebtools.*" />
+        <option name="ENABLED" value="true" />
+      </pattern>
+    </extension>
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>
