@@ -6,13 +6,10 @@ import com.eb.base.inifile.api.IniFile;
 import com.eb.base.inifile.api.IniFileProvider;
 import com.eb.base.io.FileUtil;
 import com.eb.ebmusic.tobj.MusicPlayer;
-import com.sun.javafx.collections.ElementObservableListDecorator;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -27,6 +24,7 @@ public class VlcVideoCtrl {
     private static JFrame frame;
     private final Container toolBar;
     private final IniFile iniFile;
+    private final GuiDecorator decorator;
     private VlcVideoForm vlcVideoForm;
     List<String> allFileNames;
 
@@ -45,7 +43,7 @@ public class VlcVideoCtrl {
         toolBar = vlcVideoForm.getToolBar();
         frame = vlcVideoForm.getFrame();
 
-        GuiDecorator decorator = new GuiDecorator(frame, iniFile, "Einstellungen");
+        decorator = new GuiDecorator(frame, iniFile, "Einstellungen");
         frame.setIconImage(decorator.getImage(IC.Triangle_Red));
 
         decorator.addContainer("MainToolbar", toolBar);
@@ -55,8 +53,9 @@ public class VlcVideoCtrl {
         decorator.addToolbarButton("MainToolbar", "Select next files", IC.MALE_USER, e -> ShuffleFiles());
         decorator.addToolbarButton("MainToolbar", "Refresh", IC.REFRESHPAGE, e -> DeleteShowedFiles());
 
-        addDoubleClickHandler(vlcVideoForm.getLstFiles(), this::playSelectedFiles);
-        addNKeyHandler(vlcVideoForm.getLstFiles());
+        decorator.addMouseListener(vlcVideoForm.getLstFiles(), this::playSelectedFiles);
+        decorator.addKeyHandler(vlcVideoForm.getLstFiles(),"N",()->SelectAndPlayNextFiles(1));
+        decorator.addKeyHandler(vlcVideoForm.getLstFiles(),"P",()->SelectAndPlayNextFiles(-1));
 
         toolBar.invalidate();
         toolBar.repaint();
@@ -130,40 +129,4 @@ public class VlcVideoCtrl {
         }
         FileUtil.appendLine(C_DATA_SHOWED_FILES_TXT, builder.toString());
     }
-
-    public void addDoubleClickHandler(JList<String> list, Runnable action) {
-        list.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                if (e.getClickCount() == 2) {
-                    action.run();
-                }
-            }
-        });
-    }
-
-    public void addNKeyHandler(JList<?> list) {
-        InputMap inputMap = list.getInputMap(JComponent.WHEN_FOCUSED);
-        ActionMap actionMap = list.getActionMap();
-
-        // Taste "n" registrieren
-        inputMap.put(KeyStroke.getKeyStroke("N"), "pressedN");
-        inputMap.put(KeyStroke.getKeyStroke("P"), "pressedP");
-
-        actionMap.put("pressedN", new AbstractAction() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                SelectAndPlayNextFiles(1);
-            }
-        });
-
-        actionMap.put("pressedP", new AbstractAction() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                SelectAndPlayNextFiles(-1);
-            }
-        });
-    }
-
-
 }

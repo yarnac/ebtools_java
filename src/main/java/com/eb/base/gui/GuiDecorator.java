@@ -5,7 +5,10 @@ import com.eb.base.io.FileUtil;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.List;
@@ -244,5 +247,34 @@ public class GuiDecorator {
 
 	public Image getImage(IC ic) {
 		return ic.getCachedImage();
+	}
+
+	public void addMouseListener(Component list, Runnable action) {
+		list.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				if (e.getClickCount() == 2) {
+					action.run();
+				}
+			}
+		});
+	}
+
+	public void addKeyHandler(JComponent list, String key, Runnable action) {
+		InputMap inputMap = list.getInputMap(JComponent.WHEN_FOCUSED);
+		ActionMap actionMap = list.getActionMap();
+		String upperCaseKey = key.toUpperCase();
+		String actionMapKey = "pressed" + upperCaseKey;
+
+		// Taste registrieren
+		inputMap.put(KeyStroke.getKeyStroke(upperCaseKey), actionMapKey);
+
+
+		actionMap.put(actionMapKey, new AbstractAction() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				action.run();
+			}
+		});
 	}
 }
