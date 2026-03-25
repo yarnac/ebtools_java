@@ -73,7 +73,7 @@ public class VlcVideoCtrl {
         toolBar.invalidate();
         toolBar.repaint();
 
-        if (verzeichnisse.size() > 0) {
+        if (!verzeichnisse.isEmpty()) {
             handleChangedVerzeichnis(verzeichnisse.get(0));
         }
 
