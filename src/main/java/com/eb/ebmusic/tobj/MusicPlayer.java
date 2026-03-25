@@ -79,9 +79,9 @@ public class MusicPlayer {
 				strb.append(filename);
 				strb.append(" ");
 			}
-			command.add(strb.toString());
+			//command.add(strb.toString());
 			// Alle Dateien anhängen
-			// command.addAll(filenamesToPlay);
+			command.addAll(filenamesToPlay);
 
 			ProcessBuilder pb = new ProcessBuilder(command);
 			pb.start();

@@ -1,11 +1,13 @@
 package com.eb.vlc.gui;
 
+import com.eb.base.MainGlobals;
 import com.eb.base.gui.GuiDecorator;
 import com.eb.base.gui.IC;
 import com.eb.base.inifile.api.IniFile;
 import com.eb.base.inifile.api.IniFileProvider;
 import com.eb.base.io.FileUtil;
 import com.eb.ebmusic.tobj.MusicPlayer;
+import com.sun.tools.javac.Main;
 import lombok.Getter;
 
 import javax.swing.*;
@@ -21,7 +23,7 @@ import static java.lang.System.out;
 
 public class VlcVideoCtrl {
 
-    public static final String C_DATA_SHOWED_FILES_TXT = "c:\\data\\ShowedFiles.txt";
+    public static final String C_DATA_SHOWED_FILES_TXT = MainGlobals.getEbToolsFileName("ShowedFiles.txt");
 
     @Getter
     private static JFrame frame;
@@ -43,10 +45,9 @@ public class VlcVideoCtrl {
 
     public VlcVideoCtrl() {
         vlcVideoForm = new VlcVideoForm();
-        iniFile = IniFileProvider.createIniFile("VlcVideos.ini");
+        iniFile = IniFileProvider.createIniFile(MainGlobals.getEbToolsFileName("VlcVideoCtrl.ini"));
 
-        loadVideoFiles();
-        ShuffleFiles();
+
         // vlcVideoForm.setFileNames(allFileNames);
         toolBar = vlcVideoForm.getToolBar();
         frame = vlcVideoForm.getFrame();
@@ -71,10 +72,18 @@ public class VlcVideoCtrl {
 
         toolBar.invalidate();
         toolBar.repaint();
+
+        if (verzeichnisse.size() > 0) {
+            handleChangedVerzeichnis(verzeichnisse.get(0));
+        }
+
     }
 
-    private void handleChangedVerzeichnis(String x) {
+    private void handleChangedVerzeichnis(String fileName) {
+        loadVideoFiles(fileName);
+        ShuffleFiles();
     }
+
 
     private void DeleteShowedFiles() {
         File file = new File(C_DATA_SHOWED_FILES_TXT);
@@ -95,8 +104,8 @@ public class VlcVideoCtrl {
     }
 
     List<String> showedFiles = null;
-    private void loadVideoFiles() {
-        List<String> temp = FileUtil.getFileNamesAll("d:\\Medien\\dwhelper2\\dwhelper");
+    private void loadVideoFiles(String fileName) {
+        List<String> temp = FileUtil.getFileNamesAll(fileName);
         temp.sort(Comparator.naturalOrder());
 
 
