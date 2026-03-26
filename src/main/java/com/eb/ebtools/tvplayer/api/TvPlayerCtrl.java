@@ -36,16 +36,19 @@ public class TvPlayerCtrl {
         view = new TvPlayerView();
         view.initView(tvPanel);
 
-        decorate();
+        GuiDecorator decorator = new GuiDecorator();
+        decorate(decorator);
+        decorator.addMouseDoubleClickAction(view.getLstTvItems(), ()->onShowFile(view.getSelectedTvItem()));
 
         view.getCbKategorien().addListSelectionListener(e -> kategorieChanged());
-        view.getLstTvItems().addListSelectionListener(e -> onShowFile(e));
+
+        //view.getLstTvItems().addListSelectionListener(e -> onShowFile(e));
 
         reload();
     }
 
-    private void decorate() {
-        GuiDecorator decorator = new GuiDecorator();
+    private void decorate(GuiDecorator decorator) {
+
         decorator.addContainer("main", getView().getToolBar());
 
         decorator.addToolbarButton("main", "Hörzu", IC.VIDEO_LIBRARY_SEARCH, x->openHoerzu());
@@ -82,13 +85,11 @@ public class TvPlayerCtrl {
         transfer();
     }
 
-    private void onShowFile(ListSelectionEvent e) {
-        if (e.getValueIsAdjusting()) return;
-        TvItem v = view.getSelectedTvItem();
-        if (v==null)
+    private void onShowFile(TvItem item) {
+        if (item==null)
             return;
 
-        showFile(v);
+        showFile(item);
     }
 
 
