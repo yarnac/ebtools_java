@@ -26,7 +26,7 @@ public class MusicFolder {
         this.tag = tag;
     }
 
-    enum EntryType {
+    public enum EntryType {
 		UNDEFINED,
 		FILE,
 		DIRECTORY

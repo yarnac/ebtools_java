@@ -60,11 +60,9 @@ public class SizeHashcodeDuplicateScanService implements IDuplicateScanService {
         if (file.isDirectory() || file.length()==0)
             return false;
         String fileName = path.toString();
-        return (fileName.contains(".ebindex") ||
-                fileName .contains("\\bin\\") || fileName.contains("/bin/") ||
-                fileName.contains("\\obj\\") || fileName.contains("/obj/"))
-                ? false
-                : true;
+        return !fileName.contains(".ebindex") &&
+                !fileName.contains("\\bin\\") && !fileName.contains("/bin/") &&
+                !fileName.contains("\\obj\\") && !fileName.contains("/obj/");
     }
 }
 

@@ -84,6 +84,9 @@ public class MusicPlayer {
 			command.addAll(filenamesToPlay);
 
 			ProcessBuilder pb = new ProcessBuilder(command);
+			pb.redirectInput(ProcessBuilder.Redirect.DISCARD);
+			pb.redirectOutput(ProcessBuilder.Redirect.DISCARD);
+			pb.redirectError(ProcessBuilder.Redirect.DISCARD);
 			pb.start();
 
 		} catch (IOException e) {
@@ -96,15 +99,15 @@ public class MusicPlayer {
 			// Pfad zur VLC-Executable (an dein System anpassen!)
 			String vlcPath = "C:\\Program Files\\VideoLAN\\VLC\\vlc.exe";
 
-			// Befehl zusammenbauen
-			ProcessBuilder pb = new ProcessBuilder();
-			pb.command().add(vlcPath);
+			List<String> command = new ArrayList<>();
+			command.add("cmd");
+			command.add("/c");
+			command.add("start");
+			command.add(""); // Fenstertitel leer lassen
+			command.add(vlcPath);
+			command.addAll(filenamesToPlay);
 
-			// Alle Dateien hinzufügen
-			pb.command().addAll(filenamesToPlay);
-
-			// Prozess starten
-			pb.start();
+			Process process = new ProcessBuilder(command).start();
 
 		} catch (IOException e) {
 			e.printStackTrace();

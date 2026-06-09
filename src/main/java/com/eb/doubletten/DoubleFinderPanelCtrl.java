@@ -86,7 +86,7 @@ public class DoubleFinderPanelCtrl extends AbstrPanelCtrl {
 			moveTo(getSelectedDoublette(), "~/Data/Medien/Porno/doubles");
 		if (x.getKeyChar()=='z')
 		{
-			zufall = zufall ? false : true;
+			zufall = !zufall;
 			random = new Random(new Date().getTime());
 		}
 		

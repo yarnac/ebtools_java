@@ -309,19 +309,19 @@ public final class Twofish_Algorithm // implicit no-argument constructor
 			mX[1] = Mx_X(j) & 0xFF;
 			mY[1] = Mx_Y(j) & 0xFF;
 
-			MDS[0][i] = m1[P_00] << 0 | // fill matrix w/ above elements
+			MDS[0][i] = m1[P_00] | // fill matrix w/ above elements
 					mX[P_00] << 8 |
 					mY[P_00] << 16 |
 					mY[P_00] << 24;
-			MDS[1][i] = mY[P_10] << 0 |
+			MDS[1][i] = mY[P_10] |
 					mY[P_10] << 8 |
 					mX[P_10] << 16 |
 					m1[P_10] << 24;
-			MDS[2][i] = mX[P_20] << 0 |
+			MDS[2][i] = mX[P_20] |
 					mY[P_20] << 8 |
 					m1[P_20] << 16 |
 					mY[P_20] << 24;
-			MDS[3][i] = mX[P_30] << 0 |
+			MDS[3][i] = mX[P_30] |
 					m1[P_30] << 8 |
 					mY[P_30] << 16 |
 					mX[P_30] << 24;

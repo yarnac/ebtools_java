@@ -6,6 +6,7 @@ import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.io.Serial;
 import java.util.function.Consumer;
 
 import javax.swing.JComboBox;
@@ -22,6 +23,7 @@ public class DoubleFinderPanel extends JPanel {
 	/**
 	 * 
 	 */
+	@Serial
 	private static final long serialVersionUID = 1L;
 	private JList<Doublette> lstDoubletten;
 	private JComboBox<String> comboBox;

@@ -75,4 +75,11 @@ public class VlcVideoForm {
     public List<String> getSelectedFiles() {
         return lstFiles.getSelectedValuesList();
     }
+
+    public void deleteFileName(String selectedFileName) {
+        int n = model.indexOf(selectedFileName);
+        if (n<0)
+            return;
+        model.remove(n);
+    }
 }
