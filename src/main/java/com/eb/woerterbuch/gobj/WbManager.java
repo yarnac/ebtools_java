@@ -14,7 +14,7 @@ import com.eb.base.inifile.api.IniFileProvider;
 import com.eb.base.inifile.api.IniFile;
 import com.eb.base.io.FileUtil;
 import com.eb.woerterbuch.gui.ShowCryptedFileDlg;
-import com.eb.woerterbuch.gui.WordListDlgCtrl;
+import com.eb.woerterbuch.tobj.WordListDlgCtrl;
 
 public class WbManager {
 	IniFile iniFile;

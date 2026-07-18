@@ -32,7 +32,8 @@ public class WbApp {
 		setInitialLocationAndSize();
 		registerSaveOnClose();
 	
-		getWoerterbuchFrame().setVisible(true);			
+
+		getWoerterbuchFrame().setVisible(true);
 	}
 
 	private void initializeWoerterbuchFields() {
