@@ -53,6 +53,7 @@ public class TvPlayerCtrl {
 
         decorator.addToolbarButton("main", "Hörzu", IC.VIDEO_LIBRARY_SEARCH, x->openHoerzu());
         decorator.addToolbarButton("main", "Open Tv File", IC.EDITDOC, x->tvFileBearbeiten());
+        decorator.addToolbarButton("main", "HÖRZU", IC.HELP_BLUE, x->openHoerzu());
         decorator.addToolbarButton("main", "Reload", IC.REFRESHPAGE, x->reload());
         decorator.addToolbarButton("main", "Export", IC.SAVE_ADD, x->copyScript());
         decorator.addToolbarButton("main", "Toggle Show All", IC.FILTER, x->toggleShowAll());

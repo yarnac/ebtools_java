@@ -12,8 +12,10 @@ import lombok.Getter;
 
 import javax.swing.*;
 import java.awt.*;
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -54,6 +56,7 @@ public class VlcVideoCtrl {
 
         guiDecorator = new GuiDecorator(frame, iniFile, "Einstellungen");
         frame.setIconImage(guiDecorator.getImage(IC.Triangle_Red));
+        Taskbar.getTaskbar().setIconImage(guiDecorator.getImage(IC.Triangle_Red, 32));
 
         guiDecorator.addContainer("MainToolbar", toolBar);
 
@@ -67,6 +70,7 @@ public class VlcVideoCtrl {
         guiDecorator.addToolbarButton("MainToolbar", "Select next files", IC.NEXT, e -> SelectAndPlayNextFiles(1));
         guiDecorator.addToolbarButton("MainToolbar", "Shuffle Files", IC.MALE_USER, e -> ShuffleFiles());
         guiDecorator.addToolbarButton("MainToolbar", "Refresh", IC.REFRESHPAGE, e -> DeleteShowedFiles());
+        guiDecorator.addToolbarButton("MainToolbar", "Refresh", IC.REFRESHPAGE, e -> ShowActVlcFile());
 
         guiDecorator.addMouseDoubleClickAction(vlcVideoForm.getLstFiles(), this::playSelectedFiles);
         guiDecorator.addKeyPressAction(vlcVideoForm.getLstFiles(),"N",()->SelectAndPlayNextFiles(1));
@@ -87,6 +91,34 @@ public class VlcVideoCtrl {
             vlcVideoForm.deleteFileName(selectedFileName);
         }
 
+    }
+
+    private void ShowActVlcFile() {
+        test();
+    }
+
+    public void test() {
+        try {
+            String[] cmd = {
+                    "osascript",
+                    "-e",
+                    "tell application \"VLC\" to get path of current item"
+            };
+
+            Process process = Runtime.getRuntime().exec(cmd);
+
+            BufferedReader reader = new BufferedReader(
+                    new InputStreamReader(process.getInputStream())
+            );
+
+            String line;
+            while ((line = reader.readLine()) != null) {
+                System.out.println("Aktuelle Datei: " + line);
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     private void handleChangedVerzeichnis(String fileName) {

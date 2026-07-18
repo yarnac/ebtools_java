@@ -8,6 +8,8 @@ import com.eb.ebtools.tobj.*;
 import com.eb.ebtools.gui.EbToolsView;
 import com.eb.ebtools.tvplayer.api.TvPlayerCtrl;
 
+import java.awt.*;
+
 
 public class EbToolsViewController {
 	private final TvPlayerCtrl tvPlayerCtrl;
@@ -21,8 +23,9 @@ public class EbToolsViewController {
 
 		IC.Size = 24;
 		decorator = new GuiDecorator(view.getFrame(), manager.getIniFile(),"Einstellungen");
+		view.getFrame().setIconImage(decorator.getImage(IC.TOOLS));
+		Taskbar.getTaskbar().setIconImage(decorator.getImage(IC.TOOLS,32));
 
-		
 		addToolbarButtons();
 		addMenus();
 		registerEvents();

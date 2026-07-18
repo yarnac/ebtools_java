@@ -257,6 +257,10 @@ public class GuiDecorator {
 		return ic.getCachedImage();
 	}
 
+	public Image getImage(IC ic, int size) {
+		return ic.getImage(size);
+	}
+
 	public void addMouseDoubleClickAction(JComponent list, Runnable action) {
 		list.addMouseListener(new MouseAdapter() {
 			@Override
