@@ -30,13 +30,11 @@ public class Crypt {
     }
 
     public static void saveEncryptedFile(String fileName, String passwort, String text) {
-        // TODO Ekkart 5.5 2015 Auto-generated method stub
         new Twofish_Crypter().saveEncryptedFile(fileName, passwort, text);
 
     }
 
     public static String loadEncryptedFile(String passFile, String pw) throws IOException {
-        // TODO Ekkart 5.5 2015 Auto-generated method stub
         Twofish_Crypter crypter = new Twofish_Crypter();
         return crypter.loadEncryptedFile(passFile, pw);
 

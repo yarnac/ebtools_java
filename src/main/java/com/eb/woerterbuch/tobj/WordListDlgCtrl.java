@@ -1,7 +1,8 @@
-package com.eb.woerterbuch.gui;
+package com.eb.woerterbuch.tobj;
 
 import com.eb.base.gui.GuiDecorator;
 import com.eb.base.gui.IC;
+import com.eb.woerterbuch.gui.WordListDlg;
 
 import java.util.List;
 

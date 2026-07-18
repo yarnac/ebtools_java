@@ -1,6 +1,7 @@
 package com.eb.doubletten;
 
 import java.awt.*;
+import java.io.Serial;
 import java.util.List;
 
 import javax.swing.*;
@@ -14,6 +15,7 @@ public class DoubleFinderFrame extends JFrame {
 	/**
 	 * 
 	 */
+	@Serial
 	private static final long serialVersionUID = 1L;
 	private JPanel contentPane;
 	private JPanel panelLeft;

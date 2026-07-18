@@ -2,6 +2,7 @@ package com.eb.ebmusic.tobj;
 
 import com.eb.ebmusic.gobj.MusicFolder;
 
+import java.io.Serial;
 import java.util.Vector;
 
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -38,6 +39,7 @@ public class MusicTreeNode extends DefaultMutableTreeNode{
 	/**
 	 * 
 	 */
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 }

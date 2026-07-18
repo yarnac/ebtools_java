@@ -65,7 +65,7 @@ public class EbReaderViewFrame extends JFrame {
 		gbc_toolBar.gridy = 0;
 		getContentPane().add(getTbUpper(), gbc_toolBar);
 		
-		while(getBookViews().size()>0 && false)
+		while(!getBookViews().isEmpty() && false)
 		{			
 			BookView view = getBookViews().get(0);
 			getContentPane().remove(view.getPane());

@@ -17,6 +17,7 @@ import javax.swing.event.ListSelectionEvent;
 
 import com.eb.base.gui.GuiDecorator;
 import com.eb.system.ClipboardAdapter;
+import com.eb.woerterbuch.tobj.WordListDlgCtrl;
 
 public class WordListDlg extends JFrame {
 

@@ -47,7 +47,7 @@ public class WbPanelCtrl {
 	private StringBuilder cache;
 	
 	
-	interface TopMostHandler
+	public interface TopMostHandler
 	{
 		public void setTopMost(boolean value);
 	}

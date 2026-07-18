@@ -60,10 +60,12 @@ public class VlcVideoCtrl {
         guiDecorator.addEditIniFileButton("MainToolbar");
         List<String> verzeichnisse = iniFile.getSectionValues("Verzeichnisse");
         guiDecorator.addToolbarComboBox("MainToolbar", "Verzeichnisse", verzeichnisse, x -> handleChangedVerzeichnis(x));
-        guiDecorator.addToolbarButton("MainToolbar", "Play files", IC.MB_PLAY, e -> playSelectedFiles());
+
+        guiDecorator.addToolbarButton("MainToolbar", "Delete selected files", IC.DELETE_RED, e -> deleteSelectedFiles());
+        guiDecorator.addToolbarButton("MainToolbar", "Play files", IC.MB_PLAY, e -> SelectAndPlayNextFiles(-1));
         guiDecorator.addToolbarButton("MainToolbar", "Select previous files", IC.PREV, e -> SelectAndPlayNextFiles(-1));
         guiDecorator.addToolbarButton("MainToolbar", "Select next files", IC.NEXT, e -> SelectAndPlayNextFiles(1));
-        guiDecorator.addToolbarButton("MainToolbar", "Select next files", IC.MALE_USER, e -> ShuffleFiles());
+        guiDecorator.addToolbarButton("MainToolbar", "Shuffle Files", IC.MALE_USER, e -> ShuffleFiles());
         guiDecorator.addToolbarButton("MainToolbar", "Refresh", IC.REFRESHPAGE, e -> DeleteShowedFiles());
 
         guiDecorator.addMouseDoubleClickAction(vlcVideoForm.getLstFiles(), this::playSelectedFiles);
@@ -75,6 +77,14 @@ public class VlcVideoCtrl {
 
         if (!verzeichnisse.isEmpty()) {
             handleChangedVerzeichnis(verzeichnisse.get(0));
+        }
+
+    }
+
+    private void deleteSelectedFiles() {
+        List<String> selectedFileNames = vlcVideoForm.getSelectedFiles();
+        for(String selectedFileName : selectedFileNames) {
+            vlcVideoForm.deleteFileName(selectedFileName);
         }
 
     }
@@ -103,10 +113,11 @@ public class VlcVideoCtrl {
         playSelectedFiles();
     }
 
-    List<String> showedFiles = null;
+    List<String> showedFiles = new ArrayList<>();
     private void loadVideoFiles(String fileName) {
         List<String> temp = FileUtil.getFileNamesAll(fileName);
         temp.sort(Comparator.naturalOrder());
+
 
 
         try {
@@ -114,6 +125,7 @@ public class VlcVideoCtrl {
         } catch (IOException e) {
             showedFiles = new ArrayList<>();
         }
+
 
         allFileNames = temp
                 .stream()
@@ -145,6 +157,7 @@ public class VlcVideoCtrl {
     }
 
     private void saveShowedFiles(List<String> selectedFileNames) {
+
         StringBuilder builder = new StringBuilder();
         for(String s : selectedFileNames) {
             builder.append(s);
