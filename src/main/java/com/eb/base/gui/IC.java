@@ -102,13 +102,13 @@ public enum IC
 		return getImage(Size);
 	}
 
-	private Image getImage(int size) {
+	public Image getImage(int size) {
 		String fn = fileName;
 
 		if (fileName.startsWith("HR_"))
 			fn = fileName.substring("HR_".length());
 
-		if (cachedImage ==null)
+		//if (cachedImage ==null)
 			cachedImage = Toolkit.getDefaultToolkit().getImage(IC.class.getResource("/gr" + size + "/" + fn + ".gif"));
 
 		return cachedImage;
