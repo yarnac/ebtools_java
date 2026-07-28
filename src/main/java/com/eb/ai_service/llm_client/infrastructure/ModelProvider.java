@@ -46,7 +46,7 @@ public class ModelProvider {
 
             String[] parts = line.split("\\t");
 
-            if (parts.length != 2) {
+            if (parts.length < 2) {
                 throw new IllegalArgumentException(
                         "Ungültiges Format in Zeile: " + line);
             }

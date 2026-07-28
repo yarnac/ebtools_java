@@ -1,26 +1,29 @@
 package com.eb.ebookreader.gui;
 
+import com.eb.ai_service.llm_client.infrastructure.openai.OpenAiResponse;
 import com.eb.base.inifile.api.IniFile;
-import com.eb.ebookreader.gobj.EbBook;
+import com.eb.ebookreader.gobj.*;
 import com.eb.woerterbuch.gobj.WoerterbuchSession;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 
 public class BookCtrl {
 	
-		private WoerterbuchSession wbSession;
-		private String text;
-		private BookView view;
-		private EbBook book;
-		private int scroll;
-		private String section;
-		private List<Integer> positions;
-		private int chapter;
-		
-		
-		public void store() {
+	private WoerterbuchSession wbSession;
+	private String text;
+	private BookView view;
+	private EbBook book;
+	private int scroll;
+	private String section;
+	private List<Integer> positions;
+	private int chapter;
+	private LandmarkBookConfig config;
+
+
+	public void store() {
 			book.saveChapterText(chapter, getView().getEdit().getText());				
 		}
 		
@@ -35,14 +38,24 @@ public class BookCtrl {
 		}
 		
 		private List<Integer> readPositions(String text2) {
-			int n=0;
+
+			String text2LowerCase = text2.toLowerCase();
+
+			TextFinder textFinder = new TextFinder();
+
 			positions = new ArrayList<>();
-			while ( (n = text2.indexOf("<>",n)) >= 0)
-			{
-				positions.add(Integer.valueOf(n));
-				n++;
+			List<LandmarkBookItem> landmarks = config.getLandmarks(chapter);
+			for(LandmarkBookItem item : landmarks) {
+				String searchText = item.getSearchString();
+
+
+
+				int index = textFinder.searchPositionOfWortfolge(text2, searchText);
+
+				// int index = text2LowerCase.indexOf(searchText);
+				positions.add(index >= 0 ? index : 0);
+
 			}
-			
 			return positions;
 		}
 		
@@ -93,8 +106,14 @@ public class BookCtrl {
 			int scroll = iniFile.getSectionValueAsInteger(getSection(), "Scroll", 0);
 
 			setBook(new EbBook(bookName));
-			
-			String[] parts = wbName.split(" ");
+
+            try {
+                config = LandmarkBookConfig.read(BookReader.getReaderBookLandmarkFilename(bookName));
+            } catch (IOException e) {
+                e.toString();
+            }
+
+            String[] parts = wbName.split(" ");
 			setWbSession(new WoerterbuchSession(parts[0], parts[1]));			
 			setScroll(scroll); 			
 		}

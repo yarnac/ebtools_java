@@ -5,6 +5,8 @@ import com.eb.ai_service.llm_client.infrastructure.ILlmClient;
 import com.eb.ai_service.llm_client.api.LlmRequest;
 import com.eb.ai_service.llm_client.api.LlmResponse;
 import com.eb.ai_service.llm_client.infrastructure.TokenLogger;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -45,7 +47,12 @@ public class AnthropicClient implements ILlmClient {
         body.put("system", getSystemText(messages));
 
 
-        ObjectMapper mapper = new ObjectMapper();
+
+        ObjectMapper mapper = new ObjectMapper()
+                .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+                .configure(JsonParser.Feature.ALLOW_UNQUOTED_CONTROL_CHARS, true);
+
+        mapper.enable(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY);
         String json = mapper.writeValueAsString(body);
 
         HttpRequest request = HttpRequest.newBuilder()

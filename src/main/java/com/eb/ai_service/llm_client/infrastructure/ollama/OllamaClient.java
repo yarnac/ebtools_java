@@ -11,6 +11,7 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.time.Duration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -34,6 +35,7 @@ public class OllamaClient implements ILlmClient {
                 .uri(URI.create("http://macbook-air-von-ekkart:11434/v1/chat/completions"))
                 .header("Content-Type", "application/json")
                 .header("Authorization", "Bearer " + "")
+                .timeout(Duration.ofMinutes(3))
                 .POST(HttpRequest.BodyPublishers.ofString(json))
                 .build();
 

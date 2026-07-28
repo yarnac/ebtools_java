@@ -28,4 +28,7 @@ public class BookReader {
 		return getReaderFilename("Books/" + filename);
 	}
 
+	public static String getReaderBookLandmarkFilename(String bookName) {
+		return getReaderFilename("Books/" + bookName.replace(".txt", "_LM.txt"));
+	}
 }

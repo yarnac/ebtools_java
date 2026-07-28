@@ -55,10 +55,15 @@ public class OpenAiClient implements ILlmClient {
 
         LlmResponse llrResponse = new LlmResponse();
         List<OpenAiResponse.Output> output = openAiResponse.getOutput();
-        if (output.get(0).getType().equals("message"))
-            llrResponse.setAnswer(output.get(0).getContent().get(0).getText());
-        if (output.size() > 1 && output.get(0).getType().equals("text"))
-            llrResponse.setAnswer(output.get(0).getContent().get(0).getText());
+
+        for(OpenAiResponse.Output currentOutput: output)
+        {
+            if (currentOutput.getType().equals("message"))
+            {
+                llrResponse.setAnswer(currentOutput.getContent().get(0).getText());
+                break;
+            }
+        }
         llrResponse.setModel(openAiResponse.getModel());
         llrResponse.setInputTokens(openAiResponse.getUsage().getInput_tokens());
         llrResponse.setOutputTokens(openAiResponse.getUsage().getOutput_tokens());

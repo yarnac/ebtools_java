@@ -17,6 +17,9 @@ public class LlmMessage {
         message = s;
     }
 
+    @Override
+    public String toString() {return role + ": " + message;}
+
     public  static LlmMessageBuilderSystem builder()
     {
         return LlmMessageListBuilder.create();

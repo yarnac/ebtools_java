@@ -24,11 +24,36 @@ public class LlmRequestBuilder implements LlmRequestBuilderSystem, LlmRequestBui
 
     @Override
     public LlmRequestBuilderModel addUserMsg(String msgContent) {
-        messages.add(new LlmMessage("system", msgContent));
+        messages.add(new LlmMessage("user", msgContent));
         return this;
     }
 
     @Override
+    public LlmRequestBuilderModel addRequestMsg(String requestMsg) {
+
+        if (requestMsg.startsWith("<<"))
+        {
+            int index = requestMsg.indexOf(">>");
+            String textSystem = requestMsg.substring(2,index);
+            String textUser = requestMsg.substring(index+2);
+            int newIndex = index+2;
+            while (newIndex < requestMsg.length())
+            {
+                char ch = requestMsg.charAt(newIndex);
+                if (Character.isLetterOrDigit(ch))
+                    break;
+                newIndex++;
+            }
+            textUser = requestMsg.substring(newIndex);
+            addSystemMsg(textSystem);
+            addUserMsg(textUser);
+        }
+        else
+            addSystemMsg(requestMsg);
+
+        return this;
+    }    @Override
+
     public LlmRequestBuilderFinish setModel(String newModel) {
         model = newModel;
         return this;
