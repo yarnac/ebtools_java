@@ -24,6 +24,8 @@ public class ChatGUI extends JPanel {
     private JComboBox<LlmModel> cbModels;
     private JComboBox<LlmModel> cbContext;
 
+    int FONTSIZE = 14;
+
     public ChatGUI() {
         initializeComponents();
         layoutComponents();
@@ -65,7 +67,7 @@ public class ChatGUI extends JPanel {
         edUserMessage = new JTextArea();
         edUserMessage.setLineWrap(true);
         edUserMessage.setWrapStyleWord(true);
-        edUserMessage.setFont(new Font("Monospaced", Font.PLAIN, 12));
+        edUserMessage.setFont(new Font("Monospaced", Font.PLAIN, FONTSIZE));
         edUserMessage.setEditable(true);
         scrollUserMessage = new JScrollPane(edUserMessage);
         scrollUserMessage.setPreferredSize(new Dimension(100, 150));
@@ -78,7 +80,7 @@ public class ChatGUI extends JPanel {
         edOutput.setLineWrap(true);
         edOutput.setWrapStyleWord(true);
         edOutput.setEditable(true);
-        edOutput.setFont(new Font("Monospaced", Font.PLAIN, 12));
+        edOutput.setFont(new Font("Monospaced", Font.PLAIN, FONTSIZE));
         scrollOutput = new JScrollPane(edOutput);
         scrollOutput.setPreferredSize(new Dimension(100, 600));
         panelOutput.add(scrollOutput, BorderLayout.CENTER);

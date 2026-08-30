@@ -33,9 +33,10 @@ public class OllamaClient implements ILlmClient {
 
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create("http://macbook-air-von-ekkart:11434/v1/chat/completions"))
+                //.uri(URI.create("http://127.0.0.1:11434/v1/chat/completions"))
                 .header("Content-Type", "application/json")
                 .header("Authorization", "Bearer " + "")
-                .timeout(Duration.ofMinutes(3))
+                .timeout(Duration.ofMinutes(30))
                 .POST(HttpRequest.BodyPublishers.ofString(json))
                 .build();
 

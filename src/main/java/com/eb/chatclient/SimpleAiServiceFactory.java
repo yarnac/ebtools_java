@@ -6,6 +6,8 @@ public class SimpleAiServiceFactory {
             return new SimpleOpenAiService(model, uri);
         }
 
+        return null;
+
     }
 
     private static boolean isOpenAiModel(String model) {

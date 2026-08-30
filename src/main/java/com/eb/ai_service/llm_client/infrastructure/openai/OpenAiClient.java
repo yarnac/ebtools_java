@@ -13,6 +13,7 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.time.Duration;
 import java.util.*;
 
 public class OpenAiClient implements ILlmClient {
@@ -44,6 +45,8 @@ public class OpenAiClient implements ILlmClient {
 
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create("https://api.openai.com/v1/responses"))
+                .timeout(Duration.ofMinutes(30))
+                .POST(HttpRequest.BodyPublishers.ofString(json))
                 .header("Content-Type", "application/json")
                 .header("Authorization", "Bearer " +  apiKey )
                 .POST(HttpRequest.BodyPublishers.ofString(json))
