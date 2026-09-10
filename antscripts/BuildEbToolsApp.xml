@@ -30,7 +30,7 @@
 	<target name="create_WbApp">
 	    	        <jar destfile="${dir.jarfile}/WbApp.jar">
 	    	            <manifest>
-	    	                <attribute name="Main-Class" value="main.com.eb.woerterbuch.app.WbApp"/>
+	    	                <attribute name="Main-Class" value="main.com.eb.ebwoerterbuch.app.WbApp"/>
 	    	                <attribute name="Class-Path" value=". Eb_lib/junit.jar Eb_lib/org.hamcrest.core_1.3.0.v20180420-1519.jar Eb_lib/rsc.jar Eb_lib/jl1.0.1.jar"/>
 	    	            </manifest>
 	    	            <fileset dir="${dir.workspace}/EbTools/bin"/>

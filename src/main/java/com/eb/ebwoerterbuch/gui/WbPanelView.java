@@ -1,4 +1,4 @@
-package com.eb.woerterbuch.gui;
+package com.eb.ebwoerterbuch.gui;
 import java.awt.BorderLayout;
 import java.awt.Font;
 import java.awt.GridBagConstraints;
@@ -33,10 +33,10 @@ import javax.swing.tree.TreeNode;
 
 import com.eb.base.gui.GuiDecorator;
 import com.eb.system.TextChangedHandlerUtil;
-import com.eb.woerterbuch.gobj.Vokabel;
-import com.eb.woerterbuch.gobj.formatter.FlatListFormatter;
-import com.eb.woerterbuch.gobj.formatter.IVokabelListFormatter;
-import com.eb.woerterbuch.gobj.formatter.ItemWithListAdapter;
+import com.eb.ebwoerterbuch.gobj.Vokabel;
+import com.eb.ebwoerterbuch.gobj.formatter.FlatListFormatter;
+import com.eb.ebwoerterbuch.gobj.formatter.IVokabelListFormatter;
+import com.eb.ebwoerterbuch.gobj.formatter.ItemWithListAdapter;
 
 
 @SuppressWarnings("nls")

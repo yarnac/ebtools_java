@@ -1,4 +1,4 @@
-package com.eb.woerterbuch.gui;
+package com.eb.ebwoerterbuch.gui;
 
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
@@ -11,7 +11,7 @@ import javax.swing.JDialog;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 
-import com.eb.woerterbuch.gobj.WbEinstellungen;
+import com.eb.ebwoerterbuch.gobj.WbEinstellungen;
 
 public class WbGoogleEinstDlg extends JDialog {
 

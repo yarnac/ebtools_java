@@ -1,9 +1,8 @@
 package com.eb.ebookreader.gui;
 
-import com.eb.ai_service.llm_client.infrastructure.openai.OpenAiResponse;
 import com.eb.base.inifile.api.IniFile;
 import com.eb.ebookreader.gobj.*;
-import com.eb.woerterbuch.gobj.WoerterbuchSession;
+import com.eb.ebwoerterbuch.gobj.WoerterbuchSession;
 
 import java.io.IOException;
 import java.util.ArrayList;

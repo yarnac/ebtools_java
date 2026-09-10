@@ -1,4 +1,4 @@
-package com.eb.woerterbuch.app;
+package com.eb.ebwoerterbuch.app;
 
 import com.eb.base.SearcherPair;
 import com.eb.base.gui.GuiDecorator;
@@ -8,9 +8,9 @@ import com.eb.ebookreader.tobj.StringUtil;
 import com.eb.system.ClipboardAdapter;
 import com.eb.system.KeyEventListenerBuilder;
 import com.eb.system.WordStack;
-import com.eb.woerterbuch.gobj.*;
-import com.eb.woerterbuch.gui.WbGoogleEinstDlg;
-import com.eb.woerterbuch.gui.WbPanelView;
+import com.eb.ebwoerterbuch.gobj.*;
+import com.eb.ebwoerterbuch.gui.WbGoogleEinstDlg;
+import com.eb.ebwoerterbuch.gui.WbPanelView;
 
 import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;

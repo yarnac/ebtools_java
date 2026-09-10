@@ -1,6 +1,6 @@
 package com.eb.misc;
 
-import com.eb.woerterbuch.gobj.Vokabel;
+import com.eb.ebwoerterbuch.gobj.Vokabel;
 
 public class NewSearcherFactory {
 	

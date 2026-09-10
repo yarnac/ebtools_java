@@ -1,5 +1,7 @@
-package com.eb.woerterbuch.app;
-import com.eb.woerterbuch.gui.WbPanelView;
+package com.eb.ebwoerterbuch.app;
+import com.eb.base.gui.GuiDecorator;
+import com.eb.base.gui.IC;
+import com.eb.ebwoerterbuch.gui.WbPanelView;
 
 import java.awt.BorderLayout;
 import java.awt.EventQueue;
@@ -54,6 +56,9 @@ public class WbAppWindow {
 		frmWrterbuch.setTitle("W\u00F6rterbuch");
 		frmWrterbuch.setBounds(100, 100, 615, 372);
 		frmWrterbuch.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+
+		GuiDecorator decorator = new GuiDecorator();
+		frmWrterbuch.setIconImage(decorator.getImage(IC.BOOKS_RED));
 		
 
 		JMenuBar menuBar = new JMenuBar();

@@ -2,7 +2,7 @@ package com.eb.misc;
 
 import java.util.List;
 
-import com.eb.woerterbuch.gobj.Vokabel;
+import com.eb.ebwoerterbuch.gobj.Vokabel;
 
 public class VokabelIIndexerFactory {
 	

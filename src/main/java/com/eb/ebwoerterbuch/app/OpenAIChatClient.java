@@ -1,4 +1,4 @@
-package com.eb.woerterbuch.app;
+package com.eb.ebwoerterbuch.app;
 import java.net.URI;
 import java.net.http.*;
 import java.util.*;

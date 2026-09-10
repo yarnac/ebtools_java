@@ -1,4 +1,4 @@
-package com.eb.woerterbuch.gui;
+package com.eb.ebwoerterbuch.gui;
 
 import java.awt.*;
 import java.awt.event.ActionEvent;

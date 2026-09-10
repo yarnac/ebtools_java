@@ -1,4 +1,4 @@
-package com.eb.woerterbuch.gobj;
+package com.eb.ebwoerterbuch.gobj;
 
 import com.eb.base.EbAppContext;
 import com.eb.base.inifile.api.IniFile;

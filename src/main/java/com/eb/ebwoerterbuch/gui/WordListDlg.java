@@ -1,4 +1,4 @@
-package com.eb.woerterbuch.gui;
+package com.eb.ebwoerterbuch.gui;
 
 import java.awt.BorderLayout;
 import java.awt.EventQueue;
@@ -17,7 +17,7 @@ import javax.swing.event.ListSelectionEvent;
 
 import com.eb.base.gui.GuiDecorator;
 import com.eb.system.ClipboardAdapter;
-import com.eb.woerterbuch.tobj.WordListDlgCtrl;
+import com.eb.ebwoerterbuch.tobj.WordListDlgCtrl;
 
 public class WordListDlg extends JFrame {
 

@@ -1,4 +1,4 @@
-package com.eb.woerterbuch.gobj;
+package com.eb.ebwoerterbuch.gobj;
 
 import java.awt.Dimension;
 import java.awt.Point;
@@ -13,8 +13,8 @@ import java.util.Set;
 import com.eb.base.inifile.api.IniFileProvider;
 import com.eb.base.inifile.api.IniFile;
 import com.eb.base.io.FileUtil;
-import com.eb.woerterbuch.gui.ShowCryptedFileDlg;
-import com.eb.woerterbuch.tobj.WordListDlgCtrl;
+import com.eb.ebwoerterbuch.gui.ShowCryptedFileDlg;
+import com.eb.ebwoerterbuch.tobj.WordListDlgCtrl;
 
 public class WbManager {
 	IniFile iniFile;

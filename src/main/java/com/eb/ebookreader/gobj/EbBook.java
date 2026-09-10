@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 import com.eb.base.io.FileUtil;
-import com.eb.woerterbuch.gobj.WoerterbuchSession;
+import com.eb.ebwoerterbuch.gobj.WoerterbuchSession;
 
 public class EbBook {
 	

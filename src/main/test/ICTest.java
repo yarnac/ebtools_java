@@ -2,7 +2,7 @@ package main.test;
 
 import javax.swing.ImageIcon;
 
-import com.eb.woerterbuch.gui.WbPanelView;
+import com.eb.ebwoerterbuch.gui.WbPanelView;
 import org.junit.jupiter.api.Test;
 
 public class ICTest {

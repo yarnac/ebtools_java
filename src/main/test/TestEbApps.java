@@ -1,6 +1,6 @@
 package main.test;
 
-import com.eb.woerterbuch.gui.WbApp;
+import com.eb.ebwoerterbuch.gui.WbApp;
 
 import com.eb.ebmusic.EbMusicPlayerApp;
 import com.eb.ebookreader.gui.EbReaderApp;

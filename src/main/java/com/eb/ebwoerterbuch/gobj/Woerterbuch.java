@@ -1,10 +1,10 @@
-package com.eb.woerterbuch.gobj;
+package com.eb.ebwoerterbuch.gobj;
 
 import com.eb.base.inifile.api.IniFile;
 import com.eb.base.inifile.api.IniFileProvider;
 import com.eb.base.io.FileUtil;
 import com.eb.misc.IDictionarySearchStrategy;
-import com.eb.woerterbuch.tobj.GoogleSearchManager;
+import com.eb.ebwoerterbuch.tobj.GoogleSearchManager;
 
 import java.util.List;
 import java.util.stream.Collectors;

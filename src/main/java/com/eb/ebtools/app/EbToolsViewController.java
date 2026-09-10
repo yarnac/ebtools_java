@@ -24,7 +24,7 @@ public class EbToolsViewController {
 		IC.Size = 24;
 		decorator = new GuiDecorator(view.getFrame(), manager.getIniFile(),"Einstellungen");
 		view.getFrame().setIconImage(decorator.getImage(IC.TOOLS));
-		Taskbar.getTaskbar().setIconImage(decorator.getImage(IC.TOOLS,32));
+		//Taskbar.getTaskbar().setIconImage(decorator.getImage(IC.TOOLS,32));
 
 		addToolbarButtons();
 		addMenus();

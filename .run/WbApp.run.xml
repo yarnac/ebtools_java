@@ -3,11 +3,11 @@
     <classpathModifications>
       <entry path="D:\Develop\Java\wsjava_ij\EbTools\rsc.jar" />
     </classpathModifications>
-    <option name="MAIN_CLASS_NAME" value="com.eb.woerterbuch.app.WbApp" />
+    <option name="MAIN_CLASS_NAME" value="com.eb.ebwoerterbuch.app.WbApp" />
     <module name="EbTools" />
     <extension name="coverage">
       <pattern>
-        <option name="PATTERN" value="main.com.eb.woerterbuch.gui.*" />
+        <option name="PATTERN" value="main.com.eb.ebwoerterbuch.gui.*" />
         <option name="ENABLED" value="true" />
       </pattern>
     </extension>

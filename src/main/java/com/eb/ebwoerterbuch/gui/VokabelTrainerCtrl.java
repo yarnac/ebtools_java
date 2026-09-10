@@ -1,8 +1,8 @@
-package com.eb.woerterbuch.gui;
+package com.eb.ebwoerterbuch.gui;
 
 import com.eb.base.gui.GuiDecorator;
 import com.eb.base.gui.IC;
-import com.eb.woerterbuch.app.WbApp;
+import com.eb.ebwoerterbuch.app.WbApp;
 
 import java.awt.EventQueue;
 

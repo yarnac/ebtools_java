@@ -1,5 +1,6 @@
 package com.eb.ebmusic.app;
 
+import com.eb.base.gui.IC;
 import com.eb.ebmusic.gui.EbMusicPlayerView;
 
 import java.awt.*;
@@ -25,6 +26,7 @@ public class EbMusicPlayerApp {
 			window = new EbMusicPlayerView();
 			
 			setController(new EbMusicPlayerViewController(window));
+
 			window.getFrame().setVisible(true);
 		} catch (Exception e) {
 			e.printStackTrace();

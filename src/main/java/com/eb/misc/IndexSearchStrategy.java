@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.eb.system.StringUnifier;
-import com.eb.woerterbuch.gobj.Vokabel;
+import com.eb.ebwoerterbuch.gobj.Vokabel;
 
 public  class IndexSearchStrategy extends IDictionarySearchStrategy<Vokabel>  {
 	

@@ -1,4 +1,4 @@
-package com.eb.woerterbuch.gobj;
+package com.eb.ebwoerterbuch.gobj;
 
 
 public class WbEinstellungen {

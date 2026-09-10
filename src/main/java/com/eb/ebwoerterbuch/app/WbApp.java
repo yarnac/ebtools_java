@@ -1,7 +1,7 @@
-package com.eb.woerterbuch.app;
+package com.eb.ebwoerterbuch.app;
 
-import com.eb.woerterbuch.gobj.WbManager;
-import com.eb.woerterbuch.gui.WbPanelView;
+import com.eb.ebwoerterbuch.gobj.WbManager;
+import com.eb.ebwoerterbuch.gui.WbPanelView;
 
 import javax.swing.*;
 import java.awt.*;

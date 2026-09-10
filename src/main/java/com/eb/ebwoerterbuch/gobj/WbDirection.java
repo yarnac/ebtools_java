@@ -1,4 +1,4 @@
-package com.eb.woerterbuch.gobj;
+package com.eb.ebwoerterbuch.gobj;
 
 import java.util.Arrays;
 import java.util.List;

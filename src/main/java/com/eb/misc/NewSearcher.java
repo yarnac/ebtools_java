@@ -3,7 +3,7 @@ package com.eb.misc;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import com.eb.woerterbuch.gobj.Vokabel;
+import com.eb.ebwoerterbuch.gobj.Vokabel;
 
 public abstract class NewSearcher {
 	IIndexer<Vokabel> indexer;

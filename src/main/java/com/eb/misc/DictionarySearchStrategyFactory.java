@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import com.eb.system.StringUnifier;
-import com.eb.woerterbuch.gobj.Vokabel;
+import com.eb.ebwoerterbuch.gobj.Vokabel;
 
 public class DictionarySearchStrategyFactory
 {

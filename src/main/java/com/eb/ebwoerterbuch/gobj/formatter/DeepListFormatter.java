@@ -1,4 +1,4 @@
-package com.eb.woerterbuch.gobj.formatter;
+package com.eb.ebwoerterbuch.gobj.formatter;
 
 import java.util.List;
 

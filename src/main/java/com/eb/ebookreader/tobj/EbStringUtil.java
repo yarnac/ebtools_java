@@ -1,6 +1,6 @@
 package com.eb.ebookreader.tobj;
 
-import com.eb.woerterbuch.gobj.Vokabel;
+import com.eb.ebwoerterbuch.gobj.Vokabel;
 
 import java.util.List;
 

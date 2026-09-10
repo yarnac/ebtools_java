@@ -10,8 +10,8 @@ import com.eb.ebookreader.gobj.BookReader;
 import com.eb.ebookreader.gobj.BookSession;
 import com.eb.ebookreader.gui.*;
 import com.eb.ebookreader.tobj.EbStringUtil;
-import com.eb.woerterbuch.gobj.Vokabel;
-import com.eb.woerterbuch.gobj.WoerterbuchManager;
+import com.eb.ebwoerterbuch.gobj.Vokabel;
+import com.eb.ebwoerterbuch.gobj.WoerterbuchManager;
 
 import javax.swing.*;
 import java.awt.*;
@@ -130,6 +130,8 @@ public class EBReaderViewController  {
 		
 		decorator.addToolbarButton("Upper", "Start eclipse", IC.BOX_FLOW, x->startEclipse());		
 		decorator.addToolbarButton("Upper", "Test Zipper", IC.Calendar, x->testZipper());
+
+		getView().getFrame().setIconImage(decorator.getImage(IC.BookOpen));
 	}
 	
 	private Object startAnalyzer() {

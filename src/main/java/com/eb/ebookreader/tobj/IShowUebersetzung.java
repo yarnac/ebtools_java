@@ -1,6 +1,6 @@
 package com.eb.ebookreader.tobj;
 
-import com.eb.woerterbuch.gobj.WoerterbuchSession;
+import com.eb.ebwoerterbuch.gobj.WoerterbuchSession;
 
 @FunctionalInterface
 public interface IShowUebersetzung {

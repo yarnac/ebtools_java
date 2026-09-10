@@ -1,7 +1,7 @@
-package com.eb.woerterbuch.tobj;
+package com.eb.ebwoerterbuch.tobj;
 
 import com.eb.base.inifile.api.IniFile;
-import com.eb.woerterbuch.gobj.WbEinstellungen;
+import com.eb.ebwoerterbuch.gobj.WbEinstellungen;
 
 public class GoogleSearchManager
 {

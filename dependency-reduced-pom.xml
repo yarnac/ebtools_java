@@ -22,7 +22,7 @@
             <configuration>
               <transformers>
                 <transformer>
-                  <mainClass>main.java.com.eb.woerterbuch.app.WbApp</mainClass>
+                  <mainClass>main.java.com.eb.ebwoerterbuch.app.WbApp</mainClass>
                 </transformer>
               </transformers>
             </configuration>

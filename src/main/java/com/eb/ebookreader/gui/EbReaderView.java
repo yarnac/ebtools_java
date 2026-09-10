@@ -6,7 +6,7 @@ import com.eb.ebookreader.tobj.IConsumePoint;
 import com.eb.ebookreader.tobj.IShowUebersetzung;
 import com.eb.ebookreader.tobj.StringConsumer;
 import com.eb.ebookreader.tobj.StringUtil;
-import com.eb.woerterbuch.gobj.WoerterbuchSession;
+import com.eb.ebwoerterbuch.gobj.WoerterbuchSession;
 
 import javax.swing.*;
 import java.awt.*;

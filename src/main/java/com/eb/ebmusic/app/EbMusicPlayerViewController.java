@@ -113,6 +113,8 @@ public class EbMusicPlayerViewController {
 		decorator.addToolbarButton("main", "Next Track", IC.NEXT, (x)->nextTrack());
 		decorator.addToolbarButton("main", "Stop Music", IC.STOP, (x)->stopMusic());
 		decorator.addToolbarButton("main", "Reload Bibliothek", IC.FROM_DB, (x)->reloadBibliothek());
+
+		getView().getFrame().setIconImage(decorator.getImage(IC.MusicLibraryPlay));
 	}
 	
 	public List<String> getFileNames(MusicTreeNode node)
