@@ -3818,7 +3818,7 @@ public enum ICF
 	ZoomSelection,
 	ZoomSelectionCursor;
 
-	public static int Size = 16;
+	public static int Size = 24;
 
 	@Override
 	public String toString() {

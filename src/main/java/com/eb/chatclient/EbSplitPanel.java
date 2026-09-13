@@ -83,4 +83,8 @@ public class EbSplitPanel {
     public String getToolBar2Name() {
         return toolBar2.getName();
     }
+
+    public JSplitPane getSplitPane() {
+        return splitPane;
+    }
 }

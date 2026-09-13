@@ -5,6 +5,7 @@ import com.eb.base.gui.IC;
 import com.eb.base.inifile.api.IniFile;
 import com.eb.base.inifile.api.IniFileProvider;
 import com.eb.chatclient.EbSplitPanel;
+import com.eb.chatclient.persist.ComponentPersister;
 import lombok.Getter;
 
 import javax.swing.*;
@@ -93,6 +94,14 @@ public class AiPlaygroundWindow extends JFrame {
         splitPanelMain.getToolBar1().setEnabled(b);
         splitPanelMain.getToolBar2().setEnabled(b);
     }
+
+    public void registerPersister(ComponentPersister persister) {
+        persister.addComponentItem(textPaneInput,"Input");
+        persister.addComponentItem(textPaneOutput,"Output");
+        persister.addComponentItem(splitPanelMain.getSplitPane(), "SplitPanelMain");
+        persister.addComponentItem(splitPanelMessages.getSplitPane(), "SplitPanelMessages");
+    }
+
 
     public class PanelWithToolBar {
         @Getter

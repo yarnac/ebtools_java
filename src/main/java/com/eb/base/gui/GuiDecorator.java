@@ -7,11 +7,9 @@ import lombok.Setter;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
+import java.awt.event.*;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.List;
@@ -31,15 +29,32 @@ public class GuiDecorator {
 	private final Dictionary<String, JMenu> nameToMenuBarDictionary = new Hashtable<>();
 	private final Dictionary<String, Container> nameToContainerDictionary = new Hashtable<>();
 	private String currentMenuName;
+	private List<Runnable> closeActions = new ArrayList<>();
 
 	public GuiDecorator() {
 		iniFile = null;
+	}
+
+	public void addCloseAction(Runnable action) {
+		closeActions.add(action);
 	}
 
 	public GuiDecorator(JFrame frame, IniFile newIniFile, String einstellungen) {
 		GuiPersister.registerAndLoadStatus(frame, newIniFile,einstellungen);
 		this.frame = frame;
 		iniFile = newIniFile;
+
+		WindowAdapter adapter = new WindowAdapter() {
+			@Override
+			public void windowClosing(WindowEvent e) {
+				for(Runnable action : closeActions) {
+					action.run();
+				}
+				iniFile.Write();
+			}
+		};
+
+		this.frame.addWindowListener(adapter);
 	}
 
 	public JMenu getMenu(String label)
@@ -341,4 +356,7 @@ public class GuiDecorator {
 			}
 		});
 	}
+
+    public void addCloseAction(Action action) {
+    }
 }

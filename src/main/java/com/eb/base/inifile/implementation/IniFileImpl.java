@@ -62,7 +62,8 @@ class IniFileImpl implements IniFile {
 		try {
 			if (!FileUtil.existsFile(fileName))
 			{
-				throw new FileNotFoundException(fileName);
+				Write();
+
 			}
 
 			String encoding = FileUtil.guessEncoding(fileName);
