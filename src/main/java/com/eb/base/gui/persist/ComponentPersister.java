@@ -1,8 +1,8 @@
-package com.eb.chatclient.persist;
+package com.eb.base.gui.persist;
 
 import com.eb.base.extensions.StringExtensions;
-import com.eb.base.inifile.api.IniFile;
-import com.eb.chatclient.EbSplitPanel;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import javax.swing.*;
 import java.awt.*;
@@ -11,26 +11,17 @@ import java.util.List;
 
 import static java.lang.Integer.max;
 
-public class ComponentPersister implements IComponentPersister{
+class ComponentPersister implements IComponentPersister {
 
     private IStringPersister persister;
-
-    public static ComponentPersister createIniFilePersister(IniFile iniFile)
-    {
-        ComponentPersister persister = new ComponentPersister();
-        persister.setStringPersister(new IniFilePersister(iniFile));
-        return persister;
-    }
 
     private List<ComponentItem> components = new ArrayList<>();
 
 
-    @Override
     public void setStringPersister(IStringPersister persister) {
         this.persister = persister;
     }
 
-    @Override
     public IStringPersister getStringPersister() {
         return persister;
     }
@@ -56,15 +47,15 @@ public class ComponentPersister implements IComponentPersister{
 
         if (component instanceof JTextPane) {
             JTextPane control = (JTextPane) component;
-            components.add(new ComponentItem<>(control, key, ()->control.getText(), x->control.setText(x)));
+            components.add(new ComponentItem<>(control, key, ()-> getJsonStringFromString(control.getText()), x->control.setText(getStringFromJasonString(x))));
         }
         if (component instanceof JTextField) {
             JTextField control = (JTextField) component;
-            components.add(new ComponentItem<>(control, key, ()->control.getText(), x->control.setText(x)));
+            components.add(new ComponentItem<>(control, key, ()-> getJsonStringFromString(control.getText()), x->control.setText(getStringFromJasonString(x))));
         }
         else if (component instanceof JTextArea) {
             JTextArea control = (JTextArea) component;
-            components.add(new ComponentItem<>(control, key, ()->control.getText(), x->control.setText(x)));
+            components.add(new ComponentItem<>(control, key, ()-> getJsonStringFromString(control.getText()), x->control.setText(getStringFromJasonString(x))));
         }
         else if (component instanceof JSplitPane) {
             JSplitPane control = (JSplitPane) component;
@@ -84,6 +75,27 @@ public class ComponentPersister implements IComponentPersister{
             components.add(new ComponentItem<>(control,key, () -> "" + getPointString(control.getViewport().getViewPosition()), x->control.getViewport().setViewPosition(getPoint(x))));
             Point pos = control.getViewport().getViewPosition();
             control.getViewport().setViewPosition(new Point(pos.x, pos.y));
+        }
+    }
+
+    private String getJsonStringFromString(String text) {
+        ObjectMapper mapper = new ObjectMapper();
+        try {
+            return mapper.writeValueAsString(text);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private String getStringFromJasonString(String text) {
+        if (StringExtensions.ebIsNilOrEmpty(text)) {
+            return "";
+        }
+        ObjectMapper mapper = new ObjectMapper();
+        try {
+            return mapper.readValue(text, String.class);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
         }
     }
 

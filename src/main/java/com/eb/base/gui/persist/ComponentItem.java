@@ -1,16 +1,10 @@
-package com.eb.chatclient.persist;
+package com.eb.base.gui.persist;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.Setter;
-
-import java.awt.*;
 import java.util.function.Consumer;
-import java.util.function.Function;
 import java.util.function.Supplier;
 
 
-public class ComponentItem <T>  {
+class ComponentItem <T>  {
     T component;
     String key;
     Supplier<String> getValue;

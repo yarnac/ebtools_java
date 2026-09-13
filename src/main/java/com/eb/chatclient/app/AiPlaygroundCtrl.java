@@ -8,13 +8,14 @@ import com.eb.ai_service.llm_client.infrastructure.LlmModelProvider;
 import com.eb.base.gui.GuiDecorator;
 import com.eb.base.gui.IC;
 import com.eb.base.gui.ICF;
+import com.eb.base.gui.persist.ComponentPersisterFactory;
+import com.eb.base.gui.persist.IComponentPersister;
 import com.eb.base.inifile.api.IniFile;
 import com.eb.base.inifile.api.IniFileProvider;
 import com.eb.chatclient.components.fileprovider.GuiFileNameProvider;
 import com.eb.chatclient.domain.chat.AiChat;
 import com.eb.chatclient.domain.chat.AiChatContext;
 import com.eb.chatclient.domain.chat.AiChatManager;
-import com.eb.chatclient.persist.ComponentPersister;
 
 import javax.swing.*;
 import java.awt.*;
@@ -22,7 +23,7 @@ import java.util.List;
 
 public class AiPlaygroundCtrl {
 
-    private final ComponentPersister persister;
+    private final IComponentPersister persister;
     private JComboBox<AiChatContext> cbContexts;
     private JComboBox<LlmModel> cbModelle;
     private JComboBox<AiChat> cbChats;
@@ -35,14 +36,18 @@ public class AiPlaygroundCtrl {
         window = new AiPlaygroundWindow();
         window.setVisible(true);
         IniFile iniFile = IniFileProvider.createIniFile("JavaAiPlaygroundCtrl.ini");
-        persister = ComponentPersister.createIniFilePersister(iniFile);
 
         decorateToolbarInput();
+        decorator.addEditIniFileButton("MainToolbar", iniFile.getFileName());
 
-        window.registerPersister(persister);
+
+
+        persister = ComponentPersisterFactory.createIniFilePersister(iniFile);
         persister.addComponentItem(cbChats,"CbChats");
         persister.addComponentItem(cbContexts,"CbContexts");
         persister.addComponentItem(cbModelle,"CbModelle");
+
+        window.registerPersister(persister);
 
 
         persister.loadAndSetComponentItems();

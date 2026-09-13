@@ -35,14 +35,11 @@ public class GuiDecorator {
 		iniFile = null;
 	}
 
-	public void addCloseAction(Runnable action) {
-		closeActions.add(action);
-	}
-
 	public GuiDecorator(JFrame frame, IniFile newIniFile, String einstellungen) {
-		GuiPersister.registerAndLoadStatus(frame, newIniFile,einstellungen);
 		this.frame = frame;
 		iniFile = newIniFile;
+
+		GuiPersister.registerAndLoadStatus(frame, newIniFile,einstellungen);
 
 		WindowAdapter adapter = new WindowAdapter() {
 			@Override
@@ -357,6 +354,7 @@ public class GuiDecorator {
 		});
 	}
 
-    public void addCloseAction(Action action) {
-    }
+	public void addCloseAction(Runnable action) {
+		closeActions.add(action);
+	}
 }

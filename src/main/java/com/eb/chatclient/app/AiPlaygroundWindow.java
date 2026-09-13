@@ -2,10 +2,10 @@ package com.eb.chatclient.app;
 
 import com.eb.base.gui.GuiDecorator;
 import com.eb.base.gui.IC;
+import com.eb.base.gui.persist.IComponentPersister;
 import com.eb.base.inifile.api.IniFile;
 import com.eb.base.inifile.api.IniFileProvider;
 import com.eb.chatclient.EbSplitPanel;
-import com.eb.chatclient.persist.ComponentPersister;
 import lombok.Getter;
 
 import javax.swing.*;
@@ -44,6 +44,7 @@ public class AiPlaygroundWindow extends JFrame {
 
 
         decorator = new GuiDecorator(this, myIniFile,"Einstellungen");
+        decorator.addEditIniFileButton("MainToolbar");
 
         decorateMainToolbar();
         decorateMessagesAuswahl();
@@ -95,7 +96,7 @@ public class AiPlaygroundWindow extends JFrame {
         splitPanelMain.getToolBar2().setEnabled(b);
     }
 
-    public void registerPersister(ComponentPersister persister) {
+    public void registerPersister(IComponentPersister persister) {
         persister.addComponentItem(textPaneInput,"Input");
         persister.addComponentItem(textPaneOutput,"Output");
         persister.addComponentItem(splitPanelMain.getSplitPane(), "SplitPanelMain");

@@ -1,6 +1,6 @@
-package com.eb.chatclient.persist;
+package com.eb.base.gui.persist;
 
-public interface IStringPersister {
+interface IStringPersister {
     void setString(String key, String value);
     String getString(String key);
 

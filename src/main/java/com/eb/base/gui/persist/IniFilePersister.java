@@ -1,8 +1,8 @@
-package com.eb.chatclient.persist;
+package com.eb.base.gui.persist;
 
 import com.eb.base.inifile.api.IniFile;
 
-public class IniFilePersister implements IStringPersister{
+class IniFilePersister implements IStringPersister{
 
     private IniFile iniFile;
     private String sectionName;
