@@ -35,9 +35,9 @@ public class AiPlaygroundWindow extends JFrame {
     private PanelWithToolBar panelWithToolBarInput;
     private PanelWithToolBar panelWithToolBarOutput;
 
-    public AiPlaygroundWindow()
+    public AiPlaygroundWindow(IniFile iniFile)
     {
-        myIniFile = IniFileProvider.createIniFile("SplitWindow.ini");
+        myIniFile = iniFile;
         initializeView();
 
         setFontSizes(16);

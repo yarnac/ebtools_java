@@ -2,7 +2,6 @@ package com.eb.base.io;
 
 
 import com.eb.doubletten.Doublette;
-import com.sun.javafx.binding.OrElseBinding;
 
 import java.awt.Desktop;
 import java.io.BufferedReader;
@@ -52,7 +51,7 @@ public class FileUtil {
 		FileInputStream is = new FileInputStream(name);
 		InputStreamReader isr = new InputStreamReader(is,encoding);
 		BufferedReader r = new BufferedReader(isr);
-		List<String> lines = new ArrayList<String>();
+		List<String> lines = new ArrayList<>();
 		while (r.ready())
 		{			
 			String theLine = r.readLine();
@@ -73,7 +72,7 @@ public class FileUtil {
 		if (!file.isFile())
 			return "";
 		
-		StringBuffer strb = new StringBuffer();
+		StringBuilder strb = new StringBuilder();
 		try {
 			FileInputStream is = new FileInputStream(name);
 			InputStreamReader isr = new InputStreamReader(is,encoding);
@@ -126,7 +125,7 @@ public class FileUtil {
 		StringBuilder strb = new StringBuilder();
 		
 		for (String str : lines) {
-			if (strb.length()>0)
+			if (!strb.isEmpty())
 				strb.append("\r\n"); 
 			strb.append(str);
 		}
@@ -159,8 +158,7 @@ public class FileUtil {
 
 	public static String encodeForUrl(String wort) {
 		try {
-			String encode = URLEncoder.encode(wort, "UTF8");
-			return encode;
+            return URLEncoder.encode(wort, "UTF8");
 		} catch (UnsupportedEncodingException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -207,7 +205,6 @@ public class FileUtil {
 		for (File file : directory.listFiles()) {
 			if (file.isDirectory()) {
 				List<String> temp = getFileNamesAll(file.getAbsolutePath());
-				out.println("Adding " + temp.size() + " files from " + file.getAbsolutePath());
 				res.addAll(temp);
 			}
 			else

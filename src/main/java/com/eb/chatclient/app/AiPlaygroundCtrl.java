@@ -19,30 +19,27 @@ import com.eb.chatclient.domain.chat.AiChatManager;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
 import java.util.List;
+import java.util.Objects;
 
 public class AiPlaygroundCtrl {
 
-    private final IComponentPersister persister;
     private JComboBox<AiChatContext> cbContexts;
     private JComboBox<LlmModel> cbModelle;
     private JComboBox<AiChat> cbChats;
     AiPlaygroundWindow window;
     private JProgressBar progressBar;
-    private boolean ignoreChanges;
     private GuiDecorator decorator;
 
     AiPlaygroundCtrl() {
-        window = new AiPlaygroundWindow();
-        window.setVisible(true);
+
         IniFile iniFile = IniFileProvider.createIniFile("JavaAiPlaygroundCtrl.ini");
-
+        window = new AiPlaygroundWindow(iniFile);
+        window.setVisible(true);
         decorateToolbarInput();
-        decorator.addEditIniFileButton("MainToolbar", iniFile.getFileName());
-
-
-
-        persister = ComponentPersisterFactory.createIniFilePersister(iniFile);
+        
+        IComponentPersister persister = ComponentPersisterFactory.createIniFilePersister(iniFile);
         persister.addComponentItem(cbChats,"CbChats");
         persister.addComponentItem(cbContexts,"CbContexts");
         persister.addComponentItem(cbModelle,"CbModelle");
@@ -53,7 +50,7 @@ public class AiPlaygroundCtrl {
         persister.loadAndSetComponentItems();
 
 
-        decorator.addCloseAction(()->persister.persistComponentItems());
+        decorator.addCloseAction(persister::persistComponentItems);
 
     }
 
@@ -63,18 +60,18 @@ public class AiPlaygroundCtrl {
         decorator = window.getDecorator();
 
         decorator.addToolbarButton(tbName,"Run", IC.PLAY, (s) -> sendRequest());
-        decorator.addToolbarButton(tbName,"Run", IC.MB_PLAY, (s) -> {progressBar.setIndeterminate(false);});
-        decorator.addToolbarButton(tbName,"Open append file window", ICF.BulletList, (s) -> openAppendFileWindow());
+        decorator.addToolbarButton(tbName,"Run", IC.MB_PLAY, this::actionPerformed2);
+        decorator.addToolbarButton(tbName,"Open append file window", ICF.BulletList, this::actionPerformed);
         decorator.addToolbarButton(tbName, "Dummy", ICF.LinePoints_Add, (s)->{});
         decorator.addToolbarButton(tbName, "Dummy", ICF.MaleHardHat_Lock, (s)->{});
 
         AiChatManager manager = AiChatManager.getCurrent();
 
         LlmModelProvider modelProvider = new LlmModelProvider();
-        cbChats = decorator.addToolbarComboBox( tbName,"Chats", manager.getAvailableChats(), (s) -> setChat(s));
+        cbChats = decorator.addToolbarComboBox( tbName,"Chats", manager.getAvailableChats(), this::setChat);
         int height = cbChats.getHeight();
-        cbContexts = decorator.addToolbarComboBox( tbName,"Kontext", manager.getAvailableContexts(), (s) -> setContext(s));
-        cbModelle = decorator.addToolbarComboBox( tbName,"Modell", modelProvider.getModels(), (s) -> setModel(s));
+        cbContexts = decorator.addToolbarComboBox( tbName,"Kontext", manager.getAvailableContexts(), this::setContext);
+        cbModelle = decorator.addToolbarComboBox( tbName,"Modell", modelProvider.getModels(), this::setModel);
 
         cbChats.setPreferredSize(new Dimension(20, height));
         cbModelle.setPreferredSize(new Dimension(20, height));
@@ -86,31 +83,29 @@ public class AiPlaygroundCtrl {
     private void openAppendFileWindow() {
         GuiFileNameProvider provider = new GuiFileNameProvider();
         provider.setVisible(true);
-        provider.addListConsumer(l -> appendFileNames(l));
+        provider.addListConsumer(this::appendFileNames);
     }
 
     private void appendFileNames(List<String> l) {
         StringBuilder sb = new StringBuilder();
-        sb.append(window.getInputString() + "\n");
+        sb.append(window.getInputString());
+        sb.append("\n");
         for(String s : l) {
-            sb.append("<$ " + s + "\n");
+            sb.append("<$ %s\n".formatted(s));
         }
         window.setInputText(sb.toString());
     }
 
     private void setModel(LlmModel s) {
-        if (ignoreChanges)
-            return;
+
     }
 
     private void setChat(AiChat s) {
-        if (ignoreChanges)
-            return;
+
     }
 
     private void setContext(AiChatContext s) {
-        if (ignoreChanges)
-            return;
+
         window.setInputText(s.getRequestMessage());
     }
 
@@ -118,7 +113,7 @@ public class AiPlaygroundCtrl {
         LlmRequestBuilder builder = new LlmRequestBuilder();
 
         String inputString = window.getInputString();
-        if (inputString.trim().length() == 0) {
+        if (inputString.trim().isEmpty()) {
             inputString = """
                         <<Du bist ein CSharp Programmierer unter DotNet 9 mit CSharp 10.>>
                         Schreibe einen HttpClient für Ollama.
@@ -135,7 +130,7 @@ public class AiPlaygroundCtrl {
         LlmRequest llmRequest =
                 builder
                         .addRequestMsg(inputString)
-                        .setModel(((LlmModel) cbModelle.getSelectedItem()).getModelName())
+                        .setModel(((LlmModel) Objects.requireNonNull(cbModelle.getSelectedItem())).getModelName())
                         .build();
 
         sendRequestAndHandleResponseWithNewTaskAndProgressBarAnimation(llmRequest);
@@ -143,12 +138,10 @@ public class AiPlaygroundCtrl {
 
     private void sendRequestAndHandleResponseWithNewTaskAndProgressBarAnimation(LlmRequest llmRequest) {
 
-        Thread task = new Thread(() -> {
-            withProgressbarAnimationDo(()->{
-                LlmResponse result = LlmRequestService.sendRequest(llmRequest);
-                window.setOutputText(result.getAnswer());
-            });
-        });
+        Thread task = new Thread(() -> withProgressbarAnimationDo(()->{
+            LlmResponse result = LlmRequestService.sendRequest(llmRequest);
+            window.setOutputText(result.getAnswer());
+        }));
         task.start();
     }
 
@@ -163,7 +156,11 @@ public class AiPlaygroundCtrl {
         System.out.println("\nFertig!");
     }
 
-    private void startRequest() {
+    private void actionPerformed(ActionEvent s) {
+        openAppendFileWindow();
     }
 
+    private void actionPerformed2(ActionEvent s) {
+        progressBar.setIndeterminate(false);
+    }
 }
