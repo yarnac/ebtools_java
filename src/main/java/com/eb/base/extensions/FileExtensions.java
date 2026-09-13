@@ -381,7 +381,7 @@ public class FileExtensions {
         if (!ebDirectoryExists(self)) return new String[0];
         try {
             PathMatcher matcher = FileSystems.getDefault().getPathMatcher(
-                    "glob:" + pattern.replace(".", "\\.").replace("*", ".*"));
+                    "glob:" + pattern);
             return Files.list(Paths.get(self))
                     .filter(Files::isRegularFile)
                     .filter(path -> matcher.matches(path.getFileName()))
@@ -411,7 +411,7 @@ public class FileExtensions {
         try {
             for (String p : pattern) {
                 PathMatcher matcher = FileSystems.getDefault().getPathMatcher(
-                        "glob:" + p.replace(".", "\\.").replace("*", ".*"));
+                        "glob:" + p);
                 Files.list(Paths.get(self))
                         .filter(Files::isDirectory)
                         .filter(path -> matcher.matches(path.getFileName()))

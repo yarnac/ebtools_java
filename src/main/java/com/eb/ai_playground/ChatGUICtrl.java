@@ -4,7 +4,7 @@ import com.eb.ai_service.llm_client.api.LlmClient;
 import com.eb.ai_service.llm_client.api.LlmRequest;
 import com.eb.ai_service.llm_client.api.LlmResponse;
 import com.eb.ai_service.llm_client.infrastructure.LlmModel;
-import com.eb.ai_service.llm_client.infrastructure.ModelProvider;
+import com.eb.ai_service.llm_client.infrastructure.LlmModelProvider;
 
 import javax.swing.*;
 
@@ -64,7 +64,7 @@ public class ChatGUICtrl {
     }
 
     private void fillComboBoxes() {
-        ModelProvider provider = new ModelProvider();
+        LlmModelProvider provider = new LlmModelProvider();
         LlmModel[] array = provider.getModels().toArray(new LlmModel[0]);
         chatBotGUI.getCbModels().setModel(new DefaultComboBoxModel<>(array));
 

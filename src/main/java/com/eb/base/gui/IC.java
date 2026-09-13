@@ -76,7 +76,7 @@ public enum IC
 	COINS("Coins"),
 	VIDEO_LIBRARY_SEARCH("VideoLibrary_Search");
 
-	public static int Size = 16;
+	public static int Size = 24;
 
 	@Override
 	public String toString() {

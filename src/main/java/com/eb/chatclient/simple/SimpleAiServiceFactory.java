@@ -1,4 +1,4 @@
-package com.eb.chatclient;
+package com.eb.chatclient.simple;
 
 public class SimpleAiServiceFactory {
     public static SimpleAiService getSimpleAiService(String model, String uri){

@@ -6,7 +6,7 @@ class ModelProviderTest {
 
     @Test
     public void test() {
-        ModelProvider mp = new ModelProvider();
+        LlmModelProvider mp = new LlmModelProvider();
         mp.getAllModels();
     }
 

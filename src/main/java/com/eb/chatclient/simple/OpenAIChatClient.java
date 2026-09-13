@@ -1,4 +1,4 @@
-package com.eb.chatclient;
+package com.eb.chatclient.simple;
 import java.net.URI;
 import java.net.http.*;
 import java.util.*;

@@ -11,7 +11,7 @@ public class LlmModel {
     private String modelName;
 
     @Override
-    public String toString() {return modelName + " " + company;}
+    public String toString() {return company + " " +  modelName ;}
 
     public boolean isAnthropic()
     {
@@ -26,5 +26,13 @@ public class LlmModel {
     public boolean isOllama()
     {
         return company.equals("ollama");
+    }
+
+    public int getInputTokenPrice() {
+        return 0;
+    }
+
+    public int getOutputTokenPrice() {
+        return 0;
     }
 }

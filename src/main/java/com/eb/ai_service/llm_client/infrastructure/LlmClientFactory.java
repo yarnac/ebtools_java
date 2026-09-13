@@ -35,12 +35,12 @@ public class LlmClientFactory {
     }
 
     public LlmClientFactory() {
-        modelProvider = new ModelProvider();
+        modelProvider = new LlmModelProvider();
 
         List<String> lines = null;
     }
 
-    private ModelProvider modelProvider;
+    private LlmModelProvider modelProvider;
 
     public static String getAnthropicApiKey() {
         if (anthropicKey==null)

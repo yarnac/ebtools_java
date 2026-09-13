@@ -69,10 +69,19 @@ class IniFileImpl implements IniFile {
 			List<String> lines = FileUtil.readLines(encoding, fileName);
 
  			IniFileSection s = null;
-			
+
+			 boolean first = true;
 			for (String l1 : lines) {
 				String l = l1.trim();
-				if (l1.startsWith("["))
+				if (first && l.length()>0)
+				{
+					int ch = (int) l.charAt(0);
+					if (ch == 65279)
+						l = l.substring(1);
+					first = false;
+				}
+
+				if (l.startsWith("["))
 				{
 					s = new IniFileSection(l);
 					iniFileSections.add(s);

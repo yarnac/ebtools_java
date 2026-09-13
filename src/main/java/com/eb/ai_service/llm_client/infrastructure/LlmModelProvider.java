@@ -8,7 +8,16 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ModelProvider {
+public class LlmModelProvider {
+
+    private static LlmModelProvider current;
+
+    public static LlmModelProvider getCurrent()
+    {
+        if (current == null)
+            current = new LlmModelProvider();
+        return current;
+    }
 
     private List<LlmModel> models;
     private AiServiceConfig config;
@@ -17,7 +26,7 @@ public class ModelProvider {
         return models;
     };
 
-    public ModelProvider()
+    public LlmModelProvider()
     {
         try {
             models = readModels("d:\\Develop\\Visual22\\Shared\\AiPlayground\\Provider\\provider.txt");
@@ -70,5 +79,9 @@ public class ModelProvider {
             }
         }
         return null;
+    }
+
+    public LlmModel findModel(String modelName) {
+        return getModel(modelName);
     }
 }

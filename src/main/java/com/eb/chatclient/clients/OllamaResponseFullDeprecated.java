@@ -1,25 +1,30 @@
-package com.eb.ai_service.llm_client.infrastructure.ollama;
+package com.eb.chatclient.clients;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+
 import java.util.List;
-import java.util.Map;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class OllamaResponse {
+public class OllamaResponseFullDeprecated {
 
+    @JsonProperty("id")
     private String id;
+
+    @JsonProperty("object")
     private String object;
+
+    @JsonProperty("created")
     private long created;
+
+    @JsonProperty("model")
     private String model;
 
-    @JsonProperty("system_fingerprint")
-    private String systemFingerprint;
-
+    @JsonProperty("choices")
     private List<Choice> choices;
-    private Usage usage;
 
-    private Map<String, Object> prompt_tokens_details;
+    @JsonProperty("usage")
+    private Usage usageInfo;
 
     public String getId() {
         return id;
@@ -53,14 +58,6 @@ public class OllamaResponse {
         this.model = model;
     }
 
-    public String getSystemFingerprint() {
-        return systemFingerprint;
-    }
-
-    public void setSystemFingerprint(String systemFingerprint) {
-        this.systemFingerprint = systemFingerprint;
-    }
-
     public List<Choice> getChoices() {
         return choices;
     }
@@ -69,18 +66,21 @@ public class OllamaResponse {
         this.choices = choices;
     }
 
-    public Usage getUsage() {
-        return usage;
+    public Usage getUsageInfo() {
+        return usageInfo;
     }
 
-    public void setUsage(Usage usage) {
-        this.usage = usage;
+    public void setUsageInfo(Usage usageInfo) {
+        this.usageInfo = usageInfo;
     }
 
-
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public static class Choice {
 
+        @JsonProperty("index")
         private int index;
+
+        @JsonProperty("message")
         private Message message;
 
         @JsonProperty("finish_reason")
@@ -111,11 +111,16 @@ public class OllamaResponse {
         }
     }
 
-
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public static class Message {
 
+        @JsonProperty("role")
         private String role;
+
+        @JsonProperty("content")
         private String content;
+
+        @JsonProperty("reasoning")
         private String reasoning;
 
         public String getRole() {
@@ -154,8 +159,6 @@ public class OllamaResponse {
 
         @JsonProperty("total_tokens")
         private int totalTokens;
-
-        private Map<String, Object> prompt_tokens_details;
 
         public int getPromptTokens() {
             return promptTokens;

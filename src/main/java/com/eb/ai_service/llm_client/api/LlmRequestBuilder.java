@@ -1,5 +1,7 @@
 package com.eb.ai_service.llm_client.api;
 
+import com.eb.base.extensions.StringExtensions;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -18,38 +20,37 @@ public class LlmRequestBuilder implements LlmRequestBuilderSystem, LlmRequestBui
 
     @Override
     public LlmRequestBuilderUser addSystemMsg(String msgContent) {
-        messages.add(new LlmMessage("system", msgContent));
-        return this;
+         addMsg("system", msgContent);
+         return this;
     }
 
     @Override
     public LlmRequestBuilderModel addUserMsg(String msgContent) {
-        messages.add(new LlmMessage("user", msgContent));
+        addMsg("user", msgContent);
         return this;
     }
 
-    @Override
-    public LlmRequestBuilderModel addRequestMsg(String requestMsg) {
+    public void addMsg(String role, String msgContent) {
+        if (msgContent != null || msgContent.length() > 0)
+            messages.add(new LlmMessage(role, msgContent));
+    }
 
-        if (requestMsg.startsWith("<<"))
+
+    @Override
+    public LlmRequestBuilderModel addRequestMsg(String msg) {
+
+        String userMsg = StringExtensions.ebTrimAll(msg);
+        String systemMsg = "";
+
+        if (userMsg.startsWith("<<"))
         {
-            int index = requestMsg.indexOf(">>");
-            String textSystem = requestMsg.substring(2,index);
-            String textUser = requestMsg.substring(index+2);
-            int newIndex = index+2;
-            while (newIndex < requestMsg.length())
-            {
-                char ch = requestMsg.charAt(newIndex);
-                if (Character.isLetterOrDigit(ch))
-                    break;
-                newIndex++;
-            }
-            textUser = requestMsg.substring(newIndex);
-            addSystemMsg(textSystem);
-            addUserMsg(textUser);
+            int index = userMsg.indexOf(">>");
+            systemMsg = StringExtensions.ebTrimAll(userMsg.substring(index + 2));
+            userMsg = StringExtensions.ebTrimAll(userMsg.substring(2, index));
         }
-        else
-            addSystemMsg(requestMsg);
+
+        addSystemMsg(systemMsg);
+        addUserMsg(userMsg);
 
         return this;
     }    @Override

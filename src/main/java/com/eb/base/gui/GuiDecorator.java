@@ -38,6 +38,7 @@ public class GuiDecorator {
 
 	public GuiDecorator(JFrame frame, IniFile newIniFile, String einstellungen) {
 		GuiPersister.registerAndLoadStatus(frame, newIniFile,einstellungen);
+		this.frame = frame;
 		iniFile = newIniFile;
 	}
 
@@ -59,6 +60,28 @@ public class GuiDecorator {
 		JMenuItem item = new JMenuItem(label);
 		item.addActionListener(x->object.run());
 		menu.add(item);
+	}
+
+	public JButton addToolbarButton(String toolbarName, String tooltipText, ICF ic, ActionListener listener) {
+		Container toolbar = fetchContainer(toolbarName);
+
+		JButton btn = new JButton();
+
+		try {
+			btn.setIcon(ic.getImageIcon());
+		} catch (Exception e) {
+			out.println("Image nicht gefunden: " + ic);
+		}
+		btn.setToolTipText(tooltipText);
+		toolbar.add(btn);
+		btn.addActionListener(listener);
+
+		if (!(toolbar instanceof JToolBar)) {
+			toolbar.revalidate();
+			toolbar.repaint();
+		}
+
+		return btn;
 	}
 
 	public JButton addToolbarButton(String toolbarName, String tooltipText, IC ic, ActionListener listener) {
@@ -110,13 +133,14 @@ public class GuiDecorator {
 		Container toolbar = nameToContainerDictionary.get(toolbarName);
 		if (toolbar!=null)
 			return toolbar;
-		
-		toolbar = (JToolBar) GuiUtil.findComponent(getFrame(), x->x instanceof JToolBar);
-		nameToContainerDictionary.put(toolbarName, toolbar);
-		
-				
-			
-		return toolbar;
+
+		List<Component> toolbars = GuiUtil.findComponents(getFrame(), x -> x instanceof JToolBar);
+		for(Component component : toolbars)
+			if (component.getName() != null) {
+				String name = component.getName();
+				nameToContainerDictionary.put(name, (Container) component);
+			}
+		return nameToContainerDictionary.get(toolbarName);
 	}
 	
 	public JMenuBar getMenuBar() {
@@ -183,6 +207,27 @@ public class GuiDecorator {
 		return btn;
 	}
 
+	public JToggleButton addToggleButton(String toolbarName, String tooltipText, ICF pinOrange, ICF pinRed,
+										 Consumer<Boolean> listener) {
+
+		Container toolbar = nameToContainerDictionary.get(toolbarName);
+		if (toolbar==null)
+			return null;
+
+		Image image = pinOrange.getCachedImage();
+		Image selectedImage = pinRed.getCachedImage();
+
+		JToggleButton btn = new JToggleButton("");
+
+		btn.setIcon(new ImageIcon(image));
+		btn.setSelectedIcon(new ImageIcon(selectedImage));
+
+		btn.setToolTipText(tooltipText);
+		toolbar.add(btn);
+		btn.addActionListener(x->listener.accept(btn.isSelected()));
+		return btn;
+	}
+
 	public void addToolbarSeparator(String toolbarName) {
 		Container container = fetchContainer(toolbarName);
 
@@ -208,6 +253,13 @@ public class GuiDecorator {
 		fetchContainer(toolbarName).add(comboBox);
 		comboBox.addActionListener(x->consumer.accept((T)comboBox.getSelectedItem()));
 		return comboBox;
+	}
+
+	public  JProgressBar addToolbarProgressBar(String toolbarName, String tooltipText)
+	{
+		JProgressBar progressBar = new JProgressBar();
+		fetchContainer(toolbarName).add(progressBar);
+		return progressBar;
 	}
 	
 	@SuppressWarnings("unchecked")
