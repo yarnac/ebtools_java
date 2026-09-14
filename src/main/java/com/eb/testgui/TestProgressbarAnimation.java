@@ -1,9 +1,9 @@
-package com.eb.apps.ebchatclient.app;
+package com.eb.testgui;
 
 import javax.swing.*;
 import java.awt.*;
 
-public class ProgressbarSwing {
+public class TestProgressbarAnimation {
     public static void main(String[] args) {
         JFrame frame = new JFrame("Java 21 Progressbar");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);

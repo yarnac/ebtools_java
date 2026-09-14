@@ -1,4 +1,4 @@
-package com.eb.apps.ebchatclient;
+package com.eb.base.gui;
 
 import lombok.Getter;
 

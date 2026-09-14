@@ -19,4 +19,13 @@ public class LlmRequestService {
             throw new RuntimeException(e);
         }
     }
+
+    public static LlmResponse sendSimpleRequest(String message) {
+        LlmRequest llmRequest = LlmRequest.builder()
+                .addRequestMsg(message)
+                .setModel("qwen3:8b")
+                .build();
+
+        return sendRequest(llmRequest);
+    }
 }

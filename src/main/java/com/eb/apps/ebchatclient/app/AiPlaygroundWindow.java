@@ -4,7 +4,7 @@ import com.eb.base.gui.GuiDecorator;
 import com.eb.base.gui.IC;
 import com.eb.base.gui.persist.IComponentPersister;
 import com.eb.base.inifile.api.IniFile;
-import com.eb.apps.ebchatclient.EbSplitPanel;
+import com.eb.base.gui.EbSplitPanel;
 import lombok.Getter;
 
 import javax.swing.*;

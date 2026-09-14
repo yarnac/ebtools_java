@@ -1,4 +1,4 @@
-package com.eb.apps.ebchatclient.clients;
+package com.eb.base.ai_service.llm_client.api;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
