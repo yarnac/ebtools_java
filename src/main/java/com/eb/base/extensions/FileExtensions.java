@@ -1,10 +1,13 @@
 package com.eb.base.extensions;
 
+import com.eb.base.Logger;
+
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class FileExtensions {
 
@@ -152,18 +155,15 @@ public class FileExtensions {
     }
 
     public static String ebFilenameWithDateTime(String self, java.time.LocalDateTime time) {
-        StringBuilder strb = new StringBuilder();
-        strb.append("_");
-        strb.append(time.getYear());
-        strb.append(String.format("%02d", time.getMonthValue()));
-        strb.append(String.format("%02d", time.getDayOfMonth()));
-        strb.append("_");
-        strb.append(String.format("%02d", time.getHour()));
-        strb.append(String.format("%02d", time.getMinute()));
-        strb.append("_");
-        strb.append(String.format("%02d", time.getSecond()));
-
-        return ebFileRoot(self) + strb + "." + ebFileExtension(self);
+        return "%s_%d%s%s_%s%s_%s.%s".formatted(
+                ebFileRoot(self),
+                time.getYear(),
+                String.format("%02d", time.getMonthValue()),
+                String.format("%02d", time.getDayOfMonth()),
+                String.format("%02d", time.getHour()),
+                String.format("%02d", time.getMinute()),
+                String.format("%02d", time.getSecond()),
+                ebFileExtension(self));
     }
 
     /**
@@ -202,7 +202,6 @@ public class FileExtensions {
      * Liest Dateiinhalte als String (UTF-8)
      */
     public static String ebGetFileText(String self) {
-        if (!ebFileExists(self)) return "";
         return ebGetFileTextUtf8(self);
     }
 
@@ -210,13 +209,14 @@ public class FileExtensions {
      * Liest Dateiinhalte als String (UTF-8)
      */
     public static String ebGetFileTextUtf8(String self) {
-        if (!ebFileExists(self)) return "";
-        try {
-            return new String(Files.readAllBytes(Paths.get(self)), StandardCharsets.UTF_8);
-        } catch (IOException e) {
-            System.err.println("Error reading file: " + e.getMessage());
-            return "";
+        if (ebFileExists(self)) {
+            try {
+                return Files.readString(Paths.get(self));
+            } catch (IOException e) {
+                Logger.logError(e);
+            }
         }
+        return "";
     }
 
     /**
@@ -225,7 +225,7 @@ public class FileExtensions {
     public static String ebFileContentsWindows(String self) {
         if (!ebFileExists(self)) return "";
         try {
-            return new String(Files.readAllBytes(Paths.get(self)), java.nio.charset.Charset.forName("Cp1252"));
+            return Files.readString(Paths.get(self), java.nio.charset.Charset.forName("Cp1252"));
         } catch (IOException e) {
             return "";
         }
@@ -237,7 +237,7 @@ public class FileExtensions {
     public static String ebFileContentsMac(String self) {
         if (!ebFileExists(self)) return "";
         try {
-            return new String(Files.readAllBytes(Paths.get(self)), java.nio.charset.Charset.forName("MacRoman"));
+            return Files.readString(Paths.get(self), java.nio.charset.Charset.forName("MacRoman"));
         } catch (IOException e) {
             return "";
         }
@@ -257,7 +257,7 @@ public class FileExtensions {
     public static String[] ebGetFileTextLines(String self, boolean deleteEmptyLines, java.nio.charset.Charset encoding) {
         if (!ebFileExists(self)) return new String[0];
         try {
-            String[] lines = new String(Files.readAllBytes(Paths.get(self)), encoding)
+            String[] lines = Files.readString(Paths.get(self), encoding)
                     .replace("\r", "").split("\n");
             if (!deleteEmptyLines) return lines;
             List<String> res = new ArrayList<>();
@@ -279,7 +279,7 @@ public class FileExtensions {
             if (Files.exists(Paths.get(fileName))) {
                 Files.delete(Paths.get(fileName));
             }
-            Files.write(Paths.get(fileName), self.getBytes(StandardCharsets.UTF_8));
+            Files.writeString(Paths.get(fileName), self);
         } catch (IOException e) {
             System.err.println("Error writing file: " + e.getMessage());
         }
@@ -294,7 +294,7 @@ public class FileExtensions {
             if (Files.exists(Paths.get(fileName))) {
                 Files.delete(Paths.get(fileName));
             }
-            Files.write(Paths.get(fileName), self.getBytes(java.nio.charset.Charset.forName("Cp1252")));
+            Files.writeString(Paths.get(fileName), self, java.nio.charset.Charset.forName("Cp1252"));
         } catch (IOException e) {
             System.err.println("Error writing file: " + e.getMessage());
         }
@@ -410,13 +410,15 @@ public class FileExtensions {
         List<String> res = new ArrayList<>();
         try {
             for (String p : pattern) {
-                PathMatcher matcher = FileSystems.getDefault().getPathMatcher(
-                        "glob:" + p);
-                Files.list(Paths.get(self))
-                        .filter(Files::isDirectory)
-                        .filter(path -> matcher.matches(path.getFileName()))
-                        .map(Path::toString)
-                        .forEach(res::add);
+                PathMatcher matcher = FileSystems.getDefault().getPathMatcher("glob:" + p);
+
+                // Verzeichnis iterieren und Dateien filtern
+                try (Stream<Path> stream = Files.list(Paths.get(self))) {
+                    stream.filter(Files::isDirectory)
+                            .filter(path -> matcher.matches(path.getFileName()))
+                            .map(Path::toString)
+                            .forEach(res::add);
+                }
             }
         } catch (IOException e) {
             return new ArrayList<>();

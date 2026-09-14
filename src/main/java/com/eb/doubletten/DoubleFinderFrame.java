@@ -7,6 +7,7 @@ import java.util.List;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 
+import com.eb.base.extensions.FileExtensions;
 import com.eb.base.gui.GuiDecorator;
 import com.eb.base.io.FileUtil;
 
@@ -49,7 +50,7 @@ public class DoubleFinderFrame extends JFrame {
 	protected void initializeView() {
 		DoubleFinderPanelCtrl ctrl = new DoubleFinderPanelCtrl(this, getDoubleFinderPanel());		
 		ctrl.setLstOtherDoubles(getLstOtherDoubletten());
-		
+		FileExtensions.ebGetDirectories("","");
 		List<String> strings = FileUtil.getDirectories("~/Data/Medien/Bilder");
 		strings.add("~/Data/Medien/Bilder/");
 

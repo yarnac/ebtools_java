@@ -1,6 +1,7 @@
 package com.eb.base.io;
 
 
+import com.eb.base.Logger;
 import com.eb.doubletten.Doublette;
 
 import java.awt.Desktop;
@@ -8,17 +9,16 @@ import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
-import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -111,13 +111,8 @@ public class FileUtil {
 			r.write(str);
 			r.close();
 		}
-		catch (FileNotFoundException e) {
-			// TODO eb 5.5 2017 eventuell cleanup
-			
-		}
 		catch (IOException e) {
-			// TODO eb 5.5 2017 eventuell cleanup
-			
+			Logger.logError(e);
 		}
 	}
 
@@ -157,14 +152,8 @@ public class FileUtil {
 	}
 
 	public static String encodeForUrl(String wort) {
-		try {
-            return URLEncoder.encode(wort, "UTF8");
-		} catch (UnsupportedEncodingException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		return wort;
-	}
+        return URLEncoder.encode(wort, StandardCharsets.UTF_8);
+    }
 	
 	public static void showWebseite(String address) {
 		try {
@@ -189,9 +178,13 @@ public class FileUtil {
 		File directory = new File(dirName);
 		if (!directory.isDirectory())
 			return res;
-		for (File file : directory.listFiles()) {
-			res.add(file.getAbsolutePath());
-		} 
+
+		File[] files = directory.listFiles();
+		if (files != null) {
+			for (File file : files) {
+				res.add(file.getAbsolutePath());
+			}
+		}
 		return res; 
 	}
 
@@ -202,13 +195,15 @@ public class FileUtil {
 		File directory = new File(dirName);
 		if (!directory.isDirectory())
 			return res;
-		for (File file : directory.listFiles()) {
+		File[] files = directory.listFiles();
+		if (files != null) {
+		for (File file : files) {
 			if (file.isDirectory()) {
 				List<String> temp = getFileNamesAll(file.getAbsolutePath());
 				res.addAll(temp);
-			}
-			else
+			} else
 				res.add(file.getAbsolutePath());
+		}
 		}
 		return res;
 	}
@@ -225,8 +220,7 @@ public class FileUtil {
 			Files.move(source, target, StandardCopyOption.ATOMIC_MOVE);
 			return true;
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			Logger.logError(e.getMessage());
 		}
 		return false;		
 	}
@@ -243,8 +237,7 @@ public class FileUtil {
 			Files.copy(source, target);
 			return true;
 		} catch (IOException e) {
-			
-			e.printStackTrace();
+			Logger.logError(e.getMessage());
 		}
 		return false;		
 	}
@@ -276,13 +269,12 @@ public class FileUtil {
 		
 		File file = new File(getRealFileName(dirName));
 		File[] listFiles = file.listFiles();
-		String[] array = Arrays.stream(listFiles)
-			.filter(x->x.isFile())
-			.map(x->x.getAbsolutePath())
-			.toArray(size -> new String[size]);
-		
-		return array;
-			
+		if (listFiles == null)
+			return new String[0];
+		return Arrays.stream(listFiles)
+			.filter(File::isFile)
+			.map(File::getAbsolutePath)
+			.toArray(String[]::new);
 	}
 	
 
@@ -291,23 +283,19 @@ public class FileUtil {
 		
 		File file = new File(getRealFileName(dirName));
 		
-		FilenameFilter filter = new FilenameFilter() {
-			
-			@Override
-			public boolean accept(File arg0, String arg1) {
-				return filters.test(arg1);
-			}
-		};
+		FilenameFilter filter = (arg0, arg1) -> filters.test(arg1);
 		
 		File[] listFiles = file.listFiles(filter);
-		return Arrays.stream(listFiles).map(x->x.getAbsolutePath()).collect(Collectors.toList());
+		if (listFiles == null)
+			return new ArrayList<>();
+		return Arrays.stream(listFiles).map(File::getAbsolutePath).collect(Collectors.toList());
 	}
 
 	public static HashSet<String> getVideoExtensions() {
-		return new HashSet<String>(Arrays.asList( new String[] {".mp4",".flv",".mov"} ));
+		return new HashSet<>(Arrays.asList(".mp4",".flv",".mov"));
 	}
 	public static HashSet<String> getImageExtensions() {
-		return new HashSet<String>(Arrays.asList( new String[] {".jpg",".png",".gif"} ));
+		return new HashSet<>(Arrays.asList(".jpg",".png",".gif"));
 	}
 
 	public static HashSet<String> videoExtensions = getVideoExtensions();
@@ -357,16 +345,13 @@ public class FileUtil {
 		try {
 			Files.createDirectories(pathToDir);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			Logger.logError(e.getMessage());
 		}	
 	}
 
 	public static void moveFiles(String src, String targetDirectory, Predicate<String> filter) {
 		List<String> files = getFiles(src, filter);
 		
-		if (files.size()>0)
-			"".toString();
 		for (String string : files) {
 			move(string,  targetDirectory);
 		}
@@ -388,8 +373,7 @@ public class FileUtil {
 			try {
 				handleDoublesIn(x, y, res, compSize, minDoubles);
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				Logger.logError(e.getMessage());
 			}
 		});
 		
@@ -399,7 +383,7 @@ public class FileUtil {
 	}
 
 	private static void handleDoublesIn(Long x, List<String> y, List<Doublette> res, long compSize, int minDoubles) throws IOException {
-		while(y.size()>0)
+		while(!y.isEmpty())
 		{
 			String originalName = y.get(0);
 			y.remove(originalName);
@@ -417,10 +401,9 @@ public class FileUtil {
 			}
 			catch(Exception e)
 			{
-				
+				Logger.logError(e.getMessage());
 			}
-			Doublette current = null;
-			current = new Doublette();
+			Doublette current = new Doublette();
 			current.setName(originalName);
 			res.add(current);
 			
@@ -440,7 +423,7 @@ public class FileUtil {
 				}												
 			}
 			
-			deleted.forEach(fn->y.remove(fn));			
+			deleted.forEach(y::remove);
 		}
 	}
 
@@ -457,11 +440,11 @@ public class FileUtil {
 			File file = new File(fileName);
 			if (!file.isFile() && b)
 			{
-				addFilesToMap(fileName, map, b);
+				addFilesToMap(fileName, map, true);
 				continue;
 			}
 				
-			Long length = Long.valueOf(file.length());
+			Long length = file.length();
 			List<String> fileNamesWithSameSize = map.computeIfAbsent(length, x->new ArrayList<>());
 			fileNamesWithSameSize.add(fileName);
 		}
@@ -469,12 +452,20 @@ public class FileUtil {
 
 
 	public static List<String> getEntries(String fullPath) {
+		return getEntries(fullPath, x->true);
+	}
+
+	public static List<String> getEntries(String fullPath, Predicate<File> filter) {
 		File file = new File(getRealFileName(fullPath));
 		List<String> res = new  ArrayList<>();
 		if (!file.isDirectory())
-			return res; 
-		for (File fileEntry : file.listFiles()) {			
-			res.add(fileEntry.getAbsolutePath());
+			return res;
+		File[] files = file.listFiles();
+		if (files == null)
+			return res;
+		for (File fileEntry : files) {
+			if (filter.test(fileEntry))
+				res.add(fileEntry.getAbsolutePath());
 		}
 		return res;
 	}
@@ -482,28 +473,7 @@ public class FileUtil {
 
 	public static List<String> getDirectories(String string) {
 
-		File file = new File(getRealFileName(string));
-		List<String> res = new  ArrayList<>();
-		if (!file.isDirectory())
-			return res; 
-		for (File fileEntry : file.listFiles()) {
-			if (fileEntry.isDirectory())
-				res.add(fileEntry.getAbsolutePath());
-		}
-		return res;
-	}
-	
-	public static List<String> getChildDirectories(String string) {
-		// TODO Auto-generated method stub
-		File file = new File(getRealFileName(string));
-		List<String> res = new  ArrayList<>();
-		if (!file.isDirectory())
-			return res; 
-		for (File fileEntry : file.listFiles()) {
-			if (fileEntry.isDirectory())
-				res.add(fileEntry.getAbsolutePath());
-		}
-		return res;
+		return getEntries(string, File::isDirectory);
 	}
 
 	public static void appendLine(String string, String message) {
@@ -513,8 +483,7 @@ public class FileUtil {
 			writer.write(message+"\n");
 			writer.close();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			Logger.logError(e.getMessage());
 		}
 		
 		
