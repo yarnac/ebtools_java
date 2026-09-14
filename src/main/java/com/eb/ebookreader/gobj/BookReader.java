@@ -1,6 +1,7 @@
 package com.eb.ebookreader.gobj;
 
 import com.eb.base.EbAppContext;
+import com.eb.chatclient.domain.chat.GlobaleEinstellungen;
 
 public class BookReader {
 	
@@ -16,7 +17,7 @@ public class BookReader {
 	}
 	
 	public static String getReaderFilename(String filename) {
-		return EbAppContext.getJavaDataFilename("Reader/" + filename);
+		return GlobaleEinstellungen.getDataPfadShared("Reader/" + filename);
 	}
 
 

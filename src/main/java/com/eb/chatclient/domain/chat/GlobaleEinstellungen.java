@@ -6,6 +6,7 @@ public class GlobaleEinstellungen {
     private static String AIPFAD;
     private static String JAVA_DATAPFAD;
     private static String USER_DATAPFAD;
+    private static String SHARED_DATA;
 
 
     public static String getPfad(String localIniFilePath) {
@@ -59,5 +60,19 @@ public class GlobaleEinstellungen {
 
     public static boolean isWindows() {
         return System.getProperty("os.name").toLowerCase().startsWith("windows");
+    }
+
+    public static String getDataPfadShared() {
+        if (SHARED_DATA == null) {
+            String[] directories = new  String[]{
+                    "d:\\Develop\\shared_data",
+                    "/Users/ekkart/Data/develop/shared_data"};
+            SHARED_DATA = findDirectory(directories);
+        }
+        return SHARED_DATA;
+    }
+
+    public static String getDataPfadShared(String fileName) {
+        return FileExtensions.ebFullFileNameInDirectory(fileName, getDataPfadShared());
     }
 }
