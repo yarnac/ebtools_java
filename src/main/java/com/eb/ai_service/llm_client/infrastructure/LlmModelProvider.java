@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class LlmModelProvider {
@@ -49,7 +50,7 @@ public class LlmModelProvider {
 
         config = AiServiceConfig.current();
 
-        List<String> lines = Files.readAllLines(Path.of(config.getModelFileName()));
+        List<String> lines = Arrays.stream(FileExtensions.ebGetFileTextLines(fileName)).toList();
 
         for (String line : lines) {
             line = line.trim();

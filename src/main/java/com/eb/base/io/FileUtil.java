@@ -109,7 +109,7 @@ public class FileUtil {
 			if (!FileExtensions.ebFileExists(fileName)) {
 				new File(fileName).createNewFile();
 			}
-			FileOutputStream is = new FileOutputStream(fileName,true);
+			FileOutputStream is = new FileOutputStream(fileName);
 			OutputStreamWriter isr = new OutputStreamWriter(is,encoding);
 			BufferedWriter r = new BufferedWriter(isr);
 			r.write(str);

@@ -141,8 +141,10 @@ class IniFileImpl implements IniFile {
          String str = sec.getValue(value, null);
 		 if (str == null)
 		 {
-			if (writeIfAbsent)
+			if (writeIfAbsent) {
 				sec.setValue(value, defaultString);
+				Write();
+			}
 			return defaultString;
 		 }
          return str;
