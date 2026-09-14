@@ -1,8 +1,10 @@
 package com.eb.ai_service.llm_client.api;
 
 import com.eb.ai_service.llm_client.infrastructure.AbstrLlmClientTest;
-import com.eb.ai_service.llm_client.infrastructure.LlmClientFactory;
-import com.eb.ai_service.llm_client.infrastructure.ILlmClient;
+import com.eb.base.ai_service.llm_client.api.LlmRequest;
+import com.eb.base.ai_service.llm_client.api.LlmResponse;
+import com.eb.base.ai_service.llm_client.infrastructure.LlmClientFactory;
+import com.eb.base.ai_service.llm_client.infrastructure.ILlmClient;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;

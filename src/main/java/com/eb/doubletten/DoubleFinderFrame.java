@@ -28,7 +28,7 @@ public class DoubleFinderFrame extends JFrame {
 	private JToolBar mainToolBar;
 	
 	private DoubleFinderPanel doubleFinderPanel;
-	private JList lstOtherDoubletten;
+	private JList<String> lstOtherDoubletten;
 
 	/**
 	 * Launch the application.
@@ -90,8 +90,8 @@ public class DoubleFinderFrame extends JFrame {
 		panelRight.setLayout(new GridBagLayout());
 		contentPane.add(panelRight, BorderLayout.EAST);
 		
-		setLstOtherDoubletten(new JList());
-		DefaultListModel defaultListModel = new DefaultListModel();
+		setLstOtherDoubletten(new JList<>());
+		DefaultListModel<String> defaultListModel = new DefaultListModel<>();
 		defaultListModel.addElement("Medien");
 		defaultListModel.addElement("Test");
 		lstOtherDoubletten.setModel(defaultListModel);
@@ -156,11 +156,11 @@ public class DoubleFinderFrame extends JFrame {
 		//doubleFinderPanel.getLstDoubletten().setBounds(1, 70, 413, 186);
 	}
 
-	public JList getLstOtherDoubletten() {
+	public JList<String> getLstOtherDoubletten() {
 		return lstOtherDoubletten;
 	}
 
-	public void setLstOtherDoubletten(JList lstOtherDoubletten) {
+	public void setLstOtherDoubletten(JList<String> lstOtherDoubletten) {
 		this.lstOtherDoubletten = lstOtherDoubletten;
 	}
 }

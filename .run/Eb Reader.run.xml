@@ -3,7 +3,7 @@
     <classpathModifications>
       <entry path="D:\Develop\Java\wsjava_intellij\EbTools\rsc.jar" />
     </classpathModifications>
-    <option name="MAIN_CLASS_NAME" value="com.eb.ebookreader.app.EbReaderApp" />
+    <option name="MAIN_CLASS_NAME" value="com.eb.apps.ebookreader.app.EbReaderApp" />
     <module name="EbTools" />
     <extension name="coverage">
       <pattern>

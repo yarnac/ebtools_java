@@ -1,6 +1,9 @@
 package com.eb.ai_service.llm_client.api;
 
 import com.eb.ai_service.llm_client.infrastructure.AbstrLlmClientTest;
+import com.eb.base.ai_service.llm_client.api.LlmClient;
+import com.eb.base.ai_service.llm_client.api.LlmRequest;
+import com.eb.base.ai_service.llm_client.api.LlmResponse;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;

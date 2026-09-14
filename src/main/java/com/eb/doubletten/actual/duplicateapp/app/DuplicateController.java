@@ -8,7 +8,7 @@ import com.eb.doubletten.actual.duplicates.api.IDuplicateScanService;
 import com.eb.doubletten.actual.duplicates.api.IDuplikatContainer;
 import com.eb.doubletten.actual.duplicateapp.gui.DuplicateView;
 import com.eb.doubletten.actual.duplicates.repositories.DuplicateRepository;
-import com.eb.ebookreader.tobj.StringUtil;
+import com.eb.apps.ebookreader.tobj.StringUtil;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;

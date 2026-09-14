@@ -12,13 +12,13 @@ public class DuplicateView extends JFrame {
 
     private JToolBar mainToolBar;
     private JSplitPane splitPane;
-    private JComboBox cbPaths = new JComboBox();
+    private JComboBox<String> cbPaths = new JComboBox<>();
     JList<IDuplikatContainer> containerList = new JList<>();
     JList<String> duplicateList = new JList<>();
 
     private JToolBar leftToolBar;
     private JToolBar rightToolBar;
-    private DefaultComboBoxModel cbPathModel;
+    private DefaultComboBoxModel<String> cbPathModel;
 
     public JComboBox getCbPaths() {
         return cbPaths;
@@ -92,7 +92,7 @@ public class DuplicateView extends JFrame {
     }
 
     public void setPathList(List<String> pathList) {
-        cbPathModel = new DefaultComboBoxModel(pathList.toArray());
+        cbPathModel = new DefaultComboBoxModel<>(pathList.stream().toArray(String[]::new));
         cbPaths.setModel(cbPathModel);
     }
 

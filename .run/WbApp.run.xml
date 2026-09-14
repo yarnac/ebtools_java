@@ -3,7 +3,7 @@
     <classpathModifications>
       <entry path="D:\Develop\Java\wsjava_ij\EbTools\rsc.jar" />
     </classpathModifications>
-    <option name="MAIN_CLASS_NAME" value="com.eb.ebwoerterbuch.app.WbApp" />
+    <option name="MAIN_CLASS_NAME" value="com.eb.apps.ebwoerterbuch.app.WbApp" />
     <module name="EbTools" />
     <extension name="coverage">
       <pattern>

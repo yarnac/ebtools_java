@@ -155,7 +155,7 @@ class IniFileImpl implements IniFile {
 		
 		IniFileSection section = getSection(string, false);
 		if (section==null)
-			return new ArrayList();
+			return new ArrayList<>();
 		
 		return new ArrayList<String>(section.getValues());
 	}

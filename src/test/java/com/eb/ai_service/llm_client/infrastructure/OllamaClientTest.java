@@ -1,7 +1,7 @@
 package com.eb.ai_service.llm_client.infrastructure;
 
-import com.eb.ai_service.llm_client.api.LlmResponse;
-import com.eb.ai_service.llm_client.infrastructure.ollama.OllamaClient;
+import com.eb.base.ai_service.llm_client.api.LlmResponse;
+import com.eb.base.ai_service.llm_client.infrastructure.ollama.OllamaClient;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;

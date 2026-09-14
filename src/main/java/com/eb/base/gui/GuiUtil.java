@@ -60,7 +60,7 @@ public class GuiUtil {
 
 	public static int getVisibleCarePosition(JTextPane jTextPane) {
 		Rectangle visibleRect = jTextPane.getVisibleRect();
-		int caretPosition = jTextPane.viewToModel(visibleRect.getLocation());
+		int caretPosition = jTextPane.viewToModel2D(visibleRect.getLocation());
 		return caretPosition;
 	}
 
@@ -69,7 +69,7 @@ public class GuiUtil {
 		
 		try {							
 			
-			Rectangle2D modelToView2D = jTextPanet.modelToView(caretPosition);
+			Rectangle2D modelToView2D = jTextPanet.modelToView2D(caretPosition);
 			Rectangle rect = new Rectangle((int) modelToView2D.getX(), 
 					(int) modelToView2D.getY(), 
 					jTextPanet.getWidth(),

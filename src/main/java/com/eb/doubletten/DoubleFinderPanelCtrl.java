@@ -32,7 +32,7 @@ public class DoubleFinderPanelCtrl extends AbstrPanelCtrl {
 	List<Doublette> doubletten ;
 	private JFrame frame;
 	
-	private JList lstOtherDoubles;
+	private JList<String> lstOtherDoubles;
 	private Doublette selectedDoublette;
 	private boolean zufall;
 	Random random;
@@ -418,11 +418,11 @@ public class DoubleFinderPanelCtrl extends AbstrPanelCtrl {
 		this.frame = frame;
 	}
 
-	public JList getLstOtherDoubles() {
+	public JList<String> getLstOtherDoubles() {
 		return lstOtherDoubles;
 	}
 
-	public void setLstOtherDoubles(JList lstOtherDoubles) {
+	public void setLstOtherDoubles(JList<String> lstOtherDoubles) {
 		this.lstOtherDoubles = lstOtherDoubles;
 		getLstOtherDoubles().addListSelectionListener(x->handleDoublettenFileClicked(x));
 	}

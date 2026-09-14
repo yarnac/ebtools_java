@@ -1,7 +1,7 @@
 package com.eb.ai_service.llm_client.infrastructure;
 
-import com.eb.ai_service.llm_client.api.LlmMessage;
-import com.eb.ai_service.llm_client.api.LlmRequest;
+import com.eb.base.ai_service.llm_client.api.LlmMessage;
+import com.eb.base.ai_service.llm_client.api.LlmRequest;
 
 import java.util.ArrayList;
 import java.util.List;
