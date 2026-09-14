@@ -1,5 +1,6 @@
 package com.eb.base.inifile.implementation;
 
+import com.eb.base.extensions.StringExtensions;
 import com.eb.base.inifile.api.IniFile;
 import com.eb.base.io.FileUtil;
 
@@ -102,6 +103,11 @@ class IniFileImpl implements IniFile {
 		
 	}
 
+	@Override
+	public String getSectionValue(String section, String value, String defaultString) {
+		return getSectionValue(section, value, defaultString, false);
+	}
+
 	List<IniFileSection> iniFileSections = new ArrayList<>();
 	private String fileName;
 	
@@ -127,12 +133,18 @@ class IniFileImpl implements IniFile {
      }
 	
 	 @Override
-	 public String getSectionValue(String section, String value, String defaultString)
+	 public String getSectionValue(String section, String value, String defaultString, boolean writeIfAbsent)
      {
-         IniFileSection sec = getSection(section, false);
+         IniFileSection sec = getSection(section, writeIfAbsent);
          if (sec == null)
              return defaultString;
-         String str = sec.getValue(value, defaultString);
+         String str = sec.getValue(value, null);
+		 if (str == null)
+		 {
+			if (writeIfAbsent)
+				sec.setValue(value, defaultString);
+			return defaultString;
+		 }
          return str;
      }
 

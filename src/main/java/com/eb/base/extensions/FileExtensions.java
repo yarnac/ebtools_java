@@ -1,6 +1,7 @@
 package com.eb.base.extensions;
 
 import com.eb.base.Logger;
+import com.eb.chatclient.domain.chat.GlobaleEinstellungen;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
@@ -117,6 +118,11 @@ public class FileExtensions {
     public static String ebFileNameInDirectory(String str, String dirName) {
         if (dirName == null || dirName.isEmpty()) return ebLocalFileName(str);
         return dirName + FILE_SEPARATOR + ebLocalFileName(str);
+    }
+
+    public static String ebFullFileNameInDirectory(String str, String dirName) {
+        if (dirName == null || dirName.isEmpty()) return ebLocalFileName(str);
+        return dirName + FILE_SEPARATOR + str;
     }
 
     /**
@@ -677,4 +683,13 @@ public class FileExtensions {
         }
     }
 
+    public static boolean ebIsValidAbsoluteOsFileName(String fileName) {
+        if (GlobaleEinstellungen.isWindows())
+        {
+            if (fileName == null || fileName.length() <= 3)
+                return false;
+            return fileName.charAt(1) == ':' &&  fileName.charAt(2) == '\\';
+        }
+        return fileName.startsWith("/User");
+    }
 }

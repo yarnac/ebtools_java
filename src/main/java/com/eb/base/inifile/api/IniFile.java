@@ -20,6 +20,8 @@ public interface IniFile {
 
     String getSectionValue(String section, String value, String defaultString);
 
+    String getSectionValue(String section, String value, String defaultString, boolean writeIfAbsent);
+
     List<String> getSectionValues(String string);
 
     List<String> getSectionValues(String string, boolean createSection);

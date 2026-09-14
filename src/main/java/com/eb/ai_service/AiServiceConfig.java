@@ -2,6 +2,7 @@ package com.eb.ai_service;
 
 import com.eb.base.inifile.api.IniFile;
 import com.eb.base.inifile.api.IniFileProvider;
+import com.eb.chatclient.domain.chat.AiEinstellungen;
 
 public class AiServiceConfig {
     private static AiServiceConfig instance;
@@ -25,7 +26,7 @@ public class AiServiceConfig {
 
 
     public String getModelFileName() {
-        return iniFile.getSectionValue("Einstellungen", "AiModelFileName", "");
+        return iniFile.getSectionValue("Einstellungen", "AiModelFileName", "AiServicesConfig.ini", true);
     }
 
     public String getGeheimnisFileName() {

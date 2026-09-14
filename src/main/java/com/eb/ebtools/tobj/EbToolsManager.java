@@ -1,7 +1,6 @@
 package com.eb.ebtools.tobj;
 
 import com.eb.base.EbAppContext;
-import com.eb.base.MainGlobals;
 import com.eb.base.inifile.api.IniFile;
 import com.eb.base.inifile.api.IniFileProvider;
 import com.eb.base.io.CsvFile;

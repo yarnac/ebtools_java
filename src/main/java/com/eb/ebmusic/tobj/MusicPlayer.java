@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
-import com.eb.base.MainGlobals;
+import com.eb.chatclient.domain.chat.GlobaleEinstellungen;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
 
@@ -60,7 +60,7 @@ public class MusicPlayer {
 	}
 
 	private void playUsingVlc(List<String> filenamesToPlay) {
-		if (MainGlobals.isWindows())
+		if (GlobaleEinstellungen.isWindows())
 			playUsingVlcWindows(filenamesToPlay);
 		else
 			plaxyUsingVlcMacOs(filenamesToPlay);
@@ -182,14 +182,9 @@ public class MusicPlayer {
 	public Consumer<String> getShowActTitle() {
 		return showActTitle;
 	}
-
-
-
 	public void setShowActTitle(Consumer<String> showActTitle) {
 		this.showActTitle = showActTitle;
 	}
-
-
 
 	public void stop() {
 		if (player!=null)

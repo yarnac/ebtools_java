@@ -1,6 +1,8 @@
 package com.eb.ai_service.llm_client.infrastructure;
 
 import com.eb.ai_service.AiServiceConfig;
+import com.eb.base.extensions.FileExtensions;
+import com.eb.chatclient.domain.chat.AiEinstellungen;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -29,7 +31,7 @@ public class LlmModelProvider {
     public LlmModelProvider()
     {
         try {
-            models = readModels("d:\\Develop\\Visual22\\Shared\\AiPlayground\\Provider\\provider.txt");
+            models = readModels(AiEinstellungen.getFilePath("AiServices/Modelle.txt"));
         } catch (IOException e) {
             models = new ArrayList<>();
         }
@@ -38,6 +40,10 @@ public class LlmModelProvider {
 
 
     private List<LlmModel> readModels(String fileName) throws IOException {
+
+        if (!FileExtensions.ebFileExists(fileName)) {
+            throw new RuntimeException("File not found: " + fileName);
+        }
 
         List<LlmModel> models = new ArrayList<>();
 

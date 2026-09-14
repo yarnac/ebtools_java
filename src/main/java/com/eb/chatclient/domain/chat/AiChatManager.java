@@ -103,11 +103,11 @@ public class AiChatManager {
     }
 
     private static String GetChatOrdner() {
-        return AiEinstellungen.AiPfad + "\\chats";
+        return AiEinstellungen.AiPfad + "/chats";
     }
 
     private static String GetSessionOrdner() {
-        return AiEinstellungen.AiPfad + "\\sessions";
+        return AiEinstellungen.AiPfad + "/sessions";
     }
 
     public AiChat createChat(String name, String title) {

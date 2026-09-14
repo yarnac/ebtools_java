@@ -1,10 +1,10 @@
 package com.eb.ebtools.tvplayer.api;
 
-import com.eb.base.MainGlobals;
 import com.eb.base.gui.GuiDecorator;
 import com.eb.base.gui.IC;
 import com.eb.base.inifile.api.IniFile;
 import com.eb.base.io.FileUtil;
+import com.eb.chatclient.domain.chat.GlobaleEinstellungen;
 import com.eb.ebtools.tvplayer.domain.TvItem;
 import com.eb.ebtools.tvplayer.domain.TvKategorisierung;
 import com.eb.ebtools.tvplayer.infrastructure.TvItemReader;
@@ -66,7 +66,7 @@ public class TvPlayerCtrl {
     }
 
     private void tvFileBearbeiten() {
-        FileUtil.open(MainGlobals.getEbToolsFileName("Tv/TvListeAll.txt"));
+        FileUtil.open(GlobaleEinstellungen.getDataPfadJUser("Tv/TvListeAll.txt"));
     }
 
     private void copyScript() {
@@ -154,14 +154,14 @@ public class TvPlayerCtrl {
         lines.add(v.getExtInf());
         lines.add(v.getExtVlcOpt());
         lines.add(v.getRstp());
-        String tempFile =  MainGlobals.getTempFileName("Doit.m3u");
+        String tempFile =  GlobaleEinstellungen.getTempFileName("Doit.m3u");
         FileUtil.WriteLines("UTF-8", tempFile, lines);
         FileUtil.open(tempFile);
     }
 
     public void reload() {
-        loadTvList(MainGlobals.getEbToolsFileName("Tv/tvsd.m3u"));
-        loadKategorisierung(MainGlobals.getEbToolsFileName("Tv/TvListeAll.txt"));
+        loadTvList(GlobaleEinstellungen.getDataPfadJUser("Tv/tvsd.m3u"));
+        loadKategorisierung(GlobaleEinstellungen.getDataPfadJUser("Tv/TvListeAll.txt"));
         transferKategorien();
         transfer();
     }

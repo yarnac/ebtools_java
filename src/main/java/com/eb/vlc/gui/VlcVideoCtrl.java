@@ -1,13 +1,12 @@
 package com.eb.vlc.gui;
 
-import com.eb.base.MainGlobals;
 import com.eb.base.gui.GuiDecorator;
 import com.eb.base.gui.IC;
 import com.eb.base.inifile.api.IniFile;
 import com.eb.base.inifile.api.IniFileProvider;
 import com.eb.base.io.FileUtil;
+import com.eb.chatclient.domain.chat.GlobaleEinstellungen;
 import com.eb.ebmusic.tobj.MusicPlayer;
-import com.sun.tools.javac.Main;
 import lombok.Getter;
 
 import javax.swing.*;
@@ -25,7 +24,7 @@ import static java.lang.System.out;
 
 public class VlcVideoCtrl {
 
-    public static final String C_DATA_SHOWED_FILES_TXT = MainGlobals.getEbToolsFileName("ShowedFiles.txt");
+    public static final String C_DATA_SHOWED_FILES_TXT = GlobaleEinstellungen.getDataPfadJUser("ShowedFiles.txt");
 
     @Getter
     private static JFrame frame;
@@ -47,7 +46,7 @@ public class VlcVideoCtrl {
 
     public VlcVideoCtrl() {
         vlcVideoForm = new VlcVideoForm();
-        iniFile = IniFileProvider.createIniFile(MainGlobals.getEbToolsFileName("VlcVideoCtrl.ini"));
+        iniFile = IniFileProvider.createIniFile(GlobaleEinstellungen.getDataPfadJUser("VlcVideoCtrl.ini"));
 
 
         // vlcVideoForm.setFileNames(allFileNames);

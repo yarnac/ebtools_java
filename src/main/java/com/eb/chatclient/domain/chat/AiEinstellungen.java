@@ -31,6 +31,6 @@ public class AiEinstellungen {
     }
 
     public static String getFilePath(String s) {
-        return FileExtensions.ebFileNameInDirectory(s, AiPfad);
+        return  FileExtensions.ebFullFileNameInDirectory(s, AiPfad);
     }
 }

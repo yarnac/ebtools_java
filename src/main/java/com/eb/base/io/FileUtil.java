@@ -2,6 +2,7 @@ package com.eb.base.io;
 
 
 import com.eb.base.Logger;
+import com.eb.base.extensions.FileExtensions;
 import com.eb.doubletten.Doublette;
 
 import java.awt.Desktop;
@@ -105,7 +106,10 @@ public class FileUtil {
 	public static void WriteText(String encoding, String fname, String str) {
 		String fileName = getRealFileName(fname);
 		try {
-			FileOutputStream is = new FileOutputStream(fileName);
+			if (!FileExtensions.ebFileExists(fileName)) {
+				new File(fileName).createNewFile();
+			}
+			FileOutputStream is = new FileOutputStream(fileName,true);
 			OutputStreamWriter isr = new OutputStreamWriter(is,encoding);
 			BufferedWriter r = new BufferedWriter(isr);
 			r.write(str);

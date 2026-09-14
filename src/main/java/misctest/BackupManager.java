@@ -1,4 +1,4 @@
-package main;
+package misctest;
 
 public class BackupManager {
 
