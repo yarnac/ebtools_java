@@ -12,10 +12,11 @@ public class SimpleAiRequest2 {
 
         EventQueue.invokeLater(new Runnable() {
             public void run() {
+                System.out.println("Starte Request");
 
                 LlmResponse response = LlmRequestService.sendSimpleRequest("""
                         <Du bist ein freundlicher AI Assistent>>
-                        Sag Hallo.
+                        Schreibe eine Java Klasse, die Hello World in einem neuen Fenster anzeigt.
                         """);
                 PitMessageBox.show("Llm Request Antwort", response.getAnswer());
             }

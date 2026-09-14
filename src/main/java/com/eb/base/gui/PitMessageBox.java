@@ -37,7 +37,7 @@ public class PitMessageBox {
 
         textArea = new JTextArea();
 
-        frame.getContentPane().add(textArea, BorderLayout.CENTER);
+        frame.getContentPane().add(new JScrollPane(textArea), BorderLayout.CENTER);
 
     }
 }
