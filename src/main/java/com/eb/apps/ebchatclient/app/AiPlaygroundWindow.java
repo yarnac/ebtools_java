@@ -51,10 +51,13 @@ public class AiPlaygroundWindow extends JFrame {
     }
 
     private void setFontSizes(int fontSize) {
-        Font font = new Font("Arial", Font.PLAIN, fontSize);
-        getTextPane1().setFont(new Font("Arial", Font.PLAIN, fontSize));
-        getTextPaneInput().setFont(new Font("Arial", Font.PLAIN, fontSize));
-        getTextPaneOutput().setFont(new Font("Arial", Font.PLAIN, fontSize));
+
+        Font font = new Font("JetBrains Mono", Font.PLAIN, fontSize);
+
+        // Font font = new Font("Arial", Font.PLAIN, fontSize);
+        getTextPane1().setFont(font);
+        getTextPaneInput().setFont(font);
+        getTextPaneOutput().setFont(font);
     }
 
     private void decorateMessagesInput() {

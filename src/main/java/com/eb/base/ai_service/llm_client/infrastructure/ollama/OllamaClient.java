@@ -21,7 +21,7 @@ import java.util.concurrent.CompletableFuture;
 
 public class OllamaClient implements ILlmClient {
 
-    public static String[] HOSTS = new String[]{"macbook-air-von-ekkart", "macbookpro", "xt13", "127.0.0.1", "conroy"};
+    public static String[] HOSTS = new String[]{"macbookeb", "macbook-air-von-ekkart3", "xt13", "127.0.0.1"};
     public static String HOST;
 
     @Override
@@ -32,20 +32,26 @@ public class OllamaClient implements ILlmClient {
             HOST = determineHost();
         }
 
-        // Schreibe eine Java21 Klasse, die die Dauer eines Aufrufes eines Runnables ermittelt:‚
-        //double determineSecondsToRun(Runnable runnable)
+        /*
+        Schreibe eine Java21 Klasse, die die Dauer eines Aufrufes eines Runnables ermittelt:‚
+        double determineSecondsToRun(Runnable runnable)
+         */
 
         List<LlmMessage> messages = llmRequest.getMessages();
 
         Map<String, Object> body = new HashMap<>();
-        body.put("model", "qwen3:8B");
+        body.put("model", llmRequest.getModel());
         body.put("messages", messages);
 
         ObjectMapper mapper = new ObjectMapper();
         String json = mapper.writeValueAsString(body);
 
         HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create("http://%s:11434/v1/chat/completions".formatted("macbook-air-von-ekkart")))
+                // .uri(URI.create("http://%s:11434/v1/chat/completions".formatted("macbook-air-von-ekkart")))
+                // .uri(URI.create("http://%s:11434/v1/chat/completions".formatted("xt13")))
+                // .uri(URI.create("http://%s:11434/v1/chat/completions".formatted("macbookeb")))
+                .uri(URI.create("http://%s:11434/v1/chat/completions".formatted(HOST)))
+
                 //.uri(URI.create("http://127.0.0.1:11434/v1/chat/completions"))
                 .header("Content-Type", "application/json")
                 .header("Authorization", "Bearer " + "")
@@ -80,8 +86,7 @@ public class OllamaClient implements ILlmClient {
     }
 
     private String determineHost() {
-        if (true)
-            return "macbookpro";
+
         if (HOST != null)
             return HOST;
         for (String host : OllamaClient.HOSTS)

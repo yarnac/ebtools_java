@@ -15,7 +15,8 @@ public class SimpleAiRequest2 {
                 System.out.println("Starte Request");
 
                 LlmResponse response = LlmRequestService.sendSimpleRequest("""                        
-                        Sag Hallo.
+                        << Du bist Java 21 Programmierer >>
+                        Schreibe einen http Client für die Ollama API.
                         """);
                 PitMessageBox.show("Llm Request Antwort", response.getAnswer());
             }
