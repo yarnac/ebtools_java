@@ -9,6 +9,7 @@ import com.eb.base.ai_service.llm_client.infrastructure.LlmModelProvider;
 import com.eb.base.gui.GuiDecorator;
 import com.eb.base.gui.IC;
 import com.eb.base.gui.ICF;
+import com.eb.base.gui.adapter.JTextAreaAdapter;
 import com.eb.base.gui.persist.ComponentPersisterFactory;
 import com.eb.base.gui.persist.IComponentPersister;
 import com.eb.base.inifile.api.IniFile;
@@ -53,7 +54,6 @@ public class AiPlaygroundCtrl {
 
 
         decorator.addCloseAction(persister::persistComponentItems);
-
     }
 
     private void decorateToolbarInput() {
@@ -142,16 +142,16 @@ public class AiPlaygroundCtrl {
 
         Thread task = new Thread(() -> withProgressbarAnimationDo(()->{
             LlmResponse result = LlmRequestService.sendRequest(llmRequest);
-            StringBuilder strb = new StringBuilder();
-            strb.append("Tokens            %d\n".formatted(result.getTotalTokens()));
-            strb.append("Dauer in Sekunden %f\n".formatted(result.getSecondsToRun()));
-            strb.append("Tokens je Sekunde %f\n".formatted(result.getTokensPerSecond()));
-            strb.append(result.getAnswer());
 
-            window.setOutputText(strb.toString());
+
+            String res = result.getAnswerWithDetails();
+            window.setOutputText(res);
+            window.getTextPaneAdapterOutput().setFirstVisibleLine(0);
         }));
         task.start();
     }
+
+
 
 
     private void withProgressbarAnimationDo(Runnable runnable) {

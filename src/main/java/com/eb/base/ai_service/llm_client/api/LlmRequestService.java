@@ -2,6 +2,7 @@ package com.eb.base.ai_service.llm_client.api;
 
 import com.eb.base.ai_service.llm_client.infrastructure.ILlmClient;
 import com.eb.base.ai_service.llm_client.infrastructure.LlmClientFactory;
+import com.eb.base.ai_service.llm_client.infrastructure.ollama.OllamaClient;
 
 import java.io.IOException;
 
@@ -20,10 +21,12 @@ public class LlmRequestService {
         }
     }
 
-    public static LlmResponse sendSimpleRequest(String message) {
+    public static LlmResponse sendSimpleRequest(String message, String modelName, String host) {
+        OllamaClient.HOST = host;
+
         LlmRequest llmRequest = LlmRequest.builder()
                 .addRequestMsg(message)
-                .setModel("qwen3:8b")
+                .setModel(modelName)
                 .build();
 
         return sendRequest(llmRequest);

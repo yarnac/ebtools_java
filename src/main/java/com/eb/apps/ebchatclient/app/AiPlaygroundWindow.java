@@ -2,6 +2,7 @@ package com.eb.apps.ebchatclient.app;
 
 import com.eb.base.gui.GuiDecorator;
 import com.eb.base.gui.IC;
+import com.eb.base.gui.adapter.JTextPaneAdapter;
 import com.eb.base.gui.persist.IComponentPersister;
 import com.eb.base.inifile.api.IniFile;
 import com.eb.base.gui.EbSplitPanel;
@@ -18,6 +19,9 @@ public class AiPlaygroundWindow extends JFrame {
 
     @Getter
     private final GuiDecorator decorator;
+    
+    @Getter
+    private JTextPaneAdapter textPaneAdapterOutput;
     @Getter
     private JTextPane textPane1;
     @Getter
@@ -53,6 +57,10 @@ public class AiPlaygroundWindow extends JFrame {
     private void setFontSizes(int fontSize) {
 
         Font font = new Font("JetBrains Mono", Font.PLAIN, fontSize);
+        if (!font.getFontName().equals("Jetbrains Mono"))
+            font = new Font("Consolas", Font.PLAIN, fontSize);
+        if (!font.getFontName().equals("Consolas"))
+            font = new Font("Monospaced", Font.PLAIN, fontSize);
 
         // Font font = new Font("Arial", Font.PLAIN, fontSize);
         getTextPane1().setFont(font);
@@ -186,6 +194,10 @@ public class AiPlaygroundWindow extends JFrame {
         JScrollPane scrollPane1 = new JScrollPane(textPane1);
         JScrollPane scrollPane2 = new JScrollPane(textPaneInput);
         JScrollPane scrollPane3 = new JScrollPane(textPaneOutput);
+
+        textPaneAdapterOutput = new JTextPaneAdapter(scrollPane3, textPaneOutput);
+        
+        
 
 
         // Create the SplitPanel for Messages
