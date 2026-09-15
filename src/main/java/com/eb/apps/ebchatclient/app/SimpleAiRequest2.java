@@ -14,9 +14,8 @@ public class SimpleAiRequest2 {
             public void run() {
                 System.out.println("Starte Request");
 
-                LlmResponse response = LlmRequestService.sendSimpleRequest("""
-                        <Du bist ein freundlicher AI Assistent>>
-                        Schreibe eine Java Klasse, die Hello World in einem neuen Fenster anzeigt.
+                LlmResponse response = LlmRequestService.sendSimpleRequest("""                        
+                        Sag Hallo.
                         """);
                 PitMessageBox.show("Llm Request Antwort", response.getAnswer());
             }
