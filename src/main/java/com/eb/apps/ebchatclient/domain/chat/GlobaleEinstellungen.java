@@ -37,7 +37,9 @@ public class GlobaleEinstellungen {
         if (AIPFAD == null) {
             String[] directories = new  String[]{
                     "d:\\Develop\\Visual22\\Shared\\Data\\Ai",
-                    "/Users/ekkart/Data/develop/shared-projects/Data/Ai"};
+                    "/Users/ekkart/Data/develop/shared-projects/Data/Ai",
+            };
+
             AIPFAD = findDirectory(directories);
         }
         return AIPFAD;

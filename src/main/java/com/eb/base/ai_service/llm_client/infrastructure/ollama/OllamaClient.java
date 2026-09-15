@@ -21,7 +21,7 @@ import java.util.concurrent.CompletableFuture;
 
 public class OllamaClient implements ILlmClient {
 
-    public static String[] HOSTS = new String[]{"macbook-air-von-ekkart", "xt13", "127.0.0.1", "conroy"};
+    public static String[] HOSTS = new String[]{"macbook-air-von-ekkart", "macbookpro", "xt13", "127.0.0.1", "conroy"};
     public static String HOST;
 
     @Override
@@ -31,6 +31,10 @@ public class OllamaClient implements ILlmClient {
         {
             HOST = determineHost();
         }
+
+        // Schreibe eine Java21 Klasse, die die Dauer eines Aufrufes eines Runnables ermittelt:‚
+        //double determineSecondsToRun(Runnable runnable)
+
         List<LlmMessage> messages = llmRequest.getMessages();
 
         Map<String, Object> body = new HashMap<>();
@@ -41,7 +45,7 @@ public class OllamaClient implements ILlmClient {
         String json = mapper.writeValueAsString(body);
 
         HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create("http://%s:11434/v1/chat/completions".formatted(HOST)))
+                .uri(URI.create("http://%s:11434/v1/chat/completions".formatted("macbook-air-von-ekkart")))
                 //.uri(URI.create("http://127.0.0.1:11434/v1/chat/completions"))
                 .header("Content-Type", "application/json")
                 .header("Authorization", "Bearer " + "")
@@ -49,21 +53,35 @@ public class OllamaClient implements ILlmClient {
                 .POST(HttpRequest.BodyPublishers.ofString(json))
                 .build();
 
+
+        long startTime = System.nanoTime();
         HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+        long endTime = System.nanoTime();
+        double elapsedSeconds = (endTime - startTime) / 1000000000.0;
+
+
+
+
         OllamaResponse ollamaResponse =
                 mapper.readValue(response.body(), OllamaResponse.class);
 
-        LlmResponse llrResponse = new LlmResponse();
+        LlmResponse llmResponse = new LlmResponse();
         OllamaResponse.Message answerMessage = ollamaResponse.getChoices().get(0).getMessage();
-        llrResponse.setAnswer(answerMessage.getContent());
-        llrResponse.setModel(ollamaResponse.getModel());
-        llrResponse.setInputTokens(0);
-        llrResponse.setOutputTokens(0);
-        llrResponse.setTotalTokens(ollamaResponse.getUsage().getTotalTokens());
-        return llrResponse;
+        llmResponse.setAnswer(answerMessage.getContent());
+        llmResponse.setModel(ollamaResponse.getModel());
+        llmResponse.setInputTokens(0);
+        llmResponse.setOutputTokens(0);
+        llmResponse.setTotalTokens(ollamaResponse.getUsage().getTotalTokens());
+        llmResponse.setRequest(llmRequest);
+        llmResponse.setSecondsToRun(elapsedSeconds);
+        llmResponse.calcTokens();
+
+        return llmResponse;
     }
 
     private String determineHost() {
+        if (true)
+            return "macbookpro";
         if (HOST != null)
             return HOST;
         for (String host : OllamaClient.HOSTS)

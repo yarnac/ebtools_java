@@ -15,9 +15,15 @@ public class LlmResponse {
     private int inputTokens;
     private int outputTokens;
     private int totalTokens;
+    private LlmRequest request;
+    private double secondsToRun;
+    private double tokensPerSecond;
 
     public void calcTokens()
     {
-        totalTokens = inputTokens + outputTokens;
+        if (totalTokens == 0)
+            totalTokens = inputTokens + outputTokens;
+        if (secondsToRun > 0)
+            tokensPerSecond = (double) totalTokens / (double) secondsToRun;
     }
 }

@@ -142,7 +142,13 @@ public class AiPlaygroundCtrl {
 
         Thread task = new Thread(() -> withProgressbarAnimationDo(()->{
             LlmResponse result = LlmRequestService.sendRequest(llmRequest);
-            window.setOutputText(result.getAnswer());
+            StringBuilder strb = new StringBuilder();
+            strb.append("Tokens            %d\n".formatted(result.getTotalTokens()));
+            strb.append("Dauer in Sekunden %f\n".formatted(result.getSecondsToRun()));
+            strb.append("Tokens je Sekunde %f\n".formatted(result.getTokensPerSecond()));
+            strb.append(result.getAnswer());
+
+            window.setOutputText(strb.toString());
         }));
         task.start();
     }

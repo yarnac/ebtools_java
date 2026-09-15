@@ -52,27 +52,34 @@ public class OpenAiClient implements ILlmClient {
                 .POST(HttpRequest.BodyPublishers.ofString(json))
                 .build();
 
+        long startTime = System.nanoTime();
         HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+        long endTime = System.nanoTime();
+        double elapsedSeconds = (endTime - startTime) / 1000000000.0;
+
         String responseBody = response.body();
         OpenAiResponse openAiResponse = mapper.readValue(responseBody , OpenAiResponse.class);
 
-        LlmResponse llrResponse = new LlmResponse();
+        LlmResponse llmResponse = new LlmResponse();
         List<OpenAiResponse.Output> output = openAiResponse.getOutput();
 
         for(OpenAiResponse.Output currentOutput: output)
         {
             if (currentOutput.getType().equals("message"))
             {
-                llrResponse.setAnswer(currentOutput.getContent().get(0).getText());
+                llmResponse.setAnswer(currentOutput.getContent().get(0).getText());
                 break;
             }
         }
-        llrResponse.setModel(openAiResponse.getModel());
-        llrResponse.setInputTokens(openAiResponse.getUsage().getInput_tokens());
-        llrResponse.setOutputTokens(openAiResponse.getUsage().getOutput_tokens());
-        llrResponse.setTotalTokens(openAiResponse.getUsage().getTotal_tokens());
-        TokenLogger.log(llmRequest, llrResponse);
-        return llrResponse;
+        llmResponse.setModel(openAiResponse.getModel());
+        llmResponse.setInputTokens(openAiResponse.getUsage().getInput_tokens());
+        llmResponse.setOutputTokens(openAiResponse.getUsage().getOutput_tokens());
+        llmResponse.setTotalTokens(openAiResponse.getUsage().getTotal_tokens());
+        llmResponse.setRequest(llmRequest);
+        llmResponse.setSecondsToRun(elapsedSeconds);
+
+        TokenLogger.log(llmRequest, llmResponse);
+        return llmResponse;
     }
 
 

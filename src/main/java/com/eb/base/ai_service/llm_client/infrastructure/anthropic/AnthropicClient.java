@@ -62,7 +62,12 @@ public class AnthropicClient implements ILlmClient {
                 .POST(HttpRequest.BodyPublishers.ofString(json))
                 .build();
 
+        long startTime = System.nanoTime();
         HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+        long endTime = System.nanoTime();
+        double elapsedSeconds = (endTime - startTime) / 1000000000.0;
+
+
         String respBody = response.body();
         AnthropicResponse anthropicAiResponse =
                 mapper.readValue(respBody, AnthropicResponse.class);
@@ -73,14 +78,17 @@ public class AnthropicClient implements ILlmClient {
                 .findFirst()
                 .orElse("");
 
-        LlmResponse llrResponse = new LlmResponse();
-        llrResponse.setAnswer(answer);
-        llrResponse.setModel(anthropicAiResponse.getModel());
-        llrResponse.setInputTokens(anthropicAiResponse.getUsage().getInputTokens());
-        llrResponse.setOutputTokens(anthropicAiResponse.getUsage().getOutputTokens());
-        llrResponse.calcTokens();
-        TokenLogger.log(llmRequest, llrResponse);
-        return llrResponse;
+        LlmResponse llmResponse = new LlmResponse();
+        llmResponse.setAnswer(answer);
+        llmResponse.setModel(anthropicAiResponse.getModel());
+        llmResponse.setInputTokens(anthropicAiResponse.getUsage().getInputTokens());
+        llmResponse.setOutputTokens(anthropicAiResponse.getUsage().getOutputTokens());
+        llmResponse.setRequest(llmRequest);
+        llmResponse.setSecondsToRun(elapsedSeconds);
+        llmResponse.calcTokens();
+        TokenLogger.log(llmRequest, llmResponse);
+
+        return llmResponse;
     }
 
     private List<LlmMessage> getDialogMessages(List<LlmMessage> messages) {
