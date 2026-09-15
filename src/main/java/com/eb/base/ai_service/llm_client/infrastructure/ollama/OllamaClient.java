@@ -21,7 +21,7 @@ import java.util.concurrent.CompletableFuture;
 
 public class OllamaClient implements ILlmClient {
 
-    public static String[] HOSTS = new String[]{"macbook-air-von-ekkart2", "xt13", "127.0.0.1", "conroy"};
+    public static String[] HOSTS = new String[]{"macbook-air-von-ekkart", "xt13", "127.0.0.1", "conroy"};
     public static String HOST;
 
     @Override
