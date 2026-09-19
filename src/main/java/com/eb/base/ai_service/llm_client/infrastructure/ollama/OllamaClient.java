@@ -33,14 +33,18 @@ public class OllamaClient implements ILlmClient {
 
     public static final String QWEN3_8 = "qwen3:8b";
     public static final String QWEN3_14 = "qwen3:14b";
+    public static final String QWEN35_4 = "qwen3.5:4b";
+    public static final String QWEN35_9 = "qwen3.5:9b";
     public static final String QWEN25CODER_7 = "qwen2.5-coder:7b";
     public static final String QWEN25CODER_14 = "qwen2.5-coder:14b";
 
     public static final String[] MODELLE = new String[]{
-            QWEN25CODER_7,
-            QWEN25CODER_14,
-            QWEN3_8,
-            QWEN3_14,
+            //QWEN25CODER_7,
+            //QWEN25CODER_14,
+            //QWEN3_8,
+            //QWEN3_14,
+            QWEN35_4,
+            QWEN35_9,
     };
 
 

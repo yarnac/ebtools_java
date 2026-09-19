@@ -13,6 +13,7 @@ import com.eb.base.ai_service.llm_client.infrastructure.LlmModel;
 import com.eb.base.ai_service.llm_client.infrastructure.LlmModelProvider;
 import com.eb.base.extensions.FileExtensions;
 import com.eb.base.inifile.api.IniFile;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -45,6 +46,8 @@ public class AiChatManager {
         ObjectMapper mapper = new ObjectMapper();
         mapper.enable(MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES);
         mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+        mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+
         mapper.registerModule(new JavaTimeModule());
 
         return mapper;
@@ -76,7 +79,8 @@ public class AiChatManager {
 
     private void readKontexte() {
         try {
-            String json = Files.readString(Paths.get(AiEinstellungen.getFilePath("AiServices/Kontexte.txt")), StandardCharsets.UTF_8);
+            String filePath = AiEinstellungen.getFilePath("AiServices/Kontexte.txt");
+            String json = Files.readString(Paths.get(filePath), StandardCharsets.UTF_8);
             CollectionType type = objectMapper.getTypeFactory().constructCollectionType(List.class, AiChatContext.class);
             this.availableKontexte = objectMapper.readValue(json, type);
         } catch (Exception e) {

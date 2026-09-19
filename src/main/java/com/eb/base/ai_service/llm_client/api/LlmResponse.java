@@ -53,7 +53,7 @@ public class LlmResponse {
 
         return strb.toString()
                 .replace("macbook-air-von-ekkart","Mac Book Air M4 16GB")
-                .replace("macbookeb","Mac Book Pro M1 Pro 32GB")
+                .replace("macbookeb","Mac Book Pro M1 Pro 16GB")
                 ;
 
     }
