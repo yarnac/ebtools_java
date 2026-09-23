@@ -17,6 +17,8 @@ import com.eb.base.inifile.api.IniFileProvider;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.datatransfer.Clipboard;
+import java.awt.datatransfer.StringSelection;
 import java.awt.event.ActionEvent;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
@@ -54,10 +56,11 @@ public class ContextEditDlg extends JFrame {
         decorator.setCurrentMenu("Kontext");
         ActionEvent e = new ActionEvent(this, ActionEvent.ACTION_PERFORMED, "");
         decorator.addMenuItem("Neu", ()->createNewContext(e), KeyEvent.VK_N, InputEvent.CTRL_DOWN_MASK);
-        decorator.addMenuItem("Löschen", ()->deleteContext(e), KeyEvent.VK_D, InputEvent.CTRL_DOWN_MASK);
+        decorator.addMenuItem("Löschen", ()->deleteContext(e), KeyEvent.VK_D, InputEvent.CTRL_DOWN_MASK );
         decorator.addMenuSeparator();
         decorator.addMenuItem("Speichern", ()->saveContext(e), KeyEvent.VK_S, InputEvent.CTRL_DOWN_MASK);
         decorator.addMenuItem("Undo", ()->undoEdit(e), KeyEvent.VK_Z, InputEvent.CTRL_DOWN_MASK);
+        decorator.addMenuItem("Copy Prompt", ()->copyPrompt(e), KeyEvent.VK_C, InputEvent.CTRL_DOWN_MASK | InputEvent.SHIFT_DOWN_MASK);
 
         decorator.addContainer("mainToolBar", toolBarMain);
         decorator.addContainer("editorToolBar", contextEditorPanel.getToolBar());
@@ -66,6 +69,13 @@ public class ContextEditDlg extends JFrame {
         decorator.addToolbarButton("mainToolBar", "New Context", ICF.BlankDocument_Delete, this::deleteContext);
         decorator.addToolbarButton("editorToolBar", "Save Context", ICF.Save, this::saveContext);
         decorator.addToolbarButton("editorToolBar", "Undo", ICF.UndoBlue, this::undoEdit);
+    }
+
+    private void copyPrompt(ActionEvent e) {
+        StringSelection selection = new StringSelection(contextEditorPanel.getPromptText());
+        Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+
+        clipboard.setContents(selection, null);
     }
 
     private void undoEdit(ActionEvent actionEvent) {

@@ -1,5 +1,6 @@
 package com.eb.apps.ebchatclient.domain.chat;
 
+import com.eb.apps.ebookreader.tobj.StringUtil;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -11,6 +12,7 @@ import java.util.List;
 public class AiChatContext {
     private String name;
     private String knoten;
+    private String userString;
     private String systemPrompt;
     private String userPrompt;
     private List<String> fileNames = new ArrayList<>();
@@ -29,9 +31,28 @@ public class AiChatContext {
         this.userPrompt = userPrompt;
     }
 
+    public void prepareStore()
+    {
+        if (userString!=null)
+            return;
+
+        String systemPart = StringUtil.isNullOrEmpty(systemPrompt)
+                ? ""
+                : "<<" + systemPrompt.trim() + ">>\n";
+
+        String userPart = StringUtil.isNullOrEmpty(userPrompt)
+                ? ""
+                : userPrompt;
+
+        userString = systemPart + userPart;
+    }
+
 
     public String getRequestMessage() {
-        return "<<" + systemPrompt + ">>\n" + userPrompt;
+        if (userString==null)
+            prepareStore();
+
+        return userString;
     }
 
     @Override

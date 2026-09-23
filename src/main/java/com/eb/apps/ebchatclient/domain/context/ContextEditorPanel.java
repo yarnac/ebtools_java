@@ -185,4 +185,8 @@ public final class ContextEditorPanel extends JPanel {
             transferViewToModel(actContext);
         }
     }
+
+    public String getPromptText() {
+        return edPrompt.getText();
+    }
 }
