@@ -64,11 +64,11 @@ public class AiChatManager {
         readKontexte();
         loadChats();
         loadSessions();
-        this.availableKategorien = availableKontexte.stream().map(AiChatContext::getKategorie)
+        this.availableKategorien = availableKontexte.stream().map(AiChatContext::getKnoten)
                 .filter(Objects::nonNull).distinct().collect(Collectors.toList());
 
         this.availableEntwicklungsKontexte = availableKontexte.stream()
-                .filter(x -> "Entwicklung".equals(x.getKategorie()))
+                .filter(x -> "Entwicklung".equals(x.getKnoten()))
                 .collect(Collectors.toList());
     }
 

@@ -1,15 +1,12 @@
 package com.eb.apps.ebchatclient.edcontext;
 
-import com.eb.apps.ebchatclient.app.AiPlaygroundCtrl;
 import com.eb.apps.ebchatclient.domain.chat.AiChatContext;
 import com.eb.apps.ebchatclient.domain.chat.AiChatManager;
 import com.eb.base.gui.EbSplitPanel;
-import com.sun.source.tree.Tree;
 import lombok.Getter;
 
 import javax.swing.*;
 import javax.swing.event.TreeSelectionEvent;
-import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreePath;
 import java.awt.*;
@@ -45,45 +42,52 @@ public class EdContextWindow extends JFrame {
         JPanel mainPanel = new JPanel();
         mainPanel.setLayout(new GridBagLayout());
 
-        GridBagConstraints gbc = new GridBagConstraints();
-        gbc.fill = GridBagConstraints.HORIZONTAL;
-        gbc.anchor = GridBagConstraints.WEST;
-        gbc.insets = new Insets(5, 5, 5, 5);  // Padding around components
+        GridBagConstraints gbcLeft = new GridBagConstraints();
+        GridBagConstraints gbcRight = new GridBagConstraints();
+        gbcLeft.fill = GridBagConstraints.HORIZONTAL;
+        gbcLeft.anchor = GridBagConstraints.WEST;
+        gbcLeft.anchor = GridBagConstraints.NORTHWEST;
+        gbcLeft.insets = new Insets(5, 5, 5, 5);  // Padding around components
+
+
+        gbcRight.fill = GridBagConstraints.HORIZONTAL;
+        gbcRight.anchor = GridBagConstraints.NORTHWEST;
+        gbcRight.insets = new Insets(5, 5, 5, 5);  // Padding around components
 
         // Name Label and JTextField
-        gbc.gridx = 0;
-        gbc.gridy = 0;
-        mainPanel.add(new JLabel("Name"), gbc);
 
-        gbc.gridx = 1;
-        gbc.gridy = 0;
+        gbcLeft.weightx = 0.5;
+        gbcLeft.weighty = 0.5;
+        gbcLeft.gridx = 0;
+        gbcLeft.gridheight = 20;
 
-        mainPanel.add(edContextName, gbc);
+
+        gbcRight.weightx = 1.0;
+        gbcRight.weighty = 1.0;
+        gbcRight.gridx = 1;
+        gbcLeft.gridheight = 20;
+
+        gbcLeft.gridy = 0;
+        mainPanel.add(new JLabel("Name"), gbcLeft);
+
+        gbcRight.gridy = 0;
+        mainPanel.add(edContextName, gbcRight);
 
         // Kategorie Label and JTextField
-        gbc.gridx = 0;
-        gbc.gridy = 1;
-        mainPanel.add(new JLabel("Kategorie"), gbc);
+        gbcLeft.gridy = 1;
+        mainPanel.add(new JLabel("Kategorie"), gbcLeft);
 
-        gbc.gridx = 1;
-        gbc.gridy = 1;
+        gbcRight.gridy = 1;
+        mainPanel.add(edKategorie, gbcRight);
 
-        mainPanel.add(edKategorie, gbc);
+        gbcLeft.weighty = 2.0;
+        gbcLeft.gridy = 2;
+        mainPanel.add(new JLabel("Message"), gbcLeft);
 
-        // Message Label
-        gbc.gridx = 0;
-        gbc.gridy = 2;
-        gbc.gridwidth = 2;  // Span the label across two columns
-        mainPanel.add(new JLabel("Message"), gbc);
-
-        // JTextArea for message
-        gbc.gridx = 0;
-        gbc.gridy = 3;
-        gbc.gridwidth = 2;  // Span the textarea across two columns
-        gbc.fill = GridBagConstraints.BOTH; // Fill the space available
-
-        JScrollPane scrollPane = new JScrollPane(edMessage);  // Add a scroll pane for better usability
-        mainPanel.add(scrollPane, gbc);
+        gbcRight.weighty = 2.0;
+        gbcRight.gridy = 2;
+        gbcRight.fill = GridBagConstraints.BOTH;
+        mainPanel.add(new JScrollPane(edMessage), gbcRight);
 
 
 
@@ -109,7 +113,7 @@ public class EdContextWindow extends JFrame {
         else
         {
             edContextName.setText(context.getName());
-            edKategorie.setText(context.getKategorie());
+            edKategorie.setText(context.getKnoten());
             edMessage.setText(context.getRequestMessage());
         }
 

@@ -159,8 +159,8 @@ public class TvPlayerCtrl {
     }
 
     public void reload() {
-        loadTvList(GlobaleEinstellungen.getDataPfadJUser("Tv/tvsd.m3u"));
-        loadKategorisierung(GlobaleEinstellungen.getDataPfadJUser("Tv/TvListeAll.txt"));
+        loadTvList(GlobaleEinstellungen.getDataPfadJUser("CSharp/EbTool/Medien/tv.m3u"));
+        loadKategorisierung(GlobaleEinstellungen.getDataPfadJUser("CSharp/EbTool/Medien/TvListeAll.txt"));
         transferKategorien();
         transfer();
     }

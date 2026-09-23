@@ -10,9 +10,9 @@ import java.util.List;
 
 public class AiChatContext {
     private String name;
-    private String kategorie;
-    private String systemQuestion;
-    private String userQuestion;
+    private String knoten;
+    private String systemPrompt;
+    private String userPrompt;
     private List<String> fileNames = new ArrayList<>();
 
     public AiChatContext() {
@@ -22,9 +22,16 @@ public class AiChatContext {
         this.name = name;
     }
 
+    public AiChatContext(String name, String knoten, String systemPrompt, String userPrompt) {
+        this.name = name;
+        this.knoten = knoten;
+        this.systemPrompt = systemPrompt;
+        this.userPrompt = userPrompt;
+    }
+
 
     public String getRequestMessage() {
-        return "<<" + systemQuestion + ">>\n" + userQuestion;
+        return "<<" + systemPrompt + ">>\n" + userPrompt;
     }
 
     @Override

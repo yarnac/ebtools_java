@@ -55,6 +55,9 @@ public class EbSplitPanel {
         outerPanel1.add(panel1, BorderLayout.CENTER);
         outerPanel2.add(toolBar2, BorderLayout.NORTH );
         outerPanel2.add(panel2, BorderLayout.CENTER);
+        outerPanel2.add(new JPanel(), BorderLayout.WEST);
+        outerPanel2.add(new JPanel(), BorderLayout.EAST);
+
 
         splitPane.setLeftComponent(outerPanel1);
         splitPane.setRightComponent(outerPanel2);

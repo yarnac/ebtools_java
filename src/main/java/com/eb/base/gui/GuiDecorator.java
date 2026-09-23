@@ -66,12 +66,13 @@ public class GuiDecorator {
 		return jMenu;				
 	}
 	
-	public void addMenuItem(String menuString, String label, Runnable object) {
+	public JMenuItem addMenuItem(String menuString, String label, Runnable object) {
 		JMenu menu = getMenu(menuString);
 		
 		JMenuItem item = new JMenuItem(label);
 		item.addActionListener(x->object.run());
 		menu.add(item);
+		return item;
 	}
 
 	public JButton addToolbarButton(String toolbarName, String tooltipText, ICF ic, ActionListener listener) {
@@ -191,6 +192,12 @@ public class GuiDecorator {
 	public void addMenuItem(String string, Runnable object) {
 		addMenuItem(currentMenuName, string, object);
 		
+	}
+
+	public JMenuItem addMenuItem(String string, Runnable object, int key, int mask) {
+		JMenuItem item = addMenuItem(currentMenuName, string, object);
+		item.setAccelerator( KeyStroke.getKeyStroke(key, mask) );
+		return item;
 	}
 
 	public void addMenuSeparator() {

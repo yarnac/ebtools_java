@@ -3,9 +3,7 @@ package com.eb.apps.ebchatclient.edcontext;
 import com.eb.apps.ebchatclient.domain.chat.AiChatContext;
 import com.eb.apps.ebchatclient.domain.chat.AiChatManager;
 
-import javax.naming.Context;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 
 public class TreeBuilder {
@@ -16,7 +14,7 @@ public class TreeBuilder {
         ContextTreeNode rootNode = new ContextTreeNode("Root");
         HashMap<String, ContextTreeNode> set = new HashMap<>();
         for (AiChatContext context : availableContexts) {
-            ContextTreeNode node = set.computeIfAbsent(context.getKategorie(), x -> addKategorieNode(rootNode, context.getKategorie()));
+            ContextTreeNode node = set.computeIfAbsent(context.getKnoten(), x -> addKategorieNode(rootNode, context.getKnoten()));
             node.add(new ContextTreeNode(context));
         }
         return rootNode;
