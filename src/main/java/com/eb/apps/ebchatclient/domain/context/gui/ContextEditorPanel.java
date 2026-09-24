@@ -6,13 +6,9 @@
  *
  */
 
-package com.eb.apps.ebchatclient.domain.context;
+package com.eb.apps.ebchatclient.domain.context.gui;
 
-import com.eb.apps.ebchatclient.domain.chat.AiChatContext;
-import com.eb.apps.ebookreader.tobj.StringUtil;
-import com.eb.base.gui.GuiDecorator;
-import com.eb.base.inifile.api.IniFile;
-import com.eb.base.inifile.api.IniFileProvider;
+import com.eb.apps.ebchatclient.domain.context.domain.ContextWithFiles;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -29,7 +25,7 @@ public final class ContextEditorPanel extends JPanel {
 
     @Getter     @Setter
     private JToolBar toolBar;
-    private AiChatContext actContext;
+    private ContextWithFiles actContext;
     private Runnable saveListener;
 
     public ContextEditorPanel() {
@@ -69,33 +65,17 @@ public final class ContextEditorPanel extends JPanel {
         transferModelToView(actContext);
     }
 
-    public void transferModelToView(AiChatContext aiChatContext) {
-        this.actContext = aiChatContext == null ? new AiChatContext() : aiChatContext;
+    public void transferModelToView(ContextWithFiles contextWithFiles) {
+        this.actContext = contextWithFiles == null ? new ContextWithFiles() : contextWithFiles;
         edName.setText(actContext.getName());
         edKnoten.setText(actContext.getKnoten());
-
-        StringBuilder strb = new StringBuilder();
-        if (!StringUtil.isNullOrEmpty(actContext.getSystemPrompt())) {
-            strb.append("<<" + actContext.getSystemPrompt() + ">>\n\n");
-        }
-        if (!StringUtil.isNullOrEmpty(actContext.getUserPrompt())) {
-            strb.append(actContext.getUserPrompt());
-        }
-        edPrompt.setText(strb.toString());
+        edPrompt.setText(actContext.getUserString());
     }
 
-    public void transferViewToModel(AiChatContext aiChatContext) {
-        aiChatContext.setName(edName.getText());
-        aiChatContext.setKnoten(edKnoten.getText());
-
-        String prompt = edPrompt.getText().trim();
-        String userPrompt = prompt;
-        if (prompt.startsWith("<<")) {
-            int index = prompt.indexOf(">>");
-            aiChatContext.setSystemPrompt(prompt.substring(2, index));
-            userPrompt = prompt.substring(index + 2).trim();
-        }
-        aiChatContext.setUserPrompt(userPrompt);
+    public void transferViewToModel(ContextWithFiles contextWithFiles) {
+        contextWithFiles.setName(edName.getText());
+        contextWithFiles.setKnoten(edKnoten.getText());
+        contextWithFiles.setUserString(edPrompt.getText());
     }
     
 

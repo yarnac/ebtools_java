@@ -149,7 +149,7 @@ public class AiPlaygroundWindow extends JFrame {
 
     private void initializeView() {
         // Set frame properties
-        setTitle("Split Window Example");
+        setTitle("AI Playground");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setSize(800, 600);
         setLocationRelativeTo(null); // Center the window

@@ -6,7 +6,7 @@
  *
  */
 
-package com.eb.apps.ebchatclient.domain.context;
+package com.eb.apps.ebchatclient.domain.context.app;
 
 public class ContextEditApp {
 

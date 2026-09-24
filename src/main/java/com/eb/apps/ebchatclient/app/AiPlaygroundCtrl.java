@@ -1,5 +1,7 @@
 package com.eb.apps.ebchatclient.app;
 
+import com.eb.apps.ebchatclient.domain.context.app.ContextEditDlg;
+import com.eb.apps.ebchatclient.domain.context.domain.ContextManager;
 import com.eb.base.ai_service.llm_client.api.LlmRequest;
 import com.eb.base.ai_service.llm_client.api.LlmRequestBuilder;
 import com.eb.base.ai_service.llm_client.api.LlmRequestService;
@@ -9,7 +11,6 @@ import com.eb.base.ai_service.llm_client.infrastructure.LlmModelProvider;
 import com.eb.base.gui.GuiDecorator;
 import com.eb.base.gui.IC;
 import com.eb.base.gui.ICF;
-import com.eb.base.gui.adapter.JTextAreaAdapter;
 import com.eb.base.gui.persist.ComponentPersisterFactory;
 import com.eb.base.gui.persist.IComponentPersister;
 import com.eb.base.inifile.api.IniFile;
@@ -17,7 +18,7 @@ import com.eb.base.inifile.api.IniFileProvider;
 import com.eb.apps.ebchatclient.components.JsonFileAppendUtil;
 import com.eb.apps.ebchatclient.components.fileprovider.GuiFileNameProvider;
 import com.eb.apps.ebchatclient.domain.chat.AiChat;
-import com.eb.apps.ebchatclient.domain.chat.AiChatContext;
+import com.eb.apps.ebchatclient.domain.context.domain.ContextWithFiles;
 import com.eb.apps.ebchatclient.domain.chat.AiChatManager;
 
 import javax.swing.*;
@@ -28,12 +29,13 @@ import java.util.Objects;
 
 public class AiPlaygroundCtrl {
 
-    private JComboBox<AiChatContext> cbContexts;
+    private JComboBox<ContextWithFiles> cbContexts;
     private JComboBox<LlmModel> cbModelle;
     private JComboBox<AiChat> cbChats;
     AiPlaygroundWindow window;
     private JProgressBar progressBar;
     private GuiDecorator decorator;
+    private ContextEditDlg contextEditDlg;
 
     AiPlaygroundCtrl() {
 
@@ -64,15 +66,17 @@ public class AiPlaygroundCtrl {
         decorator.addToolbarButton(tbName,"Run", IC.PLAY, (s) -> sendRequest());
         decorator.addToolbarButton(tbName,"Run", IC.MB_PLAY, this::actionPerformed2);
         decorator.addToolbarButton(tbName,"Open append file window", ICF.BulletList, this::actionPerformed);
-        decorator.addToolbarButton(tbName, "Dummy", ICF.LinePoints_Add, (s)->{});
+        decorator.addToolbarButton(tbName, "Kontexte", ICF.LinePoints_Add, this::openContextEditor);
         decorator.addToolbarButton(tbName, "Dummy", ICF.MaleHardHat_Lock, (s)->{});
 
-        AiChatManager manager = AiChatManager.getCurrent();
+        AiChatManager chatManager = AiChatManager.getCurrent();
+        ContextManager contextManager = chatManager.getContextManager();
+
 
         LlmModelProvider modelProvider = new LlmModelProvider();
-        cbChats = decorator.addToolbarComboBox( tbName,"Chats", manager.getAvailableChats(), this::setChat);
+        cbChats = decorator.addToolbarComboBox( tbName,"Chats", chatManager.getAvailableChats(), this::setChat);
         int height = cbChats.getHeight();
-        cbContexts = decorator.addToolbarComboBox( tbName,"Kontext", manager.getAvailableContexts(), this::setContext);
+        cbContexts = decorator.addToolbarComboBox( tbName,"Kontext", contextManager.getContextList(), this::setContext);
         cbModelle = decorator.addToolbarComboBox( tbName,"Modell", modelProvider.getModels(), this::setModel);
 
         cbChats.setPreferredSize(new Dimension(20, height));
@@ -80,6 +84,11 @@ public class AiPlaygroundCtrl {
         cbContexts.setPreferredSize(new Dimension(20, height));
 
         progressBar = decorator.addToolbarProgressBar(tbName,"Huhu");
+    }
+
+    private void openContextEditor(ActionEvent actionEvent) {
+
+        contextEditDlg = WindowUtility.showOrCreateWindow(contextEditDlg, ContextEditDlg::ShowWindow);
     }
 
     private void openAppendFileWindow() {
@@ -106,9 +115,9 @@ public class AiPlaygroundCtrl {
 
     }
 
-    private void setContext(AiChatContext s) {
+    private void setContext(ContextWithFiles s) {
 
-        window.setInputText(s.getRequestMessage());
+        window.setInputText(s.getUserString());
     }
 
     private void sendRequest() {

@@ -1,6 +1,6 @@
 package com.eb.apps.ebchatclient.edcontext;
 
-import com.eb.apps.ebchatclient.domain.chat.AiChatContext;
+import com.eb.apps.ebchatclient.domain.context.domain.ContextWithFiles;
 import com.eb.apps.ebchatclient.domain.chat.AiChatManager;
 import com.eb.base.gui.EbSplitPanel;
 import lombok.Getter;
@@ -104,7 +104,7 @@ public class EdContextWindow extends JFrame {
         TreePath path = e.getPath();
         ContextTreeNode node = (ContextTreeNode) path.getLastPathComponent();
         node.toString();
-        AiChatContext context = (AiChatContext) node.getUserObject();
+        ContextWithFiles context = (ContextWithFiles) node.getUserObject();
         if (context == null) {
             edContextName.setText("");
             edKategorie.setText("");
@@ -114,7 +114,7 @@ public class EdContextWindow extends JFrame {
         {
             edContextName.setText(context.getName());
             edKategorie.setText(context.getKnoten());
-            edMessage.setText(context.getRequestMessage());
+            edMessage.setText(context.getUserString());
         }
 
 

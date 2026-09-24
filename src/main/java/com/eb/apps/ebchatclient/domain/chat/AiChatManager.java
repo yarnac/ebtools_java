@@ -6,10 +6,10 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
-import com.eb.base.ai_service.llm_client.infrastructure.LlmModel;
+import com.eb.apps.ebchatclient.domain.context.domain.ContextManager;
+import com.eb.apps.ebchatclient.domain.context.domain.ContextWithFiles;
 import com.eb.base.ai_service.llm_client.infrastructure.LlmModelProvider;
 import com.eb.base.extensions.FileExtensions;
 import com.eb.base.inifile.api.IniFile;
@@ -21,15 +21,16 @@ import com.fasterxml.jackson.databind.type.CollectionType;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 public class AiChatManager {
+
     private List<AiChat> availableChats = new ArrayList<>();
-    private List<AiChatContext> availableKontexte = new ArrayList<>();
     private List<String> availableKategorien;
-    private List<AiChatContext> availableEntwicklungsKontexte;
+    private List<ContextWithFiles> availableEntwicklungsKontexte;
     private List<AiChat> availableSessions = new ArrayList<>();
     private final IniFileFactory iniFileFactory;
     private final ObjectMapper objectMapper;
 
     private static AiChatManager current;
+    private ContextManager contextManager;
 
     public static AiChatManager getCurrent()
     {
@@ -40,7 +41,27 @@ public class AiChatManager {
 
     public AiChatManager() {
         this(new DefaultIniFileFactory(), createMapper());
+        contextManager = AiContextProvider.getContextManager();
     }
+
+    public AiChatManager(IniFileFactory iniFileFactory, ObjectMapper objectMapper) {
+        this.iniFileFactory = iniFileFactory;
+        this.objectMapper = objectMapper;
+        contextManager = AiContextProvider.getContextManager();
+
+        loadChats();
+        loadSessions();
+        availableKategorien = contextManager.getKnoten();
+    }
+
+    public ContextManager getContextManager() {
+        return contextManager;
+    }
+
+    public LlmModelProvider getLlmModelProvider() {
+        return LlmModelProvider.getCurrent();
+    }
+
 
     private static ObjectMapper createMapper() {
         ObjectMapper mapper = new ObjectMapper();
@@ -51,46 +72,6 @@ public class AiChatManager {
         mapper.registerModule(new JavaTimeModule());
 
         return mapper;
-    }
-
-    public AiChatManager(IniFileFactory iniFileFactory, ObjectMapper objectMapper) {
-        this.iniFileFactory = iniFileFactory;
-        this.objectMapper = objectMapper;
-
-        // C# constructor:
-        // myIniFile = new IniFile(AiEinstellungen.GetFilePath("AiChatManager.ini", "AiManager"));
-        // ReadKontexte(); LoadChats(); LoadSessions(); AvailableKategorien = ...
-        // Here we only mirror structure; real IO depends on your IniFile implementation.
-        readKontexte();
-        loadChats();
-        loadSessions();
-        this.availableKategorien = availableKontexte.stream().map(AiChatContext::getKnoten)
-                .filter(Objects::nonNull).distinct().collect(Collectors.toList());
-
-        this.availableEntwicklungsKontexte = availableKontexte.stream()
-                .filter(x -> "Entwicklung".equals(x.getKnoten()))
-                .collect(Collectors.toList());
-    }
-
-    public void writeKontexte() throws IOException {
-        String json = objectMapper.writeValueAsString(availableKontexte);
-        Files.writeString(Paths.get(AiEinstellungen.getFilePath("AiServices/Kontexte.txt")), json, StandardCharsets.UTF_8);
-    }
-
-    private void readKontexte() {
-        try {
-            String filePath = AiEinstellungen.getFilePath("AiServices/Kontexte.txt");
-            String json = Files.readString(Paths.get(filePath), StandardCharsets.UTF_8);
-            CollectionType type = objectMapper.getTypeFactory().constructCollectionType(List.class, AiChatContext.class);
-            this.availableKontexte = objectMapper.readValue(json, type);
-        } catch (Exception e) {
-            this.availableKontexte = new ArrayList<>();
-        }
-    }
-
-    public List<LlmModel> getAvailableModels() {
-
-        return LlmModelProvider.getCurrent().getModels();
     }
 
     private void loadChats() {
@@ -197,20 +178,6 @@ public class AiChatManager {
                     .findFirst().orElse(null);
         }
         return chat;
-    }
-
-    public LlmModel getModel(String currentChatModel) {
-        if (currentChatModel == null) return null;
-        return getAvailableModels().stream().filter(x -> currentChatModel.equals(x.getModelName())).findFirst().orElse(null);
-    }
-
-    public AiChatContext getContext(String currentChatContextName) {
-        if (currentChatContextName == null) return null;
-        return availableKontexte.stream().filter(x -> currentChatContextName.equals(x.getName())).findFirst().orElse(null);
-    }
-
-    public List<AiChatContext> getAvailableContexts() {
-        return availableKontexte;
     }
 
     public List<AiChat> getAvailableChats() {

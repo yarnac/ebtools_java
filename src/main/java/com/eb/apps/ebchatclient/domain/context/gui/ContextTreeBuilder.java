@@ -6,9 +6,9 @@
  *
  */
 
-package com.eb.apps.ebchatclient.domain.context;
+package com.eb.apps.ebchatclient.domain.context.gui;
 
-import com.eb.apps.ebchatclient.domain.chat.AiChatContext;
+import com.eb.apps.ebchatclient.domain.context.domain.ContextWithFiles;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
@@ -21,7 +21,7 @@ public final class ContextTreeBuilder {
     private ContextTreeBuilder() {
     }
 
-    public static DefaultTreeModel createTreeModel(List<AiChatContext> contexts) {
+    public static DefaultTreeModel createTreeModel(List<ContextWithFiles> contexts) {
         DefaultMutableTreeNode rootNode =
                 new DefaultMutableTreeNode("Kontexte");
 
@@ -35,7 +35,7 @@ public final class ContextTreeBuilder {
          */
         Map<String, DefaultMutableTreeNode> folderNodes = new HashMap<>();
 
-        for (AiChatContext context : contexts) {
+        for (ContextWithFiles context : contexts) {
             DefaultMutableTreeNode parentNode =
                     getOrCreateFolderNode(rootNode, folderNodes, context.getKnoten());
 

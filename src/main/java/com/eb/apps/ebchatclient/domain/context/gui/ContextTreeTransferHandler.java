@@ -6,9 +6,9 @@
  *
  */
 
-package com.eb.apps.ebchatclient.domain.context;
+package com.eb.apps.ebchatclient.domain.context.gui;
 
-import com.eb.apps.ebchatclient.domain.chat.AiChatContext;
+import com.eb.apps.ebchatclient.domain.context.domain.ContextWithFiles;
 
 import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -22,15 +22,15 @@ import java.util.List;
 public final class ContextTreeTransferHandler extends TransferHandler {
 
     private static final DataFlavor AI_CHAT_CONTEXT_FLAVOR =
-            new DataFlavor(AiChatContext.class, "AiChatContext");
+            new DataFlavor(ContextWithFiles.class, "AiChatContext");
 
     private final JTree tree;
-    private final List<AiChatContext> contexts;
+    private final List<ContextWithFiles> contexts;
     private final Runnable refreshTree;
 
     public ContextTreeTransferHandler(
             JTree tree,
-            List<AiChatContext> contexts,
+            List<ContextWithFiles> contexts,
             Runnable refreshTree) {
 
         this.tree = tree;
@@ -57,7 +57,7 @@ public final class ContextTreeTransferHandler extends TransferHandler {
         Object userObject = selectedNode.getUserObject();
 
         // Nur Kontexte, keine Ordner, dürfen gezogen werden.
-        if (!(userObject instanceof AiChatContext context)) {
+        if (!(userObject instanceof ContextWithFiles context)) {
             return null;
         }
 
@@ -104,7 +104,7 @@ public final class ContextTreeTransferHandler extends TransferHandler {
         }
 
         try {
-            AiChatContext context = (AiChatContext) support.getTransferable()
+            ContextWithFiles context = (ContextWithFiles) support.getTransferable()
                     .getTransferData(AI_CHAT_CONTEXT_FLAVOR);
 
             JTree.DropLocation dropLocation =
@@ -183,9 +183,9 @@ public final class ContextTreeTransferHandler extends TransferHandler {
 
     private static final class ContextTransferable implements Transferable {
 
-        private final AiChatContext context;
+        private final ContextWithFiles context;
 
-        private ContextTransferable(AiChatContext context) {
+        private ContextTransferable(ContextWithFiles context) {
             this.context = context;
         }
 

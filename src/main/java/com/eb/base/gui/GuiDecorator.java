@@ -284,13 +284,18 @@ public class GuiDecorator {
 	@SuppressWarnings("unchecked")
 	public  <T> JComboBox<T> addToolbarComboBox(String toolbarName, String tooltipText, T[] elements, Consumer<T> consumer)
 	{
+		Container toolbar = nameToContainerDictionary.get(toolbarName);
+		if (toolbar==null)
+			return null;
+
 		JComboBox<T> comboBox = new JComboBox<>();
 		comboBox.setToolTipText(tooltipText);
-		comboBox.setFont(new Font("Arial", Font.PLAIN, 10));
+		comboBox.setFont(new Font("Arial", Font.PLAIN, 14));
 		DefaultComboBoxModel<T> model = new DefaultComboBoxModel<>(elements);
 		comboBox.setModel(model);
 		fetchContainer(toolbarName).add(comboBox);
 		comboBox.addActionListener(x->consumer.accept((T)comboBox.getSelectedItem()));
+		comboBox.setVisible(true);
 		return comboBox;
 	}
 

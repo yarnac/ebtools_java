@@ -1,6 +1,6 @@
 package com.eb.apps.ebchatclient.edcontext;
 
-import com.eb.apps.ebchatclient.domain.chat.AiChatContext;
+import com.eb.apps.ebchatclient.domain.context.domain.ContextWithFiles;
 import com.eb.apps.ebmusic.gobj.MusicFolder;
 import lombok.Getter;
 import lombok.Setter;
@@ -22,7 +22,7 @@ public class ContextTreeNode extends DefaultMutableTreeNode{
 		children = new Vector<>();
 	}
 
-	public ContextTreeNode(AiChatContext context) {
+	public ContextTreeNode(ContextWithFiles context) {
 		setUserObject(context);
 	}
 

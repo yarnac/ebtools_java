@@ -6,10 +6,13 @@
  *
  */
 
-package com.eb.apps.ebchatclient.domain.context;
+package com.eb.apps.ebchatclient.domain.context.app;
 
-import com.eb.apps.ebchatclient.domain.chat.AiChatContext;
-import com.eb.apps.ebchatclient.domain.chat.AiChatManager;
+import com.eb.apps.ebchatclient.domain.chat.AiContextProvider;
+import com.eb.apps.ebchatclient.domain.context.domain.ContextManager;
+import com.eb.apps.ebchatclient.domain.context.domain.ContextWithFiles;
+import com.eb.apps.ebchatclient.domain.context.gui.ContextEditorPanel;
+import com.eb.apps.ebchatclient.domain.context.gui.ContextTreePanel;
 import com.eb.base.gui.GuiDecorator;
 import com.eb.base.gui.ICF;
 import com.eb.base.inifile.api.IniFile;
@@ -24,17 +27,21 @@ import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.io.IOException;
 import java.util.List;
+import java.util.function.Predicate;
 
 public class ContextEditDlg extends JFrame {
 
     private static IniFile myIniFile;
     private final GuiDecorator decorator;
+    private final ContextManager contextManager;
     private JSplitPane splitPane;
     private ContextEditorPanel contextEditorPanel;
     private ContextTreePanel contextTreePanel;
 
-    private List<AiChatContext> contextList;
+    private List<ContextWithFiles> contextList;
     private JToolBar toolBarMain;
+    private JComboBox<String> comboBox;
+    private Predicate<String> filter;
 
 
     public static ContextEditDlg Show() {
@@ -43,12 +50,26 @@ public class ContextEditDlg extends JFrame {
         return dlg;
     }
 
+    public static ContextEditDlg ShowWindow() {
+        ContextEditDlg dlg = new ContextEditDlg();
+        dlg.setNormalWindow();
+        dlg.setContextList(AiContextProvider.getAvailableContexts());
+        return dlg;
+    }
+
     public ContextEditDlg() {
         initializeView();
+
+        contextManager = AiContextProvider.getContextManager();
 
         myIniFile = IniFileProvider.createIniFile("ContextEditor.ini");
         decorator = new GuiDecorator(this, myIniFile, "Einstellungen");
         initMenuAndToolBar();
+
+        setVisible(true);
+
+        splitPane.setDividerLocation(300);
+
     }
 
     private void initMenuAndToolBar() {
@@ -67,8 +88,30 @@ public class ContextEditDlg extends JFrame {
 
         decorator.addToolbarButton("mainToolBar", "New Context", ICF.BlankDocument_Add, this::createNewContext);
         decorator.addToolbarButton("mainToolBar", "New Context", ICF.BlankDocument_Delete, this::deleteContext);
+        String[] Inhalte = new String[]{"Alle", "Prompts", "Snippets"};
+        comboBox = decorator.addToolbarComboBox("mainToolBar", "Inhalt",Inhalte, x->setFilter());
+        comboBox.setMaximumSize(new Dimension(100,20));
         decorator.addToolbarButton("editorToolBar", "Save Context", ICF.Save, this::saveContext);
         decorator.addToolbarButton("editorToolBar", "Undo", ICF.UndoBlue, this::undoEdit);
+    }
+
+    private void setFilter() {
+        if (comboBox.getSelectedItem().equals("Prompts")) {
+            filter = x->x != null && x.startsWith("Prompts");
+        }
+        else if (comboBox.getSelectedItem().equals("Snippets")) {
+            filter = x->x != null && x.startsWith("Snippets");
+        }
+        else
+            filter = x->true;
+
+        filterContexts();
+
+    }
+
+    private void filterContexts() {
+        if (filter!=null)
+            contextTreePanel.setContextList(contextList.stream().filter(x->filter.test(x.getKnoten())).toList());
     }
 
     private void copyPrompt(ActionEvent e) {
@@ -93,7 +136,7 @@ public class ContextEditDlg extends JFrame {
     }
 
     private void deleteContext(ActionEvent actionEvent) {
-        AiChatContext selectedContext = contextTreePanel.getSelectedContext();
+        ContextWithFiles selectedContext = contextTreePanel.getSelectedContext();
         if (selectedContext == null)
             return;
         contextList.remove(selectedContext);
@@ -103,17 +146,18 @@ public class ContextEditDlg extends JFrame {
     }
 
     private void createNewContext(ActionEvent actionEvent) {
-        AiChatContext selectedContext = contextTreePanel.getSelectedContext();
+        ContextWithFiles selectedContext = contextTreePanel.getSelectedContext();
         if (selectedContext == null)
             return;
-        AiChatContext newContext = new AiChatContext("Neuer Knoten", selectedContext.getKnoten(), "", "");
+        ContextWithFiles newContext = new ContextWithFiles("Neuer Knoten", selectedContext.getKnoten(), "");
         contextList.add(newContext);
         contextTreePanel.rebuildTree();
         contextTreePanel.setSelectedContext(newContext);
+        filterContexts();
     }
 
 
-    public void setContextList(List<AiChatContext> contextList)
+    public void setContextList(List<ContextWithFiles> contextList)
     {
         contextTreePanel.setContextList(contextList);
         this.contextList = contextList;
@@ -122,7 +166,7 @@ public class ContextEditDlg extends JFrame {
 
     private void saveContextList() {
         try {
-            AiChatManager.getCurrent().writeKontexte();
+            contextManager.writeKontexte();
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -135,6 +179,11 @@ public class ContextEditDlg extends JFrame {
         return btn;
     }
 
+    public void setNormalWindow()
+    {
+        setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+    }
+
     private void initializeView() {
         setTitle("Chat Kontexte bearbeiten");
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
@@ -143,10 +192,6 @@ public class ContextEditDlg extends JFrame {
 
 
         initialieComponents();
-
-        setVisible(true);
-
-        splitPane.setDividerLocation(300);
 
         registerEvents();
 

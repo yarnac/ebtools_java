@@ -6,9 +6,9 @@
  *
  */
 
-package com.eb.apps.ebchatclient.domain.context;
+package com.eb.apps.ebchatclient.domain.context.gui;
 
-import com.eb.apps.ebchatclient.domain.chat.AiChatContext;
+import com.eb.apps.ebchatclient.domain.context.domain.ContextWithFiles;
 import com.eb.apps.ebchatclient.edcontext.ContextTreeNode;
 import lombok.Getter;
 import lombok.Setter;
@@ -18,16 +18,15 @@ import javax.swing.event.TreeSelectionEvent;
 import javax.swing.tree.*;
 import java.awt.*;
 import java.util.List;
-import java.util.Optional;
 import java.util.function.Consumer;
 
 public class ContextTreePanel extends JPanel {
     @Getter
     private JTree contextTree;
     private JToolBar toolBar;
-    private List<AiChatContext> contextList;
+    private List<ContextWithFiles> contextList;
     @Getter
-    private AiChatContext selectedContext;
+    private ContextWithFiles selectedContext;
 
     @Setter
     private Consumer<DefaultMutableTreeNode> treeSelectionListener;
@@ -48,8 +47,8 @@ public class ContextTreePanel extends JPanel {
                     (DefaultMutableTreeNode) contextTree.getLastSelectedPathComponent();
 
             if (selectedNode != null) {
-                if (selectedNode.getUserObject() instanceof AiChatContext) {
-                    selectedContext = (AiChatContext) selectedNode.getUserObject();
+                if (selectedNode.getUserObject() instanceof ContextWithFiles) {
+                    selectedContext = (ContextWithFiles) selectedNode.getUserObject();
                 }
             }
 
@@ -78,7 +77,7 @@ public class ContextTreePanel extends JPanel {
         add(contextTree, BorderLayout.CENTER);
     }
 
-    public void setContextList(List<AiChatContext> contextList) {
+    public void setContextList(List<ContextWithFiles> contextList) {
         this.contextList = contextList;
         rebuildTree();
 
@@ -101,7 +100,7 @@ public class ContextTreePanel extends JPanel {
     }
 
     public void rebuildTree() {
-        AiChatContext actContext = selectedContext;
+        ContextWithFiles actContext = selectedContext;
         DefaultTreeModel treeModel =
                 ContextTreeBuilder.createTreeModel(contextList);
 
@@ -143,7 +142,7 @@ public class ContextTreePanel extends JPanel {
         return null;
     }
 
-    public void setSelectedContext(AiChatContext context) {
+    public void setSelectedContext(ContextWithFiles context) {
 
         DefaultMutableTreeNode node = findNode(contextTree, context);
 

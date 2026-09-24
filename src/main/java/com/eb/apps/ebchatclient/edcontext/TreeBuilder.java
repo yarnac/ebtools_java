@@ -1,7 +1,8 @@
 package com.eb.apps.ebchatclient.edcontext;
 
-import com.eb.apps.ebchatclient.domain.chat.AiChatContext;
+import com.eb.apps.ebchatclient.domain.context.domain.ContextWithFiles;
 import com.eb.apps.ebchatclient.domain.chat.AiChatManager;
+import com.eb.apps.ebchatclient.domain.context.domain.ContextManager;
 
 import java.util.HashMap;
 import java.util.List;
@@ -9,11 +10,13 @@ import java.util.List;
 public class TreeBuilder {
 
     public ContextTreeNode buildTree() {
-        AiChatManager manager = AiChatManager.getCurrent();
-        List<AiChatContext> availableContexts = manager.getAvailableContexts();
+
+        ContextManager manager = AiChatManager.getCurrent().getContextManager();
+        List<ContextWithFiles> availableContexts = manager.getContextList();
+
         ContextTreeNode rootNode = new ContextTreeNode("Root");
         HashMap<String, ContextTreeNode> set = new HashMap<>();
-        for (AiChatContext context : availableContexts) {
+        for (ContextWithFiles context : availableContexts) {
             ContextTreeNode node = set.computeIfAbsent(context.getKnoten(), x -> addKategorieNode(rootNode, context.getKnoten()));
             node.add(new ContextTreeNode(context));
         }

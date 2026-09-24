@@ -1,5 +1,6 @@
 package com.eb.apps.ebchatclient.domain.chat;
 
+import com.eb.apps.ebchatclient.domain.context.domain.ContextWithFiles;
 import com.eb.base.extensions.FileExtensions;
 import com.eb.base.inifile.api.IniFile;
 
@@ -14,9 +15,9 @@ public class AiChat {
 
     private String model;
     private String url;
-    private AiChatContext context;
+    private ContextWithFiles context;
 
-    private AiChatContext loadedContext;
+    private ContextWithFiles loadedContext;
     private IniFile myIniFile;
 
     private double preis;
@@ -59,11 +60,11 @@ public class AiChat {
     public String getUrl() { return url; }
     public void setUrl(String url) { this.url = url; }
 
-    public AiChatContext getContext() { return context; }
-    public void setContext(AiChatContext context) { this.context = context; }
+    public ContextWithFiles getContext() { return context; }
+    public void setContext(ContextWithFiles context) { this.context = context; }
 
-    public AiChatContext getLoadedContext() { return loadedContext; }
-    public void setLoadedContext(AiChatContext loadedContext) { this.loadedContext = loadedContext; }
+    public ContextWithFiles getLoadedContext() { return loadedContext; }
+    public void setLoadedContext(ContextWithFiles loadedContext) { this.loadedContext = loadedContext; }
 
     public String getContextName() { return contextName; }
     public void setContextName(String contextName) { this.contextName = contextName; }
