@@ -390,7 +390,9 @@ public class EbMusicPlayerView {
 		// TODO Auto-generated method stub
 		
 		MusicTreeNode node = (MusicTreeNode) getTree().getModel().getRoot();
-		MusicFolder folder = node.getFolder();
+		if (node!=null) {
+			MusicFolder folder = node.getFolder();
+		}
 	}	
 
 	

@@ -14,6 +14,7 @@ import java.awt.*;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.logging.Logger;
 
 public class AiPlaygroundWindow extends JFrame {
 
@@ -85,7 +86,15 @@ public class AiPlaygroundWindow extends JFrame {
     }
 
     public void setOutputText(String answer) {
-        textPaneOutput.setText(answer);
+
+        EventQueue.invokeLater(() -> {
+            try {
+                // Dein existierender Code, vielleicht mit einem kleinen Delay, falls nötig
+                textPaneOutput.setText(answer);
+                textPaneOutput.setCaretPosition(0);
+            } catch (Exception e) {
+            }
+        });
 
     }
 

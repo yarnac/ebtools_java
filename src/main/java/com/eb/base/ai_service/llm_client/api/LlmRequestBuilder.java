@@ -1,5 +1,6 @@
 package com.eb.base.ai_service.llm_client.api;
 
+import com.eb.apps.ebchatclient.app.AiPlaygroundCtrl;
 import com.eb.base.extensions.StringExtensions;
 
 import java.util.ArrayList;
@@ -32,13 +33,14 @@ public class LlmRequestBuilder implements LlmRequestBuilderSystemOrUserMsg,
     }
 
     public void addMsg(String role, String msgContent) {
-        if (msgContent != null || msgContent.length() > 0)
+        if (msgContent != null && msgContent.length() > 0)
             messages.add(new LlmMessage(role, msgContent));
     }
 
 
+
     @Override
-    public LlmRequestBuilderUserMsg addRequestMsg(String msg) {
+    public LlmRequestBuilderUserMsg addRequestMsg(String msg, List<String> imageFileNames) {
 
         String userMsg = StringExtensions.ebTrimAll(msg);
         String systemMsg = "";
@@ -51,10 +53,19 @@ public class LlmRequestBuilder implements LlmRequestBuilderSystemOrUserMsg,
         }
 
         addSystemMsg(systemMsg);
-        addUserMsg(userMsg);
+        addMsg("user", userMsg, imageFileNames);
 
         return this;
-    }    @Override
+    }
+
+    private void addMsg(String role, String msgContent, List<String> imageFileNames) {
+        if (msgContent != null && msgContent.length() > 0) {
+            messages.add(new LlmMessage(role, msgContent, imageFileNames));
+
+        }
+    }
+
+    @Override
 
     public LlmRequestBuilderFinish setModel(String newModel) {
         model = newModel;
@@ -64,5 +75,11 @@ public class LlmRequestBuilder implements LlmRequestBuilderSystemOrUserMsg,
     @Override
     public LlmRequest build() {
         return new LlmRequest(model, messages);
+    }
+
+    @Override
+    public LlmRequestBuilderUserMsg addRequestMsg(String inputString) {
+        addRequestMsg(inputString, new ArrayList<>());
+        return this;
     }
 }

@@ -8,6 +8,7 @@
 
 package com.eb.apps.ebchatclient.domain.context.app;
 
+import com.eb.apps.ebchatclient.components.JsonFileAppendUtil;
 import com.eb.apps.ebchatclient.domain.chat.AiContextProvider;
 import com.eb.apps.ebchatclient.domain.context.domain.ContextManager;
 import com.eb.apps.ebchatclient.domain.context.domain.ContextWithFiles;
@@ -26,12 +27,13 @@ import java.awt.event.ActionEvent;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Predicate;
 
 public class ContextEditDlg extends JFrame {
 
-    private static IniFile myIniFile;
+    private IniFile myIniFile;
     private final GuiDecorator decorator;
     private final ContextManager contextManager;
     private JSplitPane splitPane;
@@ -45,7 +47,9 @@ public class ContextEditDlg extends JFrame {
 
 
     public static ContextEditDlg Show() {
+
         ContextEditDlg dlg = new ContextEditDlg();
+        dlg.setVisible(true);
         dlg.setContextList(AiContextProvider.getAvailableContexts());
         return dlg;
     }
@@ -65,11 +69,7 @@ public class ContextEditDlg extends JFrame {
         myIniFile = IniFileProvider.createIniFile("ContextEditor.ini");
         decorator = new GuiDecorator(this, myIniFile, "Einstellungen");
         initMenuAndToolBar();
-
-        setVisible(true);
-
         splitPane.setDividerLocation(300);
-
     }
 
     private void initMenuAndToolBar() {
@@ -93,6 +93,22 @@ public class ContextEditDlg extends JFrame {
         comboBox.setMaximumSize(new Dimension(100,20));
         decorator.addToolbarButton("editorToolBar", "Save Context", ICF.Save, this::saveContext);
         decorator.addToolbarButton("editorToolBar", "Undo", ICF.UndoBlue, this::undoEdit);
+        decorator.addToolbarButton("editorToolBar", "Get Output", ICF.MediaButtonPlayGreen, this::setOutputContent);
+    }
+
+    private void setOutputContent(ActionEvent actionEvent) {
+        String code = contextEditorPanel.getEdPrompt().getText();
+        String expanded = JsonFileAppendUtil.appendFiles(code, new ArrayList<>());
+        if (expanded != null) {
+
+            if (code.contains("\n<$D")) {
+                contextEditorPanel.getEdPrompt().setText(expanded);
+            }
+            else {
+                contextEditorPanel.getEdOutput().setText(expanded);
+            }
+        }
+
     }
 
     private void setFilter() {
@@ -191,7 +207,7 @@ public class ContextEditDlg extends JFrame {
         setLocation(new Point(400,400));
 
 
-        initialieComponents();
+        initializeComponents();
 
         registerEvents();
 
@@ -208,7 +224,7 @@ public class ContextEditDlg extends JFrame {
     }
 
 
-    private void initialieComponents() {
+    private void initializeComponents() {
         toolBarMain = new JToolBar();
         add(toolBarMain, BorderLayout.NORTH);
 

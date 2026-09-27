@@ -42,20 +42,31 @@ public class ContextTreePanel extends JPanel {
 
     private void registerEvents() {
         contextTree.addTreeSelectionListener((TreeSelectionEvent event) -> {
-            selectedContext = null;
-            DefaultMutableTreeNode selectedNode =
-                    (DefaultMutableTreeNode) contextTree.getLastSelectedPathComponent();
-
-            if (selectedNode != null) {
-                if (selectedNode.getUserObject() instanceof ContextWithFiles) {
-                    selectedContext = (ContextWithFiles) selectedNode.getUserObject();
-                }
-            }
+            DefaultMutableTreeNode selectedNode = getSelectedNode();
 
             if (treeSelectionListener != null) {
                 treeSelectionListener.accept(selectedNode);
             }
         });
+    }
+
+    private DefaultMutableTreeNode getSelectedNode() {
+
+        return (DefaultMutableTreeNode) contextTree.getLastSelectedPathComponent();
+    }
+
+    public ContextWithFiles getSelectedContext() {
+        DefaultMutableTreeNode selectedNode = getSelectedNode();
+        if (selectedNode == null) {
+            return null;
+        }
+
+        if (selectedNode.getUserObject() instanceof ContextWithFiles contextObj) {
+            selectedContext = contextObj;
+        }
+        else
+            selectedContext = null;
+        return selectedContext;
     }
 
     private void initializeComponents() {

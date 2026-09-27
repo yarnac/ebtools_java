@@ -8,6 +8,7 @@ import com.eb.base.ai_service.llm_client.api.LlmRequestService;
 import com.eb.base.ai_service.llm_client.api.LlmResponse;
 import com.eb.base.ai_service.llm_client.infrastructure.LlmModel;
 import com.eb.base.ai_service.llm_client.infrastructure.LlmModelProvider;
+import com.eb.base.extensions.StringExtensions;
 import com.eb.base.gui.GuiDecorator;
 import com.eb.base.gui.IC;
 import com.eb.base.gui.ICF;
@@ -24,6 +25,7 @@ import com.eb.apps.ebchatclient.domain.chat.AiChatManager;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -124,6 +126,9 @@ public class AiPlaygroundCtrl {
         LlmRequestBuilder builder = new LlmRequestBuilder();
 
         String inputString = window.getInputString();
+
+        List<String> imageFileNames = new ArrayList<>();
+
         if (inputString.trim().isEmpty()) {
             inputString = """
                         <<Du bist ein CSharp Programmierer unter DotNet 9 mit CSharp 10.>>
@@ -131,16 +136,14 @@ public class AiPlaygroundCtrl {
                         """;
         }
 
-        String inputStringWithFiles = JsonFileAppendUtil.appendFiles(inputString);
-        if (!inputStringWithFiles.equals(inputString))
-        {
-            window.setInputText(inputStringWithFiles);
-            return;
-        }
+
+
+        String inputStringWithFiles = JsonFileAppendUtil.appendFiles(inputString, imageFileNames);
+        inputStringWithFiles = JsonFileAppendUtil.appendFiles(inputStringWithFiles, imageFileNames);
 
         LlmRequest llmRequest =
                 builder
-                        .addRequestMsg(inputString)
+                        .addRequestMsg(inputStringWithFiles, imageFileNames)
                         .setModel(((LlmModel) Objects.requireNonNull(cbModelle.getSelectedItem())).getModelName())
                         .build();
 

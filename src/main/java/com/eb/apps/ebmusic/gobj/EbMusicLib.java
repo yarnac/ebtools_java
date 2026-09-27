@@ -1,5 +1,6 @@
 package com.eb.apps.ebmusic.gobj;
 
+import com.eb.apps.ebchatclient.domain.chat.GlobaleEinstellungen;
 import com.eb.base.EbAppContext;
 import com.eb.base.inifile.api.IniFile;
 
@@ -14,18 +15,19 @@ public class EbMusicLib {
 	private IniFile inifile;
 	private MusicFolder rootNode;
 	
-	public EbMusicLib(String inifileName)
+	public EbMusicLib(String iniFileName)
 	{
-		if (inifileName == null )
+		if (iniFileName == null )
 			throw new NullPointerException("inifileName is null");
 
-		File file = new File(inifileName);
+		String realIniFileName = GlobaleEinstellungen.getDataPfadJUser(iniFileName);
+
+		File file = new File(realIniFileName);
 		if (!file.exists())
-			throw new IllegalArgumentException("inifileName " + inifileName + " does not exist");
-		System.out.println("Loading inifileName " + inifileName);
-		IniFile f = IniFileProvider.createIniFile(inifileName);
+			throw new IllegalArgumentException("inifileName " + realIniFileName + " does not exist");
+		System.out.println("Loading inifileName " + realIniFileName);
+		IniFile f = IniFileProvider.createIniFile(iniFileName);
 		setInifile(f);
-		getInifile().Read();
 		setName(inifile.getSectionValue("Einstellungen", "Name", "New Bibliothek"));
 	}
 	

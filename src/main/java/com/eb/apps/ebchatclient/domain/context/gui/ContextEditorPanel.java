@@ -21,7 +21,7 @@ public final class ContextEditorPanel extends JPanel {
     private final JTextField edKnoten = new JTextField();
 
     private final JTextArea edPrompt = createTextArea();
-    private final JTextArea edUserPrompt = createTextArea();
+    private final JTextArea edOutput = createTextArea();
 
     @Getter     @Setter
     private JToolBar toolBar;
@@ -42,7 +42,7 @@ public final class ContextEditorPanel extends JPanel {
 
 
         JScrollPane systemPromptScroll = new JScrollPane(edPrompt);
-        JScrollPane userPromptScroll = new JScrollPane(edUserPrompt);
+        JScrollPane outputPromptScroll = new JScrollPane(edOutput);
 
         // Die bevorzugte Höhe des System-Prompts.
         systemPromptScroll.setPreferredSize(new Dimension(300, 80));
@@ -57,7 +57,10 @@ public final class ContextEditorPanel extends JPanel {
         addField(edKnoten, row++, 0.0, GridBagConstraints.HORIZONTAL);
 
         addLabel("Prompt", row);
-        addField(systemPromptScroll, row++, 1.0, GridBagConstraints.BOTH);
+        addField(systemPromptScroll, row++, 0.4, GridBagConstraints.BOTH);
+
+        addLabel("Output", row);
+        addField(outputPromptScroll, row++, 0.6, GridBagConstraints.BOTH);
     }
 
     public void undo()
@@ -154,6 +157,10 @@ public final class ContextEditorPanel extends JPanel {
 
     public JTextArea getEdPrompt() {
         return edPrompt;
+    }
+
+    public JTextArea getEdOutput() {
+        return edOutput;
     }
 
     public void setSaveListener(Runnable listener){

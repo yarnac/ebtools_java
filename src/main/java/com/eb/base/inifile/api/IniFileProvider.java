@@ -8,6 +8,12 @@ public class IniFileProvider {
 
     private static IFFactory factory = new IFFactory();
 
+    public static String getIniFileName(String fileName)
+    {
+        return "";
+    }
+
+
     public static IniFile createIniFile(String fileName)
     {
         if (FileExtensions.ebIsValidAbsoluteOsFileName(fileName))

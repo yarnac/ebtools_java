@@ -8,6 +8,7 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.type.CollectionType;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -40,13 +41,17 @@ public class ContextManager {
 
     public void writeKontexte() throws IOException {
         String json = objectMapper.writeValueAsString(availableKontexte);
-        Files.writeString(Paths.get(AiEinstellungen.getFilePath(contextFilePath)), json, StandardCharsets.UTF_8);
+        Files.writeString(Paths.get(contextFilePath), json, StandardCharsets.UTF_8);
     }
 
     public void readKontexte() {
+        File file = Paths.get(contextFilePath).toFile();
+        if (!file.exists()) {
+            availableKontexte = new ArrayList<>();
+            return;
+        }
         try {
-            String filePath = contextFilePath;
-            String json = Files.readString(Paths.get(filePath), StandardCharsets.UTF_8);
+            String json = Files.readString(file.toPath(), StandardCharsets.UTF_8);
             CollectionType type = objectMapper.getTypeFactory().constructCollectionType(List.class, ContextWithFiles.class);
             this.availableKontexte = objectMapper.readValue(json, type);
         } catch (Exception e) {

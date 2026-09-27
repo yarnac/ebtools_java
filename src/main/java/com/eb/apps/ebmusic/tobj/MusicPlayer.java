@@ -70,13 +70,16 @@ public class MusicPlayer {
 		try {
 			// macOS nutzt das "open"-Kommando, um Apps zu starten
 			List<String> command = new ArrayList<>();
+
 			command.add("open");
 			command.add("-a");
 			command.add("VLC");
+			command.add("--args");
+
 
 			StringBuilder strb = new StringBuilder();
 			for(String filename : filenamesToPlay) {
-				strb.append(filename);
+				strb.append("\"" + filename + "\"");
 				strb.append(" ");
 			}
 			//command.add(strb.toString());
@@ -84,9 +87,10 @@ public class MusicPlayer {
 			command.addAll(filenamesToPlay);
 
 			ProcessBuilder pb = new ProcessBuilder(command);
-			pb.redirectInput(ProcessBuilder.Redirect.DISCARD);
+			// pb.redirectInput(ProcessBuilder.Redirect.DISCARD);
 			pb.redirectOutput(ProcessBuilder.Redirect.DISCARD);
 			pb.redirectError(ProcessBuilder.Redirect.DISCARD);
+
 			pb.start();
 
 		} catch (IOException e) {

@@ -7,11 +7,14 @@
  */
 
 package com.eb.apps.ebchatclient.domain.context.app;
+import javax.swing.*;
+
 
 public class ContextEditApp {
 
     public static void main(String[] args) {
 
-        ContextEditDlg.Show();
+        SwingUtilities.invokeLater(ContextEditDlg::Show);
+
     }
 }
