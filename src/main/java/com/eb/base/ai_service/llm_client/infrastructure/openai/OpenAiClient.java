@@ -1,10 +1,10 @@
 package com.eb.base.ai_service.llm_client.infrastructure.openai;
 
-import com.eb.base.ai_service.llm_client.api.LlmMessage;
 import com.eb.base.ai_service.llm_client.infrastructure.ILlmClient;
 import com.eb.base.ai_service.llm_client.api.LlmRequest;
 import com.eb.base.ai_service.llm_client.api.LlmResponse;
 import com.eb.base.ai_service.llm_client.infrastructure.TokenLogger;
+import com.eb.base.ai_service.llm_client.infrastructure.contentmapping.LlmRequestJsonMapper;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -33,15 +33,8 @@ public class OpenAiClient implements ILlmClient {
     @Override
     public LlmResponse sendRequest(LlmRequest llmRequest) throws IOException, InterruptedException {
 
-        List<LlmMessage> messages = llmRequest.getMessages();
-
-        Map<String, Object> body = new HashMap<>();
-        body.put("model", llmRequest.getModel());
-        // body.put("input", MessageGenerator.createMessages(messages));
-        body.put("input", messages);
-        body.put("store", false);
-
-        String json = mapper.writeValueAsString(body);
+        LlmRequestJsonMapper requestJsonMapper = new LlmRequestJsonMapper(new ContentPartMapperOpenAi());
+        String json = requestJsonMapper.getJsonString(llmRequest);
 
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create("https://api.openai.com/v1/responses"))

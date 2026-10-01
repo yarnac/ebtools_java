@@ -13,7 +13,7 @@ class LlmClientTest {
 
     @Test
     void testOllama() {
-        LlmRequest request = AbstrLlmClientTest.createTestRequest("qwen3:8b");
+        LlmRequest request = AbstrLlmClientTest.createTestRequest("qwen3.5:35b");
         LlmResponse response = service.sendRequest(request);
         assertNotNull(response);
         assert response.getAnswer().contains("machen") || response.getAnswer().contains("tun");

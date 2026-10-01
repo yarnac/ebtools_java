@@ -1,14 +1,13 @@
 package com.eb.base.ai_service.llm_client.api;
 
+import com.eb.base.ai_service.llm_client.infrastructure.contentmapping.ContentPart;
+import com.eb.base.ai_service.llm_client.infrastructure.contentmapping.ContentPartImage;
+import com.eb.base.ai_service.llm_client.infrastructure.contentmapping.ContentPartText;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 import lombok.Setter;
 
-
-import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.Getter;
-import lombok.Setter;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -29,6 +28,9 @@ public class LlmMessage {
 
     @JsonIgnore
     List<String> imageFileNames = new ArrayList<>();
+
+    @JsonIgnore
+    List<String> textFileNames = new ArrayList<>();
 
     // Konstruktor für reine Text-Nachrichten (Backward Compatibility)
     public LlmMessage(String role, String text) {
@@ -52,9 +54,9 @@ public class LlmMessage {
      * Fügt einen reinen Textblock hinzu.
      * WICHTIG: Viele APIs (OpenAI) erwarten auch bei reinem Text eine Liste von Objekten.
      */
+
     public void addText(String text) {
-        ContentPart textPart = new ContentPart("text");
-        textPart.setText(text);
+        ContentPart textPart = new ContentPartText(text);
         this.contentParts.add(textPart);
     }
 
@@ -62,35 +64,34 @@ public class LlmMessage {
      * Fügt ein Bild aus einer lokalen Datei hinzu (konvertiert zu Base64).
      * Form: data:image/jpeg;base64,...
      */
+
     public void addImageFromPath(String filePath) throws IOException {
         byte[] imageBytes = Files.readAllBytes(Path.of(filePath));
         String base64 = Base64.getEncoder().encodeToString(imageBytes);
 
-        // Standard Prefix für OpenAI/Moderne APIs
-        String dataUrl = "data:image/jpeg;base64," + base64;
-
-        addImage(dataUrl);
+        String lowerCase = filePath.toLowerCase();
+        if (lowerCase.endsWith(".png")) {
+            addImage("image/png", base64);
+        }
+        else if (lowerCase.endsWith(".jpg") || lowerCase.endsWith(".jpeg")) {
+            addImage("image/jpeg", base64);
+        }
     }
 
     /**
      * Fügt ein Bild hinzu (Bereits als Base64 String oder URL)
      */
-    public void addImage(String imageData) {
-        ContentPart imagePart = new ContentPart("image_url");
-        // Für OpenAI wird das oft in einem inneren Object 'url' erwartet.
-        // Da wir im JSON später serialisiert werden müssen, nutzen wir hier eine Logik.
-        // Um die Kompatibilität zu wahren, speichern wir den URL-String direkt als Value oder bauen ein Objekt.
-
-        // Hier bauen wir das OpenAI-kompatible Inner-Object (image_url)
-        imagePart.setImageDetails(new ImageUrl(imageData));
+    public void addImage(String mimeType, String imageData) {
+        ContentPart imagePart = new ContentPartImage(mimeType, imageData);
         this.contentParts.add(imagePart);
     }
 
+    @JsonIgnore
     public String getMessage() {
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append("<%s>\n".formatted(role));
         for (ContentPart contentPart : contentParts) {
-            stringBuilder.append(contentPart.getText());
+            stringBuilder.append(contentPart);
             stringBuilder.append("\n\n");
         }
         return stringBuilder.toString();

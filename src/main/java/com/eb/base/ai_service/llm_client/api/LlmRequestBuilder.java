@@ -1,8 +1,9 @@
 package com.eb.base.ai_service.llm_client.api;
 
-import com.eb.apps.ebchatclient.app.AiPlaygroundCtrl;
 import com.eb.base.extensions.StringExtensions;
 
+import java.awt.*;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -29,6 +30,22 @@ public class LlmRequestBuilder implements LlmRequestBuilderSystemOrUserMsg,
     @Override
     public LlmRequestBuilderUserMsg addUserMsg(String msgContent) {
         addMsg("user", msgContent);
+        return this;
+    }
+
+    @Override
+    public LlmRequestBuilderUserMsg addUserMsgWithImage(String msgContent, String imagePath) {
+
+        if (msgContent != null && msgContent.length() > 0)
+        {
+            LlmMessage message = new LlmMessage("user", msgContent);
+            try {
+                message.addImageFromPath(imagePath);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+            messages.add(message);
+        }
         return this;
     }
 

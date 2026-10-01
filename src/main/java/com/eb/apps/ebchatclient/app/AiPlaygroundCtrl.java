@@ -25,6 +25,7 @@ import com.eb.apps.ebchatclient.domain.chat.AiChatManager;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
+import java.awt.event.KeyEvent;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -64,6 +65,11 @@ public class AiPlaygroundCtrl {
 
         String tbName = window.getPanelWithToolBarInput().getToolbar().getName();
         decorator = window.getDecorator();
+
+        decorator.setCurrentMenu("Datei");
+        decorator.addMenuItem("RUN",this::sendRequest, KeyEvent.VK_F5,0);
+        decorator.addOpenFileToolbarButton(tbName, "OpenAI Kosten", ICF.Monitor_Info, "https://platform.openai.com/home");
+        decorator.addOpenFileToolbarButton(tbName, "Anthropic Kosten", ICF.Monitor_Properties, "https://platform.claude.com/dashboard");
 
         decorator.addToolbarButton(tbName,"Run", IC.PLAY, (s) -> sendRequest());
         decorator.addToolbarButton(tbName,"Run", IC.MB_PLAY, this::actionPerformed2);
@@ -168,11 +174,11 @@ public class AiPlaygroundCtrl {
 
     private void withProgressbarAnimationDo(Runnable runnable) {
         progressBar.setIndeterminate(true);
-        window.setInOutEnabled(false);
+        // window.setInOutEnabled(false);
         window.getTextPaneOutput().setText("Waiting for request answer");
         runnable.run();
         progressBar.setIndeterminate(false);
-        window.setInOutEnabled(true);
+        // window.setInOutEnabled(true);
         System.out.println("\nFertig!");
     }
 

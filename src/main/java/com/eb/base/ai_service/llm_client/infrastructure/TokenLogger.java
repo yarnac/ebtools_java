@@ -23,6 +23,10 @@ public class TokenLogger {
         sb.append(response.getOutputTokens());
         sb.append(" TT:");
         sb.append(response.getTotalTokens());
+        sb.append(" T:");
+        sb.append(response.getSecondsToRun());
+        sb.append(" TS:");
+        sb.append(response.getTokensPerSecond());
 
         appendLogMessage(fileName, sb.toString());
     }
@@ -37,7 +41,7 @@ public class TokenLogger {
                     StandardOpenOption.APPEND
             );
         } catch (IOException e) {
-            throw new RuntimeException("Fehler beim Schreiben der Logdatei: " + fileName, e);
+            // throw new RuntimeException("Fehler beim Schreiben der Logdatei: " + fileName, e);
         }
     }
 

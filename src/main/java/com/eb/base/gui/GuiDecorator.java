@@ -97,6 +97,61 @@ public class GuiDecorator {
 		return btn;
 	}
 
+	public JButton addOpenFileToolbarButton(String toolbarName, String tooltipText, IC ic, String fileName) {
+		Container toolbar = fetchContainer(toolbarName);
+
+		JButton btn = new JButton();
+
+		try {
+			btn.setIcon(ic.getImageIcon());
+		} catch (Exception e) {
+			out.println("Image nicht gefunden: " + ic);
+		}
+		btn.setToolTipText(tooltipText);
+		toolbar.add(btn);
+		btn.addActionListener(x->openFile(fileName));
+
+		if (!(toolbar instanceof JToolBar)) {
+			toolbar.revalidate();
+			toolbar.repaint();
+		}
+		return btn;
+	}
+
+	public JButton addOpenFileToolbarButton(String toolbarName, String tooltipText, ICF ic, String fileName) {
+		Container toolbar = fetchContainer(toolbarName);
+
+		JButton btn = new JButton();
+
+		try {
+			btn.setIcon(ic.getImageIcon());
+		} catch (Exception e) {
+			out.println("Image nicht gefunden: " + ic);
+		}
+		btn.setToolTipText(tooltipText);
+		toolbar.add(btn);
+		btn.addActionListener(x->openFile(fileName));
+
+		if (!(toolbar instanceof JToolBar)) {
+			toolbar.revalidate();
+			toolbar.repaint();
+		}
+		return btn;
+	}
+
+	private void openFile(String fileName) {
+		if (fileName==null || fileName.isEmpty())
+			return;
+		if (fileName.startsWith("http")) {
+			BrowserLaunch.openBrowser(fileName);
+		}
+	}
+
+	private void openFile(ActionEvent actionEvent) {
+		
+	}
+
+
 	public JButton addToolbarButton(String toolbarName, String tooltipText, IC ic, ActionListener listener) {
 		
 		Container toolbar = fetchContainer(toolbarName);
