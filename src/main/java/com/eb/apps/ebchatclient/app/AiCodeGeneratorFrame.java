@@ -10,6 +10,7 @@ public class AiCodeGeneratorFrame extends JFrame {
     private JTextField edTargetDir;
     private JTextArea edCode;
     private JToolBar toolBar;
+    private JToolBar toolBar2;
 
     public static void main(String[] args) {
         AiCodeGeneratorFrame frame = new AiCodeGeneratorFrame();
@@ -35,12 +36,18 @@ public class AiCodeGeneratorFrame extends JFrame {
         toolBar = gbUtil.addToolBarRow(false);
         edNamespace = gbUtil.addLabeledFieldRow(new JTextField(),"Namespace",0,GridBagConstraints.HORIZONTAL);
         edTargetDir = gbUtil.addLabeledFieldRow(new JTextField(),"Targetdirectory",0,GridBagConstraints.HORIZONTAL);
-        edCode = gbUtil.addLabeledScrollPaneWithFieldRow(new JTextArea(),"Code",1,GridBagConstraints.BOTH);
+        toolBar2 = gbUtil.addLabeledFieldRow(new JToolBar(),"Code",0,GridBagConstraints.HORIZONTAL);
+        toolBar2.setFloatable(false);
+        edCode = gbUtil.addLabeledScrollPaneWithFieldRow(new JTextArea(),"",1,GridBagConstraints.BOTH);
 
     }
 
     public JToolBar getToolBar() {
         return toolBar;
+    }
+
+    public JToolBar getToolBarCode() {
+        return toolBar2;
     }
 
     public JTextField getEdNamespace() {
