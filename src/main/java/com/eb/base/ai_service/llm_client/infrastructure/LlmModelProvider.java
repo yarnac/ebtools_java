@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.function.Predicate;
 
 public class LlmModelProvider {
 
@@ -90,7 +91,15 @@ public class LlmModelProvider {
         return getModel(modelName);
     }
 
-    public boolean isAllowedParameter(String name, String model) {
-        return !model.toLowerCase().endsWith("luna");
+    public boolean isAllowedParameter(String name, String modelName) {
+
+        LlmModel model = getModel(modelName);
+        if (model == null)
+            return false;
+
+        if (name.equals("temperature"))
+            return !model.isOpenAi();
+
+        return true;
     }
 }

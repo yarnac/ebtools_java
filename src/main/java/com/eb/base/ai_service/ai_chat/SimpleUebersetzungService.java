@@ -15,8 +15,8 @@ public class SimpleUebersetzungService {
                 alışkanlıklarım ve anılarımla sevdiğim İstanbul’a ait olmak istiyordum. Çocukken bu iki talebi (bir çocuk ileride hem serseri, hem de büyük bir bilim
                 adamı olacağını aynı anda sorunsuzca düşleyebilir) aklımın iki ayrı köşesinde koruyabilme yeteneğini yaşım ilerledikçe kaybetmem, beni yavaş yavaş, hüzünlü bir kişiye çeviriyordu.
                 """;
-        String[] modelAuswahl = new String[]{"qwen3.5:4b", "qwen3.5:9b", "qwen3.5:35b", "qwen3-vl:30b", "gpt-6-luna","claude-haiku-4-5"};
-        int modelNr = 4;
+        String[] modelAuswahl = new String[]{"qwen3.5:4b", "qwen3.5:9b", "qwen3.5:35b", "qwen3-vl:30b", "gpt-5.6-sol","claude-haiku-4-5"};
+        int modelNr = 5;
         String result2 = service.getUebersetzungen(text, "Türkisch", modelAuswahl[modelNr]);
         System.out.println(result2);
     }
