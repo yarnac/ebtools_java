@@ -41,7 +41,5 @@ public class ContentPartMapperAnthropic implements ContentPartToMapMapper {
         return "messages";
     }
 
-    @Override public boolean shouldSendMaxTokens() {return true;}
-
     @Override public boolean shouldSendSystemSeparately() {return true;}
 }

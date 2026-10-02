@@ -11,11 +11,13 @@ public class SimpleUebersetzungService {
         SimpleUebersetzungService service = new SimpleUebersetzungService();
 
         String text = """
-                On altı-on sekiz yaşlarımda, bir yandan radikal bir Batılılaşmacı gibi, şehrin ve kendimin bütünüyle Batılı olmasını istiyor, bir yandan da içgüdülerim, alışkanlıklarım ve anılarımla sevdiğim İstanbul’a ait olmak istiyordum. Çocukken bu iki talebi (bir çocuk ileride hem serseri, hem de büyük bir bilim adamı olacağını aynı anda sorunsuzca düşleyebilir) aklımın iki ayrı köşesinde koruyabilme yeteneğini yaşım ilerledikçe kaybetmem, beni yavaş yavaş, hüzünlü bir kişiye çeviriyordu.
+                On altı-on sekiz yaşlarımda, bir yandan radikal bir Batılılaşmacı gibi, şehrin ve kendimin bütünüyle Batılı olmasını istiyor, bir yandan da içgüdülerim,
+                alışkanlıklarım ve anılarımla sevdiğim İstanbul’a ait olmak istiyordum. Çocukken bu iki talebi (bir çocuk ileride hem serseri, hem de büyük bir bilim
+                adamı olacağını aynı anda sorunsuzca düşleyebilir) aklımın iki ayrı köşesinde koruyabilme yeteneğini yaşım ilerledikçe kaybetmem, beni yavaş yavaş, hüzünlü bir kişiye çeviriyordu.
                 """;
-        String result2 = service.getUebersetzungen(text, "Türkisch", "qwen3.5:35b");
-        // String result2 = service.getUebersetzungen(text, "Türkisch", "gpt-5.6-luna");
-        // String result2 = service.getUebersetzungen(text, "Türkisch", "claude-haiku-4-5");
+        String[] modelAuswahl = new String[]{"qwen3.5:4b", "qwen3.5:9b", "qwen3.5:35b", "qwen3-vl:30b", "gpt-5.6-luna","claude-haiku-4-5"};
+        int modelNr = 2;
+        String result2 = service.getUebersetzungen(text, "Türkisch", modelAuswahl[modelNr]);
         System.out.println(result2);
     }
 
@@ -32,11 +34,12 @@ public class SimpleUebersetzungService {
                 .addSystemMsg(systemMessage)
                 .addUserMsg(userMessage)
                 .setModel(model)
+                .addParameter("temperature", 0.0)
                 .build();
 
         LlmClient client = new LlmClient();
         LlmResponse response = client.sendRequest(request);
-        return response.getAnswer();
+        return response.getAnswer() + "\n%s\t%d / %.2f \t %.2f T/s".formatted(model, response.getTotalTokens(), response.getSecondsToRun(), response.getTokensPerSecond());
     }
 
 

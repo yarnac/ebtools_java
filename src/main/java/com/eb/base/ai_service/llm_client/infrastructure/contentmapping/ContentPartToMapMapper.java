@@ -6,7 +6,6 @@ public interface ContentPartToMapMapper {
 
     Map<String, Object> map(ContentPart part);
     String getContentIdentifier();
-    default boolean shouldSendMaxTokens() {return false;}
     default boolean shouldSendSystemSeparately() {return false;}
 }
 

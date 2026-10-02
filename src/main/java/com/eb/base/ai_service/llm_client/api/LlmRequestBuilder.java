@@ -10,8 +10,9 @@ import java.util.List;
 public class LlmRequestBuilder implements LlmRequestBuilderSystemOrUserMsg,
         LlmRequestBuilderUserMsg, LlmRequestBuilderModel, LlmRequestBuilderFinish{
 
-    List<LlmMessage> messages = new ArrayList<LlmMessage>();
     String model;
+    List<LlmMessage> messages = new ArrayList<>();
+    List<Parameter> parameters = new ArrayList<>();
 
     static LlmRequestBuilderSystemOrUserMsg create()
     {
@@ -91,7 +92,13 @@ public class LlmRequestBuilder implements LlmRequestBuilderSystemOrUserMsg,
 
     @Override
     public LlmRequest build() {
-        return new LlmRequest(model, messages);
+        return new LlmRequest(model, messages, parameters);
+    }
+
+    @Override
+    public LlmRequestBuilderFinish addParameter(String parameterName, Object value) {
+        parameters.add(new Parameter(parameterName, value));
+        return this;
     }
 
     @Override

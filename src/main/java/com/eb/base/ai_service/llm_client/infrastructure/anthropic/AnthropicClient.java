@@ -1,6 +1,7 @@
 package com.eb.base.ai_service.llm_client.infrastructure.anthropic;
 
 import com.eb.base.ai_service.llm_client.api.LlmMessage;
+import com.eb.base.ai_service.llm_client.api.Parameter;
 import com.eb.base.ai_service.llm_client.infrastructure.ILlmClient;
 import com.eb.base.ai_service.llm_client.api.LlmRequest;
 import com.eb.base.ai_service.llm_client.api.LlmResponse;
@@ -21,6 +22,7 @@ import java.util.stream.Collectors;
 
 public class AnthropicClient implements ILlmClient {
 
+    private static final int DEFAULT_MAX_TOKENS = 20000;
     private final ObjectMapper mapper;
     private final HttpClient httpClient;
     private final String apiKey;
@@ -35,8 +37,8 @@ public class AnthropicClient implements ILlmClient {
     @Override
     public LlmResponse sendRequest(LlmRequest llmRequest) throws IOException, InterruptedException {
 
-        List<LlmMessage> messages = llmRequest.getMessages();
-        List<LlmMessage> dialogMessages = getDialogMessages(messages);
+        if (!llmRequest.hasParameter("max_tokens"))
+            llmRequest.getParameters().add(new Parameter("max_tokens", DEFAULT_MAX_TOKENS));
 
         LlmRequestJsonMapper requestJsonMapper = new LlmRequestJsonMapper(new ContentPartMapperAnthropic());
         String json = requestJsonMapper.getJsonString(llmRequest);

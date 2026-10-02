@@ -2,6 +2,7 @@ package com.eb.base.ai_service.llm_client.infrastructure.contentmapping;
 
 import com.eb.base.ai_service.llm_client.api.LlmMessage;
 import com.eb.base.ai_service.llm_client.api.LlmRequest;
+import com.eb.base.ai_service.llm_client.api.Parameter;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -28,9 +29,9 @@ public class LlmRequestJsonMapper {
         body.put("model", llmRequest.getModel());
         moveSystemContentsIfNeccesary(messagesRaw, body);
         body.put(contentPartToMapMapper.getContentIdentifier(), messagesRaw);
-        if (contentPartToMapMapper.shouldSendMaxTokens())
-            body.put("max_tokens", 20000);
 
+        for (Parameter parameter : llmRequest.getParameters())
+            body.put(parameter.getName(), parameter.getValue());
 
         ObjectMapper jsonMapper = new ObjectMapper();
         try {

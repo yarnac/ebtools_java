@@ -4,13 +4,6 @@ import com.eb.base.ai_service.llm_client.api.LlmClient;
 import com.eb.base.ai_service.llm_client.api.LlmRequest;
 import com.eb.base.ai_service.llm_client.api.LlmResponse;
 
-import javax.imageio.ImageIO;
-import java.awt.*;
-import java.awt.image.BufferedImage;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-
 public class SimpleImageService {
 
     public static void main(String[] args)
@@ -20,12 +13,13 @@ public class SimpleImageService {
         //String text = "Analysiere das folgende Bild";
         String text = getVerschlagwortungString();
 
-        System.out.println(service.getImageDescription(text, "/Volumes/Macintosh HD/Users/ekkart/Pictures/Rotterdam/1/2794.JPG" , "qwen3.5:35b"));
-        //System.out.println(service.getImageDescription(text, "/Volumes/Macintosh HD/Users/ekkart/Pictures/Rotterdam/1/2760.JPG" , "qwen3-vl:30b"));
-
-        // System.out.println(service.getImageDescription(text, "/Volumes/Macintosh HD/Users/ekkart/Pictures/Rotterdam/1/2760.JPG" , "gpt-5.6-luna"));
-        // System.out.println(service.getImageDescription(text, "/Volumes/Macintosh HD/Users/ekkart/Pictures/Rotterdam/1/2760.JPG" , "claude-haiku-4-5"));
-
+        String[] modelAuswahl = new String[]{"qwen3.5:4b", "qwen3.5:9b", "qwen3.5:35b", "qwen3-vl:30b", "gpt-5.6-luna","claude-haiku-4-5"};
+        for (int i=0;i<modelAuswahl.length;i++)
+        {
+            String model = modelAuswahl[i];
+            for (int j=0;j<5;j++)
+            System.out.println(service.getImageDescription(text, "/Volumes/Macintosh HD/Users/ekkart/Pictures/Rotterdam/1/2794.JPG" , model));
+        }
 
     }
 
@@ -44,6 +38,7 @@ public class SimpleImageService {
                                    - "motiv" (Liste mit Tags zum Hauptmotiv des Bildes)
                                 4. Wenn eine Kategorie nicht im Bild sichtbar ist, nutze ein leeres Array: []
                                 5. Nutze keine Markdown-Formatierung für die Ausgabe, nur reiner JSON-Text.
+                                6. Gebe je Kategorie immer 5 Schlagworte aus.
                         
                                 Hier ist das Schema, das du ausgeben musst:
                                 {
@@ -58,23 +53,16 @@ public class SimpleImageService {
         return text;
     }
 
-    public String getImageDescription(String word, String image, String model)
+    public String getImageDescription(String userMessage, String image, String model)
     {
-        String userMessage = word;
-
         LlmRequest request = LlmRequest.builder()
                 .addUserMsgWithImage(userMessage, image)
                 .setModel(model)
+                .addParameter("temperature", 0.0)
                 .build();
 
         LlmClient client = new LlmClient();
         LlmResponse response = client.sendRequest(request);
-        return response.getAnswer();
+        return response.getAnswer() + "\n%s\t%d / %.2f \t %.2f T/s".formatted(model, response.getTotalTokens(), response.getSecondsToRun(), response.getTokensPerSecond());
     }
-
-
-
-
-
-
 }
