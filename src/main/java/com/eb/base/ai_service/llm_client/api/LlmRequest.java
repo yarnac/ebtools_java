@@ -36,13 +36,20 @@ public class LlmRequest {
         return LlmRequestBuilder.create();
     }
 
+    public void addParameter(Parameter parameter) {
+        this.parameters.add(parameter);
+    }
 
-    public boolean hasParameter(String maxTokens) {
+    public Parameter getParameter(String name) {
         for (Parameter parameter : parameters) {
-            if (parameter.getName().equals(maxTokens)) {
-                return true;
+            if (parameter.getName().equals(name)) {
+                return parameter;
             }
         }
-        return false;
+        return null;
+    }
+
+    public boolean hasParameter(String maxTokens) {
+        return getParameter(maxTokens) != null;
     }
 }
