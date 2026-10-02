@@ -152,7 +152,7 @@ public class AiPlaygroundWindow extends JFrame {
     public PanelWithToolBar getPanelWithToolBarOutput()
     {
         if (panelWithToolBarOutput == null)
-            panelWithToolBarOutput = new PanelWithToolBar(splitPanelMessages.getPanel1(), splitPanelMessages.getToolBar1());
+            panelWithToolBarOutput = new PanelWithToolBar(splitPanelMessages.getPanel2(), splitPanelMessages.getToolBar2());
         return panelWithToolBarOutput;
     }
 

@@ -46,19 +46,23 @@ public class AiPlaygroundCtrl {
         window = new AiPlaygroundWindow(iniFile);
         window.setVisible(true);
         decorateToolbarInput();
+
+        String tbOutputName = window.getPanelWithToolBarOutput().getToolbar().getName();
+        decorator.addToolbarButton(tbOutputName,"Generate Code", ICF.ArrowFlowVertical_Add, this::handleGenerateCode);
+
         
         IComponentPersister persister = ComponentPersisterFactory.createIniFilePersister(iniFile);
         persister.addComponentItem(cbChats,"CbChats");
         persister.addComponentItem(cbContexts,"CbContexts");
         persister.addComponentItem(cbModelle,"CbModelle");
-
         window.registerPersister(persister);
-
-
         persister.loadAndSetComponentItems();
-
-
         decorator.addCloseAction(persister::persistComponentItems);
+    }
+
+    private void handleGenerateCode(ActionEvent actionEvent) {
+        AiCodeGeneratorCtrl generator = new AiCodeGeneratorCtrl();
+        generator.setCodeText(window.getTextPaneOutput().getText());
     }
 
     private void decorateToolbarInput() {
@@ -79,7 +83,6 @@ public class AiPlaygroundCtrl {
 
         AiChatManager chatManager = AiChatManager.getCurrent();
         ContextManager contextManager = chatManager.getContextManager();
-
 
         LlmModelProvider modelProvider = new LlmModelProvider();
         cbChats = decorator.addToolbarComboBox( tbName,"Chats", chatManager.getAvailableChats(), this::setChat);

@@ -9,6 +9,7 @@
 package com.eb.apps.ebchatclient.domain.context.gui;
 
 import com.eb.apps.ebchatclient.domain.context.domain.ContextWithFiles;
+import com.eb.base.gui.EbGridBagUtil;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -17,11 +18,11 @@ import java.awt.*;
 
 public final class ContextEditorPanel extends JPanel {
 
-    private final JTextField edName = new JTextField();
-    private final JTextField edKnoten = new JTextField();
+    private JTextField edName;
+    private JTextField edKnoten;
 
-    private final JTextArea edPrompt = createTextArea();
-    private final JTextArea edOutput = createTextArea();
+    private JTextArea edPrompt;
+    private JTextArea edOutput;
 
     @Getter     @Setter
     private JToolBar toolBar;
@@ -37,9 +38,6 @@ public final class ContextEditorPanel extends JPanel {
     private void initializeComponents() {
         setBorder(BorderFactory.createEmptyBorder(2, 4, 4, 4));
 
-        toolBar = new JToolBar();
-        toolBar.setFloatable(false);
-
 
         JScrollPane systemPromptScroll = new JScrollPane(edPrompt);
         JScrollPane outputPromptScroll = new JScrollPane(edOutput);
@@ -47,20 +45,14 @@ public final class ContextEditorPanel extends JPanel {
         // Die bevorzugte Höhe des System-Prompts.
         systemPromptScroll.setPreferredSize(new Dimension(300, 80));
 
-        int row = 0;
-        addToolBar(toolBar, row++);
 
-        addLabel("Name", row);
-        addField(edName, row++, 0.0, GridBagConstraints.HORIZONTAL);
+        EbGridBagUtil util = new EbGridBagUtil(this, 0);
 
-        addLabel("Knoten", row);
-        addField(edKnoten, row++, 0.0, GridBagConstraints.HORIZONTAL);
-
-        addLabel("Prompt", row);
-        addField(systemPromptScroll, row++, 0.4, GridBagConstraints.BOTH);
-
-        addLabel("Output", row);
-        addField(outputPromptScroll, row++, 0.6, GridBagConstraints.BOTH);
+        toolBar = util.addToolBarRow(false);
+        edName = util.addLabeledFieldRow(new JTextField(), "Name", 0.0, GridBagConstraints.HORIZONTAL);
+        edKnoten = util.addLabeledFieldRow(new JTextField(), "Knoten", 0.0, GridBagConstraints.HORIZONTAL);
+        edPrompt = util.addLabeledScrollPaneWithFieldRow(new JTextArea(), "Prompt", 0.4, GridBagConstraints.BOTH);
+        edOutput = util.addLabeledScrollPaneWithFieldRow(new JTextArea(), "Output", 0.6, GridBagConstraints.BOTH);
     }
 
     public void undo()
@@ -80,71 +72,13 @@ public final class ContextEditorPanel extends JPanel {
         contextWithFiles.setKnoten(edKnoten.getText());
         contextWithFiles.setUserString(edPrompt.getText());
     }
-    
 
-
-
-    private void addToolBar(JToolBar toolBar, int row) {
-        GridBagConstraints gbc = new GridBagConstraints();
-
-        gbc.gridx = 0;
-        gbc.gridy = row;
-
-        // Die Toolbar belegt beide Spalten.
-        gbc.gridwidth = 2;
-
-        // Toolbar soll die volle Breite erhalten.
-        gbc.weightx = 1.0;
-        gbc.weighty = 0.0;
-        gbc.fill = GridBagConstraints.HORIZONTAL;
-
-        gbc.anchor = GridBagConstraints.NORTHWEST;
-        gbc.insets = new Insets(0, 0, 4, 0);
-
-        add(toolBar, gbc);
-    }
 
     private JTextArea createTextArea() {
         JTextArea textArea = new JTextArea();
         textArea.setLineWrap(true);
         textArea.setWrapStyleWord(true);
         return textArea;
-    }
-
-    private void addLabel(String text, int row) {
-        GridBagConstraints gbc = new GridBagConstraints();
-
-        gbc.gridx = 0;
-        gbc.gridy = row;
-        gbc.weightx = 0.0;
-        gbc.weighty = 0.0;
-
-        gbc.anchor = GridBagConstraints.NORTHWEST;
-        gbc.fill = GridBagConstraints.NONE;
-
-        gbc.insets = new Insets(6, 0, 1, 1);
-
-        add(new JLabel(text), gbc);
-    }
-
-    private void addField(Component component, int row, double weighty, int fill) {
-        GridBagConstraints gbc = new GridBagConstraints();
-
-        gbc.gridx = 1;
-        gbc.gridy = row;
-
-        // Die rechte Spalte erhält die zusätzliche Breite.
-        gbc.weightx = 1.0;
-
-        // Nur der User Prompt erhält zusätzliche Höhe.
-        gbc.weighty = weighty;
-
-        gbc.fill = fill;
-        gbc.anchor = GridBagConstraints.NORTHWEST;
-
-        gbc.insets = new Insets(1, 2, 1, 2);
-
-        add(component, gbc);
     }
 
     public JTextField getEdName() {
