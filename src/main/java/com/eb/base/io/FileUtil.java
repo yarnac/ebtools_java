@@ -493,7 +493,23 @@ public class FileUtil {
 		
 	}
 
-	
 
+	public static List<String> ebGetFiles(String aiLogPfad, String s) {
+		return FileExtensions.ebGetFileList(aiLogPfad, false, s);
+	}
 
+	public static void ensureDirectory(String ordnerInAiPfad) {
+		try {
+			Files.createDirectories(Paths.get(ordnerInAiPfad));
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	public static List<String> getAllFiles(String directory, String s1) {
+		return getFileNamesAll(directory)
+				.stream()
+				.filter(f -> getFileName(f).equals(s1))
+				.toList();
+	}
 }

@@ -3,6 +3,7 @@ package com.eb.base.ai_service.llm_client.infrastructure.contentmapping;
 import com.eb.base.ai_service.llm_client.api.LlmMessage;
 import com.eb.base.ai_service.llm_client.api.LlmRequest;
 import com.eb.base.ai_service.llm_client.api.Parameter;
+import com.eb.base.ai_service.llm_client.infrastructure.LlmModelProvider;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -31,7 +32,8 @@ public class LlmRequestJsonMapper {
         body.put(contentPartToMapMapper.getContentIdentifier(), messagesRaw);
 
         for (Parameter parameter : llmRequest.getParameters())
-            body.put(parameter.getName(), parameter.getValue());
+            if (isAllowedParameter(parameter.getName(), llmRequest.getModel()))
+                body.put(parameter.getName(), parameter.getValue());
 
         ObjectMapper jsonMapper = new ObjectMapper();
         try {
@@ -41,6 +43,10 @@ public class LlmRequestJsonMapper {
             throw new RuntimeException(e);
         }
 
+    }
+
+    private boolean isAllowedParameter(String name, String model) {
+        return LlmModelProvider.getCurrent().isAllowedParameter(name, model);
     }
 
     private void moveSystemContentsIfNeccesary(List<LlmMessageRaw> messagesRaw, Map<String, Object> body) {

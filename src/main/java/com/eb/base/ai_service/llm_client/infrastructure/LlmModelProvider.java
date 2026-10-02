@@ -89,4 +89,8 @@ public class LlmModelProvider {
     public LlmModel findModel(String modelName) {
         return getModel(modelName);
     }
+
+    public boolean isAllowedParameter(String name, String model) {
+        return !model.toLowerCase().endsWith("luna");
+    }
 }

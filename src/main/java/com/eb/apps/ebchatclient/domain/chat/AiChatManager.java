@@ -13,6 +13,7 @@ import com.eb.apps.ebchatclient.domain.context.domain.ContextWithFiles;
 import com.eb.base.ai_service.llm_client.infrastructure.LlmModelProvider;
 import com.eb.base.extensions.FileExtensions;
 import com.eb.base.inifile.api.IniFile;
+import com.eb.base.io.FileUtil;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -76,13 +77,13 @@ public class AiChatManager {
 
     private void loadChats() {
         // placeholder: you need your folder helper like EbGetAllFiles
-        List<String> iniFiles = FileHelpers.getAllFiles(GetChatOrdner(), "chat.ini");
+        List<String> iniFiles = FileUtil.getAllFiles(GetChatOrdner(), "chat.ini");
         this.availableChats = iniFiles.stream().map(this::readChat)
                 .collect(Collectors.toList());
     }
 
     private void loadSessions() {
-        List<String> iniFiles = FileHelpers.getAllFiles(GetSessionOrdner(), "chat.ini");
+        List<String> iniFiles = FileUtil.getAllFiles(GetSessionOrdner(), "chat.ini");
         this.availableSessions = iniFiles.stream().map(this::readChat)
                 .collect(Collectors.toList());
     }
@@ -98,7 +99,7 @@ public class AiChatManager {
     public AiChat createChat(String name, String title) {
         AiChat chat = new AiChat(name, title);
         // Directory.CreateDirectory(chat.ChunkPath);
-        FileHelpers.ensureDirectory(chat.getChunkPath());
+        FileUtil.ensureDirectory(chat.getChunkPath());
 
         IniFile iniFile = iniFileFactory.create(FileExtensions.ebFileNameInDirectory("chat.ini",chat.getFilePath()));
         chat.setMyIniFile(iniFile);
@@ -150,7 +151,7 @@ public class AiChatManager {
         }
         String json = AiChatSerializer.serializeAiChatMessages(chat.getMessages());
         String filePath = getChatFilePath(chat, "message.json");
-        FileHelpers.ensureDirectory(FileExtensions.ebFileDirectory(filePath));
+        FileUtil.ensureDirectory(FileExtensions.ebFileDirectory(filePath));
         Files.writeString(Paths.get(filePath), json, StandardCharsets.UTF_8);
     }
 

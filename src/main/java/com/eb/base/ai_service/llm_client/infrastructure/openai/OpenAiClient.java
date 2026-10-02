@@ -51,6 +51,10 @@ public class OpenAiClient implements ILlmClient {
         double elapsedSeconds = (endTime - startTime) / 1000000000.0;
 
         String responseBody = response.body();
+        if (response.statusCode() != 200) {
+            throw new RuntimeException("Error response from OpenAI: " + responseBody);
+
+        }
         OpenAiResponse openAiResponse = mapper.readValue(responseBody , OpenAiResponse.class);
 
         LlmResponse llmResponse = new LlmResponse();

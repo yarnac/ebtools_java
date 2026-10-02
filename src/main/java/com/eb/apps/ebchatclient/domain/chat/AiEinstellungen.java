@@ -1,6 +1,7 @@
 package com.eb.apps.ebchatclient.domain.chat;
 
 import com.eb.base.extensions.FileExtensions;
+import com.eb.base.io.FileUtil;
 
 import java.util.List;
 
@@ -10,7 +11,7 @@ public class AiEinstellungen {
     public static String AILogPfad = AiPfad + "\\chats\\requests";
 
     public static List<String> AiLogFiles() {
-        return EbFileHelpers.EbGetFiles(AILogPfad, "log*.txt");
+        return FileUtil.ebGetFiles(AILogPfad, "log*.txt");
     }
 
     public static String AIKey;
@@ -20,13 +21,13 @@ public class AiEinstellungen {
         String ordnerInAiPfad = (ordner != null)
                 ? AiPfad + "\\" + ordner
                 : AiPfad;
-        EbFileHelpers.ensureDirectory(ordnerInAiPfad);
+        FileUtil.ensureDirectory(ordnerInAiPfad);
         return FileExtensions.ebFileNameInDirectory(dateiName, ordnerInAiPfad);
     }
 
     public static String GetIniFilePathLocal(String aiplaygroundIni) {
         String path = GlobaleEinstellungen.getPfad("LocalIniFilePath") + "\\" + aiplaygroundIni;
-        EbFileHelpers.ensureDirectory(FileExtensions.ebFileDirectory(aiplaygroundIni));
+        FileUtil.ensureDirectory(FileExtensions.ebFileDirectory(aiplaygroundIni));
         return path;
     }
 
