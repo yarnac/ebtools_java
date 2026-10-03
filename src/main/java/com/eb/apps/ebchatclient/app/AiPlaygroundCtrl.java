@@ -29,6 +29,8 @@ import java.awt.event.KeyEvent;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class AiPlaygroundCtrl {
 
@@ -39,6 +41,9 @@ public class AiPlaygroundCtrl {
     private JProgressBar progressBar;
     private GuiDecorator decorator;
     private ContextEditDlg contextEditDlg;
+    private LlmRequest actLlmRequest;
+
+    private static final ExecutorService executor = Executors.newFixedThreadPool(4);
 
     AiPlaygroundCtrl() {
 
@@ -58,6 +63,13 @@ public class AiPlaygroundCtrl {
         window.registerPersister(persister);
         persister.loadAndSetComponentItems();
         decorator.addCloseAction(persister::persistComponentItems);
+
+
+        // ✅ Empfehlung der AI qwen3.5:9
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            executor.shutdown();
+        }));
+
     }
 
     private void handleGenerateCode(ActionEvent actionEvent) {
@@ -71,12 +83,12 @@ public class AiPlaygroundCtrl {
         decorator = window.getDecorator();
 
         decorator.setCurrentMenu("Datei");
-        decorator.addMenuItem("RUN",this::sendRequest, KeyEvent.VK_F5,0);
+        decorator.addMenuItem("RUN",()->sendRequest(false), KeyEvent.VK_F5,0);
         decorator.addOpenFileToolbarButton(tbName, "OpenAI Kosten", ICF.Monitor_Info, "https://platform.openai.com/home");
         decorator.addOpenFileToolbarButton(tbName, "Anthropic Kosten", ICF.Monitor_Properties, "https://platform.claude.com/dashboard");
 
-        decorator.addToolbarButton(tbName,"Run", IC.PLAY, (s) -> sendRequest());
-        decorator.addToolbarButton(tbName,"Run", IC.MB_PLAY, this::actionPerformed2);
+        decorator.addToolbarButton(tbName,"Run", IC.PLAY, (s) -> sendRequest(false));
+        decorator.addToolbarButton(tbName,"Run again", IC.MB_PLAY,  (s) -> sendRequest(true));
         decorator.addToolbarButton(tbName,"Open append file window", ICF.BulletList, this::actionPerformed);
         decorator.addToolbarButton(tbName, "Kontexte", ICF.LinePoints_Add, this::openContextEditor);
         decorator.addToolbarButton(tbName, "Dummy", ICF.MaleHardHat_Lock, (s)->{});
@@ -131,45 +143,56 @@ public class AiPlaygroundCtrl {
         window.setInputText(s.getUserString());
     }
 
-    private void sendRequest() {
-        LlmRequestBuilder builder = new LlmRequestBuilder();
+    private void sendRequest(boolean append) {
 
         String inputString = window.getInputString();
 
         List<String> imageFileNames = new ArrayList<>();
 
         if (inputString.trim().isEmpty()) {
-            inputString = """
-                        <<Du bist ein CSharp Programmierer unter DotNet 9 mit CSharp 10.>>
-                        Schreibe einen HttpClient für Ollama.
-                        """;
+            JOptionPane.showMessageDialog(null, "Kein Prompt", "Fehler", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        String inputStringWithDirectoriesAndFiles = JsonFileAppendUtil.appendDirectoryFiles(inputString);
+        String inputStringWithFiles = JsonFileAppendUtil.appendFiles(inputStringWithDirectoriesAndFiles, imageFileNames);
+
+        if (!append || actLlmRequest==null) {
+            actLlmRequest = null;
+
+            LlmRequestBuilder builder = new LlmRequestBuilder();
+            actLlmRequest =
+                    builder
+                            .addRequestMsg(inputStringWithFiles, imageFileNames)
+                            .setModel(((LlmModel) Objects.requireNonNull(cbModelle.getSelectedItem())).getModelName())
+                            .build();
+        }
+        else
+        {
+            actLlmRequest.addUserMsg(inputStringWithFiles);
         }
 
 
-
-        String inputStringWithFiles = JsonFileAppendUtil.appendFiles(inputString, imageFileNames);
-        inputStringWithFiles = JsonFileAppendUtil.appendFiles(inputStringWithFiles, imageFileNames);
-
-        LlmRequest llmRequest =
-                builder
-                        .addRequestMsg(inputStringWithFiles, imageFileNames)
-                        .setModel(((LlmModel) Objects.requireNonNull(cbModelle.getSelectedItem())).getModelName())
-                        .build();
-
-        sendRequestAndHandleResponseWithNewTaskAndProgressBarAnimation(llmRequest);
+        sendRequestAndHandleResponseWithNewTaskAndProgressBarAnimation(actLlmRequest);
     }
 
+
     private void sendRequestAndHandleResponseWithNewTaskAndProgressBarAnimation(LlmRequest llmRequest) {
-
-        Thread task = new Thread(() -> withProgressbarAnimationDo(()->{
-            LlmResponse result = LlmRequestService.sendRequest(llmRequest);
-
-
-            String res = result.getAnswerWithDetails();
-            window.setOutputText(res);
-            window.getTextPaneAdapterOutput().setFirstVisibleLine(0);
-        }));
-        task.start();
+        executor.execute(() -> {
+            SwingUtilities.invokeLater(() -> withProgressbarAnimationDo(() -> {
+                try {
+                    LlmResponse result = LlmRequestService.sendRequest(llmRequest);
+                    SwingUtilities.invokeLater(() -> {
+                        window.setOutputText(result.getAnswerWithDetails());
+                        window.getTextPaneAdapterOutput().setFirstVisibleLine(0);
+                    });
+                } catch (Exception e) {
+                    SwingUtilities.invokeLater(() -> {
+                        window.setOutputText("Error: " + e.getMessage());
+                    });
+                }
+            }));
+        });
     }
 
 

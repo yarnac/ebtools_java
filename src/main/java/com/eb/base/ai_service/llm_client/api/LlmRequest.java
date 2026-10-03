@@ -1,5 +1,6 @@
 package com.eb.base.ai_service.llm_client.api;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -10,9 +11,11 @@ import java.util.Objects;
 @Getter
 @Setter
 public class LlmRequest {
+    @JsonProperty("model")
     private String model;
     List<LlmMessage> messages;
     List<Parameter> parameters;
+    private LlmResponse lastResponse;
 
     public LlmRequest(String model, List<LlmMessage> messages) {
         Objects.requireNonNull(model);
@@ -40,6 +43,7 @@ public class LlmRequest {
         this.parameters.add(parameter);
     }
 
+    @JsonProperty
     public Parameter getParameter(String name) {
         for (Parameter parameter : parameters) {
             if (parameter.getName().equals(name)) {
@@ -51,5 +55,15 @@ public class LlmRequest {
 
     public boolean hasParameter(String maxTokens) {
         return getParameter(maxTokens) != null;
+    }
+
+    public void addUserMsg(String inputStringWithFiles) {
+        LlmMessage msg = new LlmMessage("user", inputStringWithFiles);
+        getMessages().add(msg);
+    }
+
+    public void addResponse(LlmResponse response) {
+        lastResponse = response;
+        getMessages().add(new LlmMessage("assistant", response.getAnswer()));
     }
 }

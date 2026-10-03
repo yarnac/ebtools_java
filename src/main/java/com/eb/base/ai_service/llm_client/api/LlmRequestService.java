@@ -13,6 +13,7 @@ public class LlmRequestService {
         ILlmClient client = factory.getLlmClient(llmRequest);
         try {
             LlmResponse response = client.sendRequest(llmRequest);
+            llmRequest.addResponse(response);
             return response;
         } catch (IOException e) {
             throw new RuntimeException(e);
