@@ -176,22 +176,38 @@ public class AiPlaygroundCtrl {
         sendRequestAndHandleResponseWithNewTaskAndProgressBarAnimation(actLlmRequest);
     }
 
-
     private void sendRequestAndHandleResponseWithNewTaskAndProgressBarAnimation(LlmRequest llmRequest) {
+        // 1. UI-Status setzen (Wird vom EDT ausgeführt, blockiert also nicht durch die Logik)
+        SwingUtilities.invokeLater(() -> {
+            progressBar.setIndeterminate(true);
+            window.getTextPaneOutput().setText("Waiting for request answer");
+            // Optional: Input deaktivieren
+            // window.setInOutEnabled(false);
+        });
+
+        // 2. Request im Hintergrund-Thread ausführen (Blockiert nicht die UI)
         executor.execute(() -> {
-            SwingUtilities.invokeLater(() -> withProgressbarAnimationDo(() -> {
-                try {
-                    LlmResponse result = LlmRequestService.sendRequest(llmRequest);
-                    SwingUtilities.invokeLater(() -> {
-                        window.setOutputText(result.getAnswerWithDetails());
+            try {
+                LlmResponse result = LlmRequestService.sendRequest(llmRequest);
+
+                // 3. Erfolg: UI-Ergebnis setzen (Wieder zurück auf den EDT via invokeLater)
+                SwingUtilities.invokeLater(() -> {
+                    window.setOutputText(result.getAnswerWithDetails());
+                    if(window.getTextPaneAdapterOutput() != null) {
                         window.getTextPaneAdapterOutput().setFirstVisibleLine(0);
-                    });
-                } catch (Exception e) {
-                    SwingUtilities.invokeLater(() -> {
-                        window.setOutputText("Error: " + e.getMessage());
-                    });
-                }
-            }));
+                    }
+                    progressBar.setIndeterminate(false);
+                    System.out.println("\nFertig!");
+                });
+
+            } catch (Exception e) {
+                // 4. Fehler: UI-Fehlermeldung setzen (Wieder zurück auf den EDT via invokeLater)
+                SwingUtilities.invokeLater(() -> {
+                    window.setOutputText("Error: " + e.getMessage());
+                    progressBar.setIndeterminate(false);
+                    System.out.println("\nFertig!");
+                });
+            }
         });
     }
 

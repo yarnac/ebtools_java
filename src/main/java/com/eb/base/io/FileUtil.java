@@ -512,4 +512,8 @@ public class FileUtil {
 				.filter(f -> getFileName(f).equals(s1))
 				.toList();
 	}
+
+	public static boolean exists(String commandPath) {
+		return FileExtensions.ebFileExists(commandPath);
+	}
 }

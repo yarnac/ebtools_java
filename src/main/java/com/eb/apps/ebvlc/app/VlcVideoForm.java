@@ -1,5 +1,6 @@
 package com.eb.apps.ebvlc.app;
 
+import com.eb.base.gui.ICF;
 import lombok.Getter;
 
 import javax.swing.*;
@@ -25,6 +26,12 @@ public class VlcVideoForm {
 
     public VlcVideoForm() {
         initialize();
+
+        Image image = new ImageIcon(ICF.Tablet.getImage(24)).getImage();
+        frame.setIconImage(image);
+        Taskbar taskbar = Taskbar.getTaskbar();
+        taskbar.setIconImage(image);
+
         frame.setVisible(true);
     }
 

@@ -2,6 +2,7 @@ package com.eb.apps.ebchatclient.app;
 
 import com.eb.base.gui.GuiDecorator;
 import com.eb.base.gui.IC;
+import com.eb.base.gui.ICF;
 import com.eb.base.gui.adapter.JTextPaneAdapter;
 import com.eb.base.gui.persist.IComponentPersister;
 import com.eb.base.inifile.api.IniFile;
@@ -45,6 +46,7 @@ public class AiPlaygroundWindow extends JFrame {
         initializeView();
 
         setFontSizes(16);
+
 
 
         decorator = new GuiDecorator(this, myIniFile,"Einstellungen");
@@ -160,6 +162,12 @@ public class AiPlaygroundWindow extends JFrame {
         // Set frame properties
         setTitle("AI Playground");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+
+        Image image = new ImageIcon(ICF.BulbOn.getImage(24)).getImage();
+        setIconImage(image);
+        Taskbar taskbar = Taskbar.getTaskbar();
+        taskbar.setIconImage(image);
+
         setSize(800, 600);
         setLocationRelativeTo(null); // Center the window
 

@@ -1,5 +1,7 @@
 package com.eb.apps.ebtools.gui;
 
+import com.eb.base.gui.ICF;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionListener;
@@ -46,7 +48,9 @@ public class EbToolsView {
 	 */
 	public EbToolsView() {
 		//java.awt.Taskbar.getTaskbar().setIconImage(IC.TOOLS_HR.getImage32());
-		initialize();				
+		initialize();
+
+
 		//java.awt.Desktop.getDesktop().setDefaultMenuBar(menuBar);		
 	}
 	
@@ -63,7 +67,10 @@ public class EbToolsView {
 	private void initialize() {
 		setFrame(new JFrame());
 		getFrame().setTitle("Tools");
-		getFrame().setIconImage(getImage("Tools"));
+		Image image = getImage("Tools");
+		getFrame().setIconImage(image);
+		Taskbar taskbar = Taskbar.getTaskbar();
+		taskbar.setIconImage(image);
 		getFrame().setBounds(100, 100, 450, 75);
 		getFrame().setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		

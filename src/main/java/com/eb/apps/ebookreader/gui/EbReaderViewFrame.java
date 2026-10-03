@@ -1,16 +1,12 @@
 package com.eb.apps.ebookreader.gui;
 
-import java.awt.Font;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.Insets;
+import com.eb.base.gui.ICF;
+
+import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.swing.JFrame;
-import javax.swing.JScrollPane;
-import javax.swing.JTextPane;
-import javax.swing.JToolBar;
+import javax.swing.*;
 
 public class EbReaderViewFrame extends JFrame {
 	/**
@@ -35,7 +31,12 @@ public class EbReaderViewFrame extends JFrame {
 		setBounds(100, 100, 517, 781);
 		setDefaultCloseOperation(EXIT_ON_CLOSE);
 		setTitle("EB Reader");
-		
+
+		Image image = new ImageIcon(ICF.BooksBlueGreenRed.getImage(24)).getImage();
+		setIconImage(image);
+		Taskbar taskbar = Taskbar.getTaskbar();
+		taskbar.setIconImage(image);
+
 		createViewColumns(columns);
 	}
 

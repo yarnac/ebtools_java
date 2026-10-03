@@ -89,7 +89,7 @@ public class FileExtensions {
      */
     public static boolean ebFileExists(String str) {
         if (str == null) return false;
-        return Files.exists(Paths.get(str));
+        return Files.exists(Paths.get(str)) && Files.isRegularFile(Paths.get(str));
     }
 
     /**

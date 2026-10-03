@@ -3,6 +3,7 @@ package com.eb.apps.ebmusic.gui;
 import com.eb.apps.ebmusic.tobj.MusicTreeNode;
 import com.eb.apps.ebmusic.gobj.EbMusicLib;
 import com.eb.apps.ebmusic.gobj.MusicFolder;
+import com.eb.base.gui.ICF;
 
 import javax.swing.*;
 import javax.swing.border.LineBorder;
@@ -57,7 +58,13 @@ public class EbMusicPlayerView {
 	 */
 	public EbMusicPlayerView() {
 		//java.awt.Taskbar.getTaskbar().setIconImage(IC.MusicLibrary_HR.getImage32());
-		initialize();		
+		initialize();
+
+		Image image = new ImageIcon(ICF.MusicLibrary_View.getImage(32)).getImage();
+		frame.setIconImage(image);
+		Taskbar taskbar = Taskbar.getTaskbar();
+		taskbar.setIconImage(image);
+
 		registerEvents();
 		
 		
