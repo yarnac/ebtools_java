@@ -19,7 +19,8 @@ public class GlobaleEinstellungen {
         {
             String[] directories = new  String[]{
                     "d:\\Develop\\Java\\wsjava_ij\\Data",
-                    "/Users/ekkart/Data/develop/wsjava_ij/Data"};
+                    "/Users/ekkart/Data/develop/wsjava_ij/Data",
+                    "/home/ekkart/develop/java/shared_data"};
 
             JAVA_DATAPFAD = findDirectory(directories);
         }
@@ -38,6 +39,7 @@ public class GlobaleEinstellungen {
             String[] directories = new  String[]{
                     "d:\\Develop\\Visual22\\Shared\\Data\\Ai",
                     "/Users/ekkart/Data/develop/shared-projects/Data/Ai",
+                    "/home/ekkart/develop/java/shared-projects/Data/Ai"
             };
 
             AIPFAD = findDirectory(directories);
@@ -76,5 +78,9 @@ public class GlobaleEinstellungen {
 
     public static String getDataPfadShared(String fileName) {
         return FileExtensions.ebFullFileNameInDirectory(fileName, getDataPfadShared());
+    }
+
+    public static boolean isMacOs() {
+        return getDataPfadJava().startsWith("/User");
     }
 }

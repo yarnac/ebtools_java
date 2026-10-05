@@ -690,6 +690,6 @@ public class FileExtensions {
                 return false;
             return fileName.charAt(1) == ':' &&  fileName.charAt(2) == '\\';
         }
-        return fileName.startsWith("/User");
+        return fileName.startsWith("/User") || fileName.startsWith("/home");
     }
 }

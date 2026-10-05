@@ -166,9 +166,10 @@ public class AiPlaygroundWindow extends JFrame {
 
         Image image = new ImageIcon(ICF.BulbOn.getImage(24)).getImage();
         setIconImage(image);
-        Taskbar taskbar = Taskbar.getTaskbar();
-        if (!GlobaleEinstellungen.isWindows())
+        if (GlobaleEinstellungen.isMacOs()) {
+            Taskbar taskbar = Taskbar.getTaskbar();
             taskbar.setIconImage(image);
+        }
 
         setSize(800, 600);
         setLocationRelativeTo(null); // Center the window

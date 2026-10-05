@@ -23,6 +23,7 @@ public class OllamaClient implements ILlmClient {
     public static final String HOST_XT13 = "xt13";
     public static final String[] HOSTS = new String[]{
             HOST_MACSTUDIO,
+            "192.168.178.105",
             HOST_MACBOOK,
             // HOST_MACBOOKAIR,
             // HOST_XT13
