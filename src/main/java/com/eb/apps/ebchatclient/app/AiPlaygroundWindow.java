@@ -1,5 +1,6 @@
 package com.eb.apps.ebchatclient.app;
 
+import com.eb.apps.ebchatclient.domain.chat.GlobaleEinstellungen;
 import com.eb.base.gui.GuiDecorator;
 import com.eb.base.gui.IC;
 import com.eb.base.gui.ICF;
@@ -166,7 +167,8 @@ public class AiPlaygroundWindow extends JFrame {
         Image image = new ImageIcon(ICF.BulbOn.getImage(24)).getImage();
         setIconImage(image);
         Taskbar taskbar = Taskbar.getTaskbar();
-        taskbar.setIconImage(image);
+        if (!GlobaleEinstellungen.isWindows())
+            taskbar.setIconImage(image);
 
         setSize(800, 600);
         setLocationRelativeTo(null); // Center the window
