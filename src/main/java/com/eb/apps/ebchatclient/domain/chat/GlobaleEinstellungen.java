@@ -20,7 +20,9 @@ public class GlobaleEinstellungen {
             String[] directories = new  String[]{
                     "d:\\Develop\\Java\\wsjava_ij\\Data",
                     "/Users/ekkart/Data/develop/wsjava_ij/Data",
-                    "/home/ekkart/develop/java/shared_data"};
+                    "/home/ekkart/develop/java/shared_data",
+                    "c:\\workspaces\\etw\\Visual Studio\\Shared\\Data",
+                    "/Users/ekkart/Data/develop/wsjava_ij/Data"};
 
             JAVA_DATAPFAD = findDirectory(directories);
         }
@@ -38,6 +40,7 @@ public class GlobaleEinstellungen {
         if (AIPFAD == null) {
             String[] directories = new  String[]{
                     "d:\\Develop\\Visual22\\Shared\\Data\\Ai",
+                    "c:\\workspaces\\etw\\Visual Studio\\Shared\\Data\\Ai",
                     "/Users/ekkart/Data/develop/shared-projects/Data/Ai",
                     "/home/ekkart/develop/java/shared-projects/Data/Ai"
             };

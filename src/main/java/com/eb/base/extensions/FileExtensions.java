@@ -122,7 +122,7 @@ public class FileExtensions {
 
     public static String ebFullFileNameInDirectory(String str, String dirName) {
         if (dirName == null || dirName.isEmpty()) return ebLocalFileName(str);
-        return dirName + FILE_SEPARATOR + str;
+        return (dirName + FILE_SEPARATOR + str).replace("/", File.separator).replace("\\", File.separator);
     }
 
     /**
