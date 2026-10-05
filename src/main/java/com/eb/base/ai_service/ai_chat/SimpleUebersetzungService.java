@@ -16,7 +16,7 @@ public class SimpleUebersetzungService {
                 adamı olacağını aynı anda sorunsuzca düşleyebilir) aklımın iki ayrı köşesinde koruyabilme yeteneğini yaşım ilerledikçe kaybetmem, beni yavaş yavaş, hüzünlü bir kişiye çeviriyordu.
                 """;
         String[] modelAuswahl = new String[]{"qwen3.5:4b", "qwen3.5:9b", "qwen3.5:35b", "qwen3-vl:30b", "gpt-5.6-sol","claude-haiku-4-5"};
-        int modelNr = 5;
+        int modelNr = 1;
         String result2 = service.getUebersetzungen(text, "Türkisch", modelAuswahl[modelNr]);
         System.out.println(result2);
     }
