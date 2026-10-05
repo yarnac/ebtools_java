@@ -1,5 +1,7 @@
 package com.eb.apps.ebchatclient.app;
 
+import com.eb.apps.ebchatclient.codegen.AiCodeGeneratorCtrl;
+import com.eb.apps.ebchatclient.domain.chat.GlobaleEinstellungen;
 import com.eb.apps.ebchatclient.domain.context.app.ContextEditDlg;
 import com.eb.apps.ebchatclient.domain.context.domain.ContextManager;
 import com.eb.base.ai_service.llm_client.api.LlmRequest;
@@ -8,7 +10,6 @@ import com.eb.base.ai_service.llm_client.api.LlmRequestService;
 import com.eb.base.ai_service.llm_client.api.LlmResponse;
 import com.eb.base.ai_service.llm_client.infrastructure.LlmModel;
 import com.eb.base.ai_service.llm_client.infrastructure.LlmModelProvider;
-import com.eb.base.extensions.StringExtensions;
 import com.eb.base.gui.GuiDecorator;
 import com.eb.base.gui.IC;
 import com.eb.base.gui.ICF;
@@ -46,6 +47,20 @@ public class AiPlaygroundCtrl {
     private static final ExecutorService executor = Executors.newFixedThreadPool(4);
 
     AiPlaygroundCtrl() {
+
+
+        try {
+            if (!GlobaleEinstellungen.isWindows()) {
+                System.out.println(UIManager.getLookAndFeel());
+                System.out.println(UIManager.getLookAndFeel().getClass().getName());
+                UIManager.setLookAndFeel(
+                        UIManager.getCrossPlatformLookAndFeelClassName()
+                );
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+
 
         IniFile iniFile = IniFileProvider.createIniFile("JavaAiPlaygroundCtrl.ini");
         window = new AiPlaygroundWindow(iniFile);
@@ -146,6 +161,8 @@ public class AiPlaygroundCtrl {
     private void sendRequest(boolean append) {
 
         String inputString = window.getInputString();
+        if (!validateInput(inputString))
+            return;
 
         List<String> imageFileNames = new ArrayList<>();
 
@@ -176,13 +193,41 @@ public class AiPlaygroundCtrl {
         sendRequestAndHandleResponseWithNewTaskAndProgressBarAnimation(actLlmRequest);
     }
 
+    private boolean validateInput(String inputString) {
+        String fehlerMessage = null;
+        if (inputString.isEmpty()) {
+            fehlerMessage = "Kein Prompt";
+
+        }
+        else {
+            int startSystem = inputString.indexOf("<<");;
+            if (startSystem >= 0) {
+                int endSystem = inputString.indexOf(">>");;
+                if (endSystem < startSystem) {
+                    fehlerMessage = "System Message nicht abgeschlossen. '>>' fehlt!";
+                }
+            }
+        }
+        if (fehlerMessage != null) {
+            JOptionPane.showMessageDialog(window, fehlerMessage, "Kein gültiger Prompt", JOptionPane.ERROR_MESSAGE);
+            return false;
+        }
+        return true;
+    }
+
     private void sendRequestAndHandleResponseWithNewTaskAndProgressBarAnimation(LlmRequest llmRequest) {
         // 1. UI-Status setzen (Wird vom EDT ausgeführt, blockiert also nicht durch die Logik)
         SwingUtilities.invokeLater(() -> {
+            // progressBar.setUI(new BasicProgressBarUI());
             progressBar.setIndeterminate(true);
             window.getTextPaneOutput().setText("Waiting for request answer");
-            // Optional: Input deaktivieren
-            // window.setInOutEnabled(false);
+
+            progressBar.revalidate();
+            progressBar.repaint();
+
+            // Optional: Auch das Fenster erzwingen zu repainted, falls die Progressbar in einer komplexeren Struktur liegt
+            window.revalidate();
+            window.repaint();
         });
 
         // 2. Request im Hintergrund-Thread ausführen (Blockiert nicht die UI)

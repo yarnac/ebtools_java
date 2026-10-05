@@ -11,6 +11,7 @@ public class EbGridBagUtil {
 
     public EbGridBagUtil(Container container, int row) {
         currentContainer = container;
+        currentContainer.setLayout(new GridBagLayout());
         currentRow = row;
     }
 

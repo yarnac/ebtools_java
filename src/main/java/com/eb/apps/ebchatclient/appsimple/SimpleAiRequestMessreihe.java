@@ -1,12 +1,9 @@
-package com.eb.apps.ebchatclient.app;
+package com.eb.apps.ebchatclient.appsimple;
 
 import com.eb.base.ai_service.llm_client.api.LlmRequestService;
 import com.eb.base.ai_service.llm_client.api.LlmResponse;
 import com.eb.base.ai_service.llm_client.infrastructure.ollama.OllamaClient;
-import com.eb.base.gui.PitMessageBox;
 import com.eb.base.io.FileUtil;
-
-import java.awt.*;
 
 public class SimpleAiRequestMessreihe {
     public static void main(String[] args) {

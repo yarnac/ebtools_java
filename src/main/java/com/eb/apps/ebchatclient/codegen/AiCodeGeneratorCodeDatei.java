@@ -1,4 +1,4 @@
-package com.eb.apps.ebchatclient.app;
+package com.eb.apps.ebchatclient.codegen;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;

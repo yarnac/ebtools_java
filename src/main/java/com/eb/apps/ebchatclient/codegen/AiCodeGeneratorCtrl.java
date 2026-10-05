@@ -1,4 +1,4 @@
-package com.eb.apps.ebchatclient.app;
+package com.eb.apps.ebchatclient.codegen;
 
 import com.eb.base.gui.GuiDecorator;
 import com.eb.base.gui.ICF;

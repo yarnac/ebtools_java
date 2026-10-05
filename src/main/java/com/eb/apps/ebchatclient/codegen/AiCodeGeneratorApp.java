@@ -1,6 +1,4 @@
-package com.eb.apps.ebchatclient.app;
-
-import javax.swing.*;
+package com.eb.apps.ebchatclient.codegen;
 
 public class AiCodeGeneratorApp {
 

@@ -1,4 +1,4 @@
-package com.eb.apps.ebchatclient.app;
+package com.eb.apps.ebchatclient.appsimple;
 
 import com.eb.base.ai_service.llm_client.api.LlmRequest;
 import com.eb.base.ai_service.llm_client.api.LlmRequestService;

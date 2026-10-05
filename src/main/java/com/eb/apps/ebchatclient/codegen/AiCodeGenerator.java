@@ -1,7 +1,6 @@
-package com.eb.apps.ebchatclient.app;
+package com.eb.apps.ebchatclient.codegen;
 
 import com.eb.base.extensions.FileExtensions;
-import com.eb.base.extensions.StringExtensions;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;

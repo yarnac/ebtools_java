@@ -33,6 +33,16 @@ public class EbSplitPanel {
         outerPanel1 = new JPanel();
         outerPanel2 = new JPanel();
         outerPanel1.setLayout(new BorderLayout());
+
+        outerPanel1.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createEmptyBorder(5, 5, 5, 5), // Oben, Links, Unten, Rechts
+                BorderFactory.createLineBorder(Color.BLACK, 1)
+        ));
+        outerPanel2.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createEmptyBorder(5, 5, 5, 5), // Oben, Links, Unten, Rechts
+                BorderFactory.createLineBorder(Color.BLACK, 1)
+        ));
+
         outerPanel1.setLayout(new BorderLayout());
         outerPanel2.setLayout(new BorderLayout());
         outerPanel2.setLayout(new BorderLayout());
