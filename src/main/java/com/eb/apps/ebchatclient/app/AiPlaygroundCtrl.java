@@ -10,6 +10,7 @@ import com.eb.base.ai_service.llm_client.api.LlmRequestService;
 import com.eb.base.ai_service.llm_client.api.LlmResponse;
 import com.eb.base.ai_service.llm_client.infrastructure.LlmModel;
 import com.eb.base.ai_service.llm_client.infrastructure.LlmModelProvider;
+import com.eb.base.ai_service.llmreqstore.LlmRequestManager;
 import com.eb.base.gui.GuiDecorator;
 import com.eb.base.gui.IC;
 import com.eb.base.gui.ICF;
@@ -43,6 +44,7 @@ public class AiPlaygroundCtrl {
     private GuiDecorator decorator;
     private ContextEditDlg contextEditDlg;
     private LlmRequest actLlmRequest;
+    private LlmRequestManager llmRequestManager;
 
     private static final ExecutorService executor = Executors.newFixedThreadPool(4);
 
@@ -79,6 +81,8 @@ public class AiPlaygroundCtrl {
         persister.loadAndSetComponentItems();
         decorator.addCloseAction(persister::persistComponentItems);
 
+        llmRequestManager = new LlmRequestManager();
+
 
         // ✅ Empfehlung der AI qwen3.5:9
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
@@ -99,6 +103,7 @@ public class AiPlaygroundCtrl {
 
         decorator.setCurrentMenu("Datei");
         decorator.addMenuItem("RUN",()->sendRequest(false), KeyEvent.VK_F5,0);
+        decorator.addMenuItem("Speichern",()->speichereRequest(), KeyEvent.VK_S,7);
         decorator.addOpenFileToolbarButton(tbName, "OpenAI Kosten", ICF.Monitor_Info, "https://platform.openai.com/home");
         decorator.addOpenFileToolbarButton(tbName, "Anthropic Kosten", ICF.Monitor_Properties, "https://platform.claude.com/dashboard");
 
@@ -122,6 +127,17 @@ public class AiPlaygroundCtrl {
         cbContexts.setPreferredSize(new Dimension(20, height));
 
         progressBar = decorator.addToolbarProgressBar(tbName,"Huhu");
+    }
+
+    private void speichereRequest() {
+        if (actLlmRequest == null) {
+            return;
+        }
+
+        if (llmRequestManager==null) {
+            llmRequestManager = new LlmRequestManager();
+        }
+        llmRequestManager.store(actLlmRequest);
     }
 
     private void openContextEditor(ActionEvent actionEvent) {

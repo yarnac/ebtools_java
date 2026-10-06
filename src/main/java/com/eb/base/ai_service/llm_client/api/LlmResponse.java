@@ -1,6 +1,7 @@
 package com.eb.base.ai_service.llm_client.api;
 
 import com.eb.base.ai_service.llm_client.infrastructure.ollama.OllamaClient;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -16,9 +17,23 @@ public class LlmResponse {
     private int inputTokens;
     private int outputTokens;
     private int totalTokens;
+    @JsonIgnore
     private LlmRequest request;
     private double secondsToRun;
     private double tokensPerSecond;
+
+    @JsonIgnore
+    public LlmMessageInfo getMessageInfo()
+    {
+        LlmMessageInfo result = new LlmMessageInfo();
+        result.setModel(model);
+        result.setInputTokens(inputTokens);
+        result.setOutputTokens(outputTokens);
+        result.setTotalTokens(totalTokens);
+        result.setSecondsToRun(secondsToRun);
+        result.setTokensPerSecond(tokensPerSecond);
+        return result;
+    }
 
     public void calcTokens()
     {
@@ -28,6 +43,7 @@ public class LlmResponse {
             tokensPerSecond = (double) totalTokens / (double) secondsToRun;
     }
 
+    @JsonIgnore
     public String getAnswerWithDetails() {
         StringBuilder strb = new StringBuilder();
         strb.append("Modell               %s\n".formatted(model));
@@ -41,6 +57,7 @@ public class LlmResponse {
         return res;
     }
 
+    @JsonIgnore
     public String getDetails() {
 
         StringBuilder strb = new StringBuilder();

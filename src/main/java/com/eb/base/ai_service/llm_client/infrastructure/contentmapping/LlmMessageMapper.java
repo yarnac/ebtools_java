@@ -17,7 +17,7 @@ public class LlmMessageMapper {
     public LlmMessageRaw getRawMessage(LlmMessage llmMessage) {
         LlmMessageRaw message = new LlmMessageRaw(llmMessage.getRole());
         for (ContentPart contentPart : llmMessage.getContentParts()) {
-            message.addContentPartMap(contentPartToMapMapper.map(contentPart));
+            message.addContentPartMap(contentPartToMapMapper.map(llmMessage.getRole(), contentPart));
         }
         return message;
     }

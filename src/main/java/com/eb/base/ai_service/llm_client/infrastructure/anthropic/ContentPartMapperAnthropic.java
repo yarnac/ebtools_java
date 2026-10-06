@@ -13,7 +13,7 @@ import java.util.Map;
 public class ContentPartMapperAnthropic implements ContentPartToMapMapper {
 
     @Override
-    public Map<String, Object> map(ContentPart part) {
+    public Map<String, Object> map(String role, ContentPart part) {
         return switch (part) {
             case ContentPartText text -> Map.of(
                     "type", "text",

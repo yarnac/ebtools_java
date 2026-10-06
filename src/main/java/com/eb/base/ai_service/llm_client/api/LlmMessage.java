@@ -1,8 +1,6 @@
 package com.eb.base.ai_service.llm_client.api;
 
-import com.eb.base.ai_service.llm_client.infrastructure.contentmapping.ContentPart;
-import com.eb.base.ai_service.llm_client.infrastructure.contentmapping.ContentPartImage;
-import com.eb.base.ai_service.llm_client.infrastructure.contentmapping.ContentPartText;
+import com.eb.base.ai_service.llm_client.infrastructure.contentmapping.*;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
@@ -20,11 +18,19 @@ import java.util.List;
 @Setter
 public class LlmMessage {
 
+    public LlmMessage()
+    {
+
+    }
+
     @JsonProperty("role")
     private String role; // z.B. "user", "system", "assistant"
 
     @JsonProperty("content")
     private List<ContentPart> contentParts = new ArrayList<>();
+
+    @JsonProperty("info")
+    private LlmMessageInfo messageInfo;
 
     @JsonIgnore
     List<String> imageFileNames = new ArrayList<>();

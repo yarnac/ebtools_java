@@ -11,10 +11,11 @@ public class ContentPartMapperOpenAi
         implements ContentPartToMapMapper {
 
     @Override
-    public Map<String, Object> map(ContentPart part) {
+    public Map<String, Object> map(String role, ContentPart part) {
+        String textName = "assistant".equals(role) ? "output_text" : "input_text";
         return switch (part) {
             case ContentPartText text -> Map.of(
-                    "type", "input_text",
+                    "type", textName,
                     "text", text.text()
             );
 

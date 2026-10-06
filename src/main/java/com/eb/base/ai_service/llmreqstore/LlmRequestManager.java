@@ -3,6 +3,7 @@ package com.eb.base.ai_service.llmreqstore;
 import com.eb.apps.ebchatclient.domain.chat.AiChatMessage;
 import com.eb.apps.ebchatclient.domain.chat.AiEinstellungen;
 import com.eb.base.ai_service.llm_client.api.LlmRequest;
+import com.eb.base.ai_service.llm_client.api.LlmResponse;
 import com.eb.base.extensions.FileExtensions;
 import com.eb.base.io.FileUtil;
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -44,14 +45,6 @@ public class LlmRequestManager {
             storeNewRequest(request);
             return;
         }
-        if (llmRequestStoreItem.getLlmRequest()==request)
-        {
-            llmRequestStoreItem.setLlmResponse(request.getLastResponse());
-        }
-        else
-        {
-            // Combine new and old Requests
-        }
         storeRequestStoreItem(llmRequestStoreItem);
     }
 
@@ -65,9 +58,8 @@ public class LlmRequestManager {
     private void storeNewRequest(LlmRequest request) {
         LlmRequestStoreItem llmRequestStoreItem = new LlmRequestStoreItem();
         request.setRequestId(new Date().getTime());
+        llmRequestStoreItem.setRequestId(request.getRequestId());
         llmRequestStoreItem.setLlmRequest(request);
-        llmRequestStoreItem.setLlmResponse(request.getLastResponse());
-
         storeRequestStoreItem(llmRequestStoreItem);
 
         llmRequestStoreItemList.add(llmRequestStoreItem);
@@ -76,6 +68,7 @@ public class LlmRequestManager {
 
     private void storeRequestStoreItem(LlmRequestStoreItem llmRequestStoreItem) {
         String storeFileName = "Request_" + llmRequestStoreItem.getLlmRequest().getRequestId() + ".json";
+        llmRequestStoreItem.setRequestId(llmRequestStoreItem.getLlmRequest().getRequestId());
         String storeFilePathName = FileExtensions.ebFileNameInDirectory(storeFileName, GetRequestsOrdner());
 
         try {

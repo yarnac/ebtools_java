@@ -17,6 +17,8 @@ public class LlmRequest {
     List<LlmMessage> messages;
     List<Parameter> parameters;
 
+    public LlmRequest() {}
+
     @JsonIgnore()
     private LlmResponse lastResponse;
 
@@ -71,6 +73,8 @@ public class LlmRequest {
 
     public void addResponse(LlmResponse response) {
         lastResponse = response;
-        getMessages().add(new LlmMessage("assistant", response.getAnswer()));
+        LlmMessage message = new LlmMessage("assistant", response.getAnswer());
+        message.setMessageInfo(response.getMessageInfo());
+        getMessages().add(message);
     }
 }

@@ -194,14 +194,6 @@ public class AiPlaygroundWindow extends JFrame {
         JMenuBar menuBar = new JMenuBar();
         JMenu fileMenu = new JMenu("Datei");
 
-        JMenuItem saveMenuItem = new JMenuItem("Speichern");
-        saveMenuItem.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                saveFile();
-            }
-        });
-        fileMenu.add(saveMenuItem);
         menuBar.add(fileMenu);
         setJMenuBar(menuBar);
     }
@@ -233,23 +225,4 @@ public class AiPlaygroundWindow extends JFrame {
         splitPanelMain.getToolBar2().setVisible(false);
 
     }
-
-    private void saveFile() {
-        JFileChooser fileChooser = new JFileChooser();
-        int returnValue = fileChooser.showSaveDialog(this);
-
-        if (returnValue == JFileChooser.APPROVE_OPTION) {
-            java.io.File selectedFile = fileChooser.getSelectedFile();
-            try {
-                java.io.FileWriter fileWriter = new java.io.FileWriter(selectedFile);
-                fileWriter.write(textPane1.getText());
-                fileWriter.close();
-                JOptionPane.showMessageDialog(this, "Datei gespeichert: " + selectedFile.getCanonicalPath());
-            } catch (Exception ex) {
-                JOptionPane.showMessageDialog(this, "Fehler beim Speichern der Datei: " + ex.getMessage(), "Fehler", JOptionPane.ERROR_MESSAGE);
-            }
-        }
-    }
-
-
 }

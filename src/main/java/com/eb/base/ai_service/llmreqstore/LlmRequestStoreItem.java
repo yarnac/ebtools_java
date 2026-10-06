@@ -9,8 +9,10 @@ import lombok.Setter;
 public class LlmRequestStoreItem {
     private long requestId;
     private LlmRequest llmRequest;
-    private LlmResponse llmResponse;
     private String title;
     private String description;
 
+    public LlmRequestStoreItem() {
+
+    };
 }
