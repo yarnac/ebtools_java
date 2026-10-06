@@ -4,6 +4,7 @@ import com.eb.base.ai_service.llm_client.api.*;
 import com.eb.base.ai_service.llm_client.infrastructure.ILlmClient;
 import com.eb.base.ai_service.llm_client.infrastructure.TokenLogger;
 import com.eb.base.ai_service.llm_client.infrastructure.contentmapping.LlmRequestJsonMapper;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.IOException;
@@ -12,6 +13,8 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.time.Duration;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 
@@ -123,5 +126,49 @@ public class OllamaClient implements ILlmClient {
     private final HttpClient httpClient;
     public OllamaClient(HttpClient newHttpClient) {
         httpClient = newHttpClient;
+    }
+
+    public List<String> getAvailableModels() {
+        try {
+            if (HOST==null)
+                HOST = determineHost();
+
+            HttpClient client = HttpClient.newBuilder()
+                    .connectTimeout(Duration.ofSeconds(10))
+                    .build();
+
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create("http://%s:%d/api/tags".formatted(HOST, 11434)))
+                    .timeout(Duration.ofSeconds(30))
+                    .GET()
+                    .build();
+
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+
+            if (response.statusCode() == 200) {
+                ObjectMapper objectMapper = new ObjectMapper();
+                JsonNode rootNode = objectMapper.readTree(response.body());
+                JsonNode modelsNode = rootNode.get("models");
+
+                List<String> modelNames = new ArrayList<>();
+                if (modelsNode != null && modelsNode.isArray()) {
+                    for (JsonNode modelNode : modelsNode) {
+                        JsonNode nameNode = modelNode.get("name");
+                        if (nameNode != null && !nameNode.asText().isEmpty()) {
+                            modelNames.add(nameNode.asText());
+                        }
+                    }
+                }
+
+                return modelNames;
+            } else {
+                System.err.println("Failed to fetch models. Status code: " + response.statusCode());
+                return new ArrayList<>();
+            }
+        } catch (IOException | InterruptedException e) {
+            System.err.println("Error while fetching available models: " + e.getMessage());
+            e.printStackTrace();
+            return new ArrayList<>();
+        }
     }
 }

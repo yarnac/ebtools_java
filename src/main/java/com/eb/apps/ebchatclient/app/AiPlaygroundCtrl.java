@@ -10,6 +10,7 @@ import com.eb.base.ai_service.llm_client.api.LlmRequestService;
 import com.eb.base.ai_service.llm_client.api.LlmResponse;
 import com.eb.base.ai_service.llm_client.infrastructure.LlmModel;
 import com.eb.base.ai_service.llm_client.infrastructure.LlmModelProvider;
+import com.eb.base.ai_service.llm_client.infrastructure.ollama.OllamaClient;
 import com.eb.base.ai_service.llmreqstore.LlmRequestManager;
 import com.eb.base.gui.GuiDecorator;
 import com.eb.base.gui.IC;
@@ -28,6 +29,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
+import java.net.http.HttpClient;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -109,6 +111,7 @@ public class AiPlaygroundCtrl {
 
         decorator.addToolbarButton(tbName,"Run", IC.PLAY, (s) -> sendRequest(false));
         decorator.addToolbarButton(tbName,"Run again", IC.MB_PLAY,  (s) -> sendRequest(true));
+        decorator.addToolbarButton(tbName,"Get Ollama Models", ICF.Help,  (s) -> showOllamaModelsFromClient());
         decorator.addToolbarButton(tbName,"Open append file window", ICF.BulletList, this::actionPerformed);
         decorator.addToolbarButton(tbName, "Kontexte", ICF.LinePoints_Add, this::openContextEditor);
         decorator.addToolbarButton(tbName, "Dummy", ICF.MaleHardHat_Lock, (s)->{});
@@ -127,6 +130,32 @@ public class AiPlaygroundCtrl {
         cbContexts.setPreferredSize(new Dimension(20, height));
 
         progressBar = decorator.addToolbarProgressBar(tbName,"Huhu");
+    }
+
+    private void showOllamaModelsFromClient() {
+
+        setWaitingModus();
+
+        // 2. Request im Hintergrund-Thread ausführen (Blockiert nicht die UI)
+        executor.execute(() -> {
+            try {
+                String msg = getOllamaModelsString();
+                SetResult(msg);
+
+            } catch (Exception e) {
+                HandleException(e);
+            }
+        });
+    }
+
+    private String getOllamaModelsString() {
+        OllamaClient client = new OllamaClient(HttpClient.newHttpClient());
+        List<String> models = client.getAvailableModels();
+        StringBuilder strb = new StringBuilder();
+        for (String model : models) {
+            strb.append("ollama\t%s\t0,0\t0,0\t1\n".formatted(model));
+        }
+        return strb.toString();
     }
 
     private void speichereRequest() {
@@ -232,47 +261,51 @@ public class AiPlaygroundCtrl {
     }
 
     private void sendRequestAndHandleResponseWithNewTaskAndProgressBarAnimation(LlmRequest llmRequest) {
-        // 1. UI-Status setzen (Wird vom EDT ausgeführt, blockiert also nicht durch die Logik)
-        SwingUtilities.invokeLater(() -> {
-            // progressBar.setUI(new BasicProgressBarUI());
-            progressBar.setIndeterminate(true);
-            window.getTextPaneOutput().setText("Waiting for request answer");
 
-            progressBar.revalidate();
-            progressBar.repaint();
-
-            // Optional: Auch das Fenster erzwingen zu repainted, falls die Progressbar in einer komplexeren Struktur liegt
-            window.revalidate();
-            window.repaint();
-        });
+        setWaitingModus();
 
         // 2. Request im Hintergrund-Thread ausführen (Blockiert nicht die UI)
         executor.execute(() -> {
             try {
                 LlmResponse result = LlmRequestService.sendRequest(llmRequest);
-
-                // 3. Erfolg: UI-Ergebnis setzen (Wieder zurück auf den EDT via invokeLater)
-                SwingUtilities.invokeLater(() -> {
-                    window.setOutputText(result.getAnswerWithDetails());
-                    if(window.getTextPaneAdapterOutput() != null) {
-                        window.getTextPaneAdapterOutput().setFirstVisibleLine(0);
-                    }
-                    progressBar.setIndeterminate(false);
-                    System.out.println("\nFertig!");
-                });
+                String resultMessage = result.getAnswerWithDetails();
+                SetResult(resultMessage);
 
             } catch (Exception e) {
-                // 4. Fehler: UI-Fehlermeldung setzen (Wieder zurück auf den EDT via invokeLater)
-                SwingUtilities.invokeLater(() -> {
-                    window.setOutputText("Error: " + e.getMessage());
-                    progressBar.setIndeterminate(false);
-                    System.out.println("\nFertig!");
-                });
+                HandleException(e);
             }
         });
     }
 
+    private void HandleException(Exception e) {
+        // 4. Fehler: UI-Fehlermeldung setzen (Wieder zurück auf den EDT via invokeLater)
+        SwingUtilities.invokeLater(() -> {
+            window.setOutputText("Error: " + e.getMessage());
+            progressBar.setIndeterminate(false);
+            System.out.println("\nFertig!");
+        });
+    }
 
+    private void SetResult(String result) {
+        // 3. Erfolg: UI-Ergebnis setzen (Wieder zurück auf den EDT via invokeLater)
+        SwingUtilities.invokeLater(() -> {
+            window.setOutputText(result);
+            if(window.getTextPaneAdapterOutput() != null) {
+                window.getTextPaneAdapterOutput().setFirstVisibleLine(0);
+            }
+            progressBar.setIndeterminate(false);
+            System.out.println("\nFertig!");
+        });
+    }
+
+    private void setWaitingModus() {
+        // 1. UI-Status setzen (Wird vom EDT ausgeführt, blockiert also nicht durch die Logik)
+        SwingUtilities.invokeLater(() -> {
+            // progressBar.setUI(new BasicProgressBarUI());
+            progressBar.setIndeterminate(true);
+            window.getTextPaneOutput().setText("Waiting for request answer");
+        });
+    }
 
 
     private void withProgressbarAnimationDo(Runnable runnable) {
