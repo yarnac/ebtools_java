@@ -1,5 +1,6 @@
 package com.eb.base.ai_service.llm_client.api;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 import lombok.Setter;
@@ -15,7 +16,13 @@ public class LlmRequest {
     private String model;
     List<LlmMessage> messages;
     List<Parameter> parameters;
+
+    @JsonIgnore()
     private LlmResponse lastResponse;
+
+    @JsonIgnore()
+    private Long requestId;
+
 
     public LlmRequest(String model, List<LlmMessage> messages) {
         Objects.requireNonNull(model);
