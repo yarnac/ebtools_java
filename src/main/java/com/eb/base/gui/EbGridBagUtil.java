@@ -1,6 +1,6 @@
 package com.eb.base.gui;
 
-import com.eb.apps.ebchatclient.domain.context.gui.ContextEditorPanel;
+import com.eb.apps.ebchat_client.domain.context.gui.ContextEditorPanel;
 
 import javax.swing.*;
 import java.awt.*;

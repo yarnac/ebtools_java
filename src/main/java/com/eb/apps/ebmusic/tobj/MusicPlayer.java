@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
-import com.eb.apps.ebchatclient.domain.chat.GlobaleEinstellungen;
+import com.eb.apps.ebchat_client.domain.chat.GlobaleEinstellungen;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
 

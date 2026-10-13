@@ -1,7 +1,7 @@
 package com.eb.base.extensions;
 
 import com.eb.base.Logger;
-import com.eb.apps.ebchatclient.domain.chat.GlobaleEinstellungen;
+import com.eb.apps.ebchat_client.domain.chat.GlobaleEinstellungen;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;

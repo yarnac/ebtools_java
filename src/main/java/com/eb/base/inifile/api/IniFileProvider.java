@@ -2,7 +2,7 @@ package com.eb.base.inifile.api;
 
 import com.eb.base.extensions.FileExtensions;
 import com.eb.base.inifile.implementation.IFFactory;
-import com.eb.apps.ebchatclient.domain.chat.GlobaleEinstellungen;
+import com.eb.apps.ebchat_client.domain.chat.GlobaleEinstellungen;
 
 public class IniFileProvider {
 

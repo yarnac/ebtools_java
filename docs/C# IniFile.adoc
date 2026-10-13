@@ -1,0 +1,327 @@
+## ✅ 1. AsciiDoc-Dokumentation der Klassen
+
+
+=== `PitLibrary.file` – INI-Datei-Verwaltung
+
+==== `IIniFileObj`
+
+Eine leere Schnittstelle (`interface`).
+→ *Aktueller Stand:* Unnötig, da sie keine Member definiert.
+
+#### Empfehlung
+- ❌ *Entfernen*, oder
+- ✅ *Mit `Clone()` ergänzen*, falls `T` klonbar sein soll (s. `IniFileSection.GetClone()`)
+
+---
+
+#### `IniFile`
+
+Zentrale Klasse für das Lesen, Schreiben, Verwalten von INI-Dateien.
+
+
+##### Konstruktoren
+|===
+| Konstruktor | Beschreibung |
+|-------------|--------------|
+| `IniFile(string fileName, MODUS m)` | Liest die Datei (nur `MODUS.READ` unterstützt). Bei `NOREAD` wird leer initialisiert. |
+| `IniFile(string fileName)` | Identisch mit `new IniFile(fileName, MODUS.READ)`. |
+| `IniFile(string fileName, bool b)` | Setzt `IsDBCallDataEnabled`. |
+| `IniFile(string fileName, string schwacherSchlüssel)` | VerschlüsselteINI mit `Passwort`. |
+| `IniFile()` | Default (Name = *undefiniert*). |
+| `CreateLazyLoadedIniFile(string fileName)` | Statischer Factory-Methode für verzögertes Laden. |
+|===
+
+##### Hauptfunktionen
+|===
+| Funktion | Beschreibung |
+|---------|--------------|
+| `Read(string fileName, Encoding encoding)` | Liest INI-Datei in `List<IniFileSection>`. |
+| `Write(string fileName, Encoding encoding)` | Schreibt INI-Datei (inkl. Backup). |
+| `GetSection(string sectionName, bool create = false)` | Holt oder erzeugt einen Abschnitt. |
+| `GetSectionValue(...)` | Holt einen Wert (auch *entschlüsselt*). |
+| `SetSectionValue(...)` | Schreibt einen Wert, markiert `Modified`. |
+| `TransferIniToObject<T>(string section)` / `TransferObjectToIni(...)` | Mapped INI ↔ Objekt (mittels `IniFileHelper`). |
+| `SearchSectionData(...)` | Sucht DB-bezogene Abschnitte. |
+|===
+
+##### Status & Metainformation
+| Property | Typ | Bedeutung |
+|---------|-----|-----------|
+| `IsValid` | `bool` | Gibt an, ob Lesen erfolgreich war. |
+| `IsModified` (field `_modified`) | `bool` | Status für Änderungen. |
+| `FileName` | `string` | Pfad zur INI-Datei. |
+| `Passwort` | `string?` | Schlüssel für AES-Verschlüsselung. |
+| `IsDBCallDataEnabled` | `bool` | Steuert DB-Daten-Extraktion. |
+
+##### Wichtige Features
+- **Kommentare** ganz oben in der Datei werden in `_kommentar` gespeichert.
+- **Backup** wird bei `Write()` automatisch erstellt (`BackupFile(..., 2)`).
+- **Umlaute-Ersatz** (`EbReplaceUmlaute()`) bei fehlender Datei.
+- **Verzeichnis-Pfadsuche**: `IniFilePath = directory`.
+→ Ein *Global State* (→ *problematisch bei Parallelität*).
+
+---
+
+#### `IniFileSection`
+
+Repräsentiert einen `[Abschnitt]` in der INI-Datei.
+
+##### Hauptfield
+| Field | Type | Bemerkung |
+|------|------|-----------|
+| `Name` | `string` | z. B. `"[Datenbank]"`. |
+| `_values` | `List<string>` | `["DB=ORA", "User=..."]`. |
+| `IsDbCallDataEnabled` | `bool` | Steuert DB-Daten-Extraktion. |
+
+##### Wichtige Methoden
+| Methode | Beschreibung |
+|--------|--------------|
+| `GetValue(string name, string default)` | Holt Wert (auch mit `@`-Präfix). |
+| `SetValue(string name, string value)` | Setzt Wert, gibt `bool written` zurück. |
+| `GetValues(params string[] filter)` | Holt alle Werte (exkl. DB-interne Filterung). |
+| `GetClone()` | Erstellt Kopie (inkl. `*** Kopie von` im Name). |
+| `GetSectionData(bool create)` | Wandelt DB-Daten aus `SectionData=...` in `DBCallData`. |
+| `RemoveEmptyEndlines()` | Entfernt leere Zeilen am Ende. |
+
+##### DB-Extraktion
+- Wenn `IsDbCallDataEnabled && Name.Contains("datenbank")`, extrahiert `SectionData=` → `DBCallData`.
+- Anzeige von DB-Daten wird über `ToStringImplementation()` steuert.
+
+---
+
+#### `IniFileHelper`
+
+Hilfsklasse zur *Objekt-Serialisierung* mit Reflection.
+
+| Methode | Beschreibung |
+|--------|--------------|
+| `ReadFromIniFile(Object obj)` | Füllt alle public Properties aus INI. |
+| `WriteToIniFile(Object obj)` | Schreibt alle public Properties in INI. |
+| `AddProperty(Type, section, name, default)` | Registriert Property zur Übertragung. |
+| `TransferIniToObject(...)` | Statische Convenience-Methode. |
+
+- Verwendet `IniFileObjAttribute` zur Steuerung (`Ignore`, `String`, `StringList`).
+- `List<string>` werden per `#` getrennt gespeichert.
+
+---
+
+#### `IniFileObjAttribute`
+
+Attribute für Properties, um Verhalten in `IniFileHelper` zu steuern.
+
+| Modus | Bedeutung |
+|-------|-----------|
+| `Ignore` (`-1`) | Überspringe Property. |
+| `String` (`100`) | Normaler String. |
+| `StringList` (`101`) | `#`-getrennte Liste. |
+
+→ *Nicht genutzt im Code, nur in `IniFileHelper` implementiert.*
+
+---
+
+#### `IniSerializer<T>`
+
+Leicht unvollständige Serialisierungsklasse (nur `Serialize`, keine `Deserialize`).
+→ *Scheint veraltet / unbenutzt zu sein.*
+
+---
+
+#### `IniFileEinstellung`
+
+Stellt einfache, registrierte Konfigurationswerte zur Verfügung.
+
+| Property | Description |
+|----------|-------------|
+| `Section` | INI-Abschnitt. |
+| `Name` | Schlüsselname. |
+| `Default` | Default-Wert. |
+| `WriteIfAbsent` | Schreibe beim Lesen, wenn nicht vorhanden. |
+
+→ *Nur als `Einstellungen: List<IniFileEinstellung>` static verwaltet.*
+
+---
+
+## ✅ 2. Klassenbeurteilung (Clean Code, Sicherheit, Korrektheit)
+
+### 🔴 Kritische Probleme
+
+#### 1. **Undefiniertes Verhalten bei Parallelität**
+- `IniFilePath = directory` ist ein **globales statisches Feld**.
+- *Problem*: Wenn zwei `IniFile`-Instanzen parallel laufen, kann es zu Race Conditions kommen.
+- *Lösung*: Entferne das statische Feld oder mache es thread-lokal.
+
+```csharp
+// ❌ Aktueller Stand
+public static string IniFilePath = ".\\";
+```
+
+```csharp
+// ✅ Vorschlag
+private string _iniDirectory;
+public string IniDirectory => Path.GetDirectoryName(_fileName);
+```
+
+---
+
+#### 2. **Fehlende Validierung & Null-Reference-Risiken**
+- `int.Parse(...)` in `GetSectionValueAsInt(...)` wirft `FormatException`.
+- `double.Parse(...)` in `GetSectionValueAsDouble(...)` wirft同样.
+- `File.Exists()` prüft nur auf `null`/leer, nicht auf `..\\..\path`.
+
+```csharp
+// ❌ current
+public int GetSectionValueAsInt(string sectionName, string valueName, int defaultValue)
+{
+    string str = GetSectionValue(sectionName, valueName, defaultValue.ToString());
+    return int.Parse(str); // ⚠️ Crashes bei ungültigem Wert
+}
+```
+
+```csharp
+// ✅ safe
+public int GetSectionValueAsInt(string sectionName, string valueName, int defaultValue)
+{
+    string val = GetSectionValue(sectionName, valueName, defaultValue.ToString());
+    return int.TryParse(val, out int result) ? result : defaultValue;
+}
+```
+
+---
+
+#### 3. **Sicherheitslücke: AES-Verschlüsselung fehlerhaft**
+- `CryptAES.EncryptString("Sb33924840", key)` wird **nicht** genutzt, um zu entschlüsseln.
+- `DecryptString(text, key)` wird direkt aufgerufen → *möglicherweise falsch implementiert*.
+
+```csharp
+// ❌ in IniFileSection.GetSectionValueDecrypted()
+string textDecrypted = CryptAES.DecryptString(text, key); // Kein "Sb33924840"-Check
+```
+
+→ Sicherheitskritisch: Wenn `CryptAES` keine Authentifizierung (z. B. HMAC) hat, ist *Ciphertext* manipulierbar.
+
+---
+
+#### 4. **Unvollständige `Equals()`-Implementierung**
+- `IniFileSection.Equals()` vergleicht nur `_titel`, `_values`, `Name` – **nicht** `Line`, `Index`, `IsDbCallDataEnabled`.
+- `GetHashCode()` ignoriert `_titel`.
+
+```csharp
+public override int GetHashCode() =>
+    HashCode.Combine(_titel, _values, Name); // ✅ _titel wird berücksichtigt
+```
+→ *Problematisch, wenn `_values` sehr groß ist*, da `List<string>`-Hashing linear laufen muss.
+
+---
+
+#### 5. **Falsche List-Referenz in `RemoveSection`**
+```csharp
+public void RemoveSection(IniFileSection iniFileSection)
+{
+    int countBefore = _iniFileSections.Count;
+    _iniFileSections.Remove(iniFileSection);
+    int countAfter = _iniFileSections.Count;
+    if (countBefore <= countAfter)
+        this.ToString(); // ❌ Debug-Snippet!
+}
+```
+→ *Wahrscheinlich versehentlich übrig gebliebenes Debug-Statement.*
+
+---
+
+#### 6. **Logikfehler in `Rewrrite` (Tippfehler?)**
+```csharp
+public void Rewrrite(IniFileSection section1, string sectionName1, ...) {
+    string[] lines = Utils.ReadAllLines(FileName);
+    if (section1!=null)
+        lines[section1.Line-1] = sectionName1; // ⚠️ Line-based? Falsch bei eingefügten/entfernten Abschnitten!
+    ...
+}
+```
+→ *Nur sinnvoll bei exaktem Satz von Zeilen, nicht bei dynamischem Schreiben.*
+
+---
+
+### 🟡 Schwächen (Clean Code)
+
+#### 1. **Overload-Stau**
+- 7+ Konstruktoren mit `bool`/`string`-Parametern → schwer merkbar.
+- *Besser:* `IniFileBuilder` oder optionale Parameter (`MODUS? mode = null`).
+
+```csharp
+// ❌
+public IniFile(string newIniFileName, bool b)
+public IniFile(string newIniFileName, string schwacherSchlüssel)
+
+// ✅ Vorschlag
+public IniFile(string fileName, bool isDBEnabled = false, string? password = null)
+```
+
+---
+
+#### 2. **Mangelnde Trennung von Zustand und Logik**
+- `IniFile` hat zu viele stateful-*Accessor*-Methoden (z. B. `Rewrrite`, `SetKommandos`, `ReplacePathPlaceHolders`).
+- *Besser:* Separate *Reader*, *Writer*, *PathResolver*.
+
+---
+
+#### 3. **Unklare Konventionen**
+- Warum `@name=`? Warum `VAT-TITEL`? Kein Dokumentationskommentar.
+- `Eb...`-Prefix bei Utils (`EbReplaceUmlaute`, `EbFormat`) → nicht selbsterklärend.
+
+```csharp
+// ❌ unklar
+Name = "abc";
+
+// ✅ besser
+Name = "sectionName";
+```
+
+---
+
+#### 4. **Nameninkonsistenzen**
+- `IniFileObjAttribute.Ignore = -1` → `Ignore` ist `const int`, aber ` modus` ist `int` (nicht `readonly`).
+- `GetValue("SectionData", null)` vs `GetValue("SectionData")`.
+
+---
+
+### 🟢 Stärken
+
+- ✅ Backup-Logik (`Utils.FileUtil.BackupFile(fileName, 2)`) — sehr sauber.
+- ✅ Unterstützung für Umlaute (`EbReplaceUmlaute()`).
+- ✅ Trennung von DB-Extraktion (`DBCallData`) in `IniFileSection`.
+- ✅ `IniFileHelper` nutzt Reflection gut für einfaches Mapping.
+- ✅ `IsModified` vermeidet unnötiges Schreiben.
+
+---
+
+## ✅ 3. Empfehlungen als Action-List
+|===
+| Kategorie | Maßnahme | Priorität |
+|-----------|----------|-----------|
+| 🔒 Sicherheit | `GetSectionValueAsInt`/`double` mit `TryParse` | Hoch |
+| 🔒 Sicherheit | AES-Verschlüsselung prüfen + HMAC hinzufügen | Hoch |
+| 🧱 Stabilität | `IniFilePath` entfernen / ersetzen | Hoch |
+| 🧱 Stabilität | `Equals()`/`GetHashCode()` korrigieren | Mittel |
+| 🧼 CleanCode | `IniSerializer<T>` entfernen oder vervollständigen | Niedrig |
+| 🧼 CleanCode | `Rewrrite`/`RemoveSection`-Debug-Code entfernen | Mittel |
+| 🧼 CleanCode | `IIniFileObj` entfernen | Mittel |
+|===
+---
+
+## ✅ 4. Bonus: Modernisierungsvorschlag (.NET 9)
+
+```csharp
+// ✅ Aktualisierung: record structs für IniFileSection
+public record IniFileSection(string Name, List<string> Values, int Line);
+```
+
+→ **Vorteile**: Immutable by default, `Equals()`/`GetHashCode()` automatisch, `with`-Clause für Kopien.
+
+---
+
+### ✅ Fazit
+
+Die KLassen sind **funktional stark**, aber **nicht fit für produktiven Einsatz**, solange die kritischen Punkte (Sicherheit, Parallelität, `int.Parse`) nicht behoben werden.
+Die Architektur ist anfällig für Spätfolgen durch globale Zustände und fehlende Trennung der Verantwortlichkeiten.
+
+> **Empfehlung**: Refactoring in kleine, testbare Klassen (`IniReader`, `IniWriter`, `IniSection`) mit unit tests für `TryParse`, `Encrypt`, `Concurrency`.

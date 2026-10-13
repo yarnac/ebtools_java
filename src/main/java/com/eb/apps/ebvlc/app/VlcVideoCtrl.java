@@ -5,7 +5,7 @@ import com.eb.base.gui.IC;
 import com.eb.base.inifile.api.IniFile;
 import com.eb.base.inifile.api.IniFileProvider;
 import com.eb.base.io.FileUtil;
-import com.eb.apps.ebchatclient.domain.chat.GlobaleEinstellungen;
+import com.eb.apps.ebchat_client.domain.chat.GlobaleEinstellungen;
 import com.eb.apps.ebmusic.tobj.MusicPlayer;
 import com.eb.base.gui.JListUtils;
 import lombok.Getter;

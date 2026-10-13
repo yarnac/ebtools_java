@@ -2,13 +2,12 @@ package com.eb.base.ai_service.llm_client.infrastructure;
 
 import com.eb.base.ai_service.AiServiceConfig;
 import com.eb.base.extensions.FileExtensions;
-import com.eb.apps.ebchatclient.domain.chat.AiEinstellungen;
+import com.eb.apps.ebchat_client.domain.chat.AiEinstellungen;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.function.Predicate;
 
 public class LlmModelProvider {
 

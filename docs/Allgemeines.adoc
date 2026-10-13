@@ -4,7 +4,90 @@
 
 === Da sehen wirs
 
+Modell               qwen3.6:35b
+Host                 macstudio
+Tokens               3382
+Dauer in Sekunden    22,6
+Tokens je Sekunde    149,9
 
+[cols="20%, 20%, 10%, 70%"]
+|===
+|Spalte 1 (20%) |Spalte 2 (20%) |Spalte 3 (10%) |Spalte 4 (70%)
+|Inhalt         |Inhalt         |Kurz           |Ausführlicher Zellentext, der die restliche Layout-Breite für flexible Darstellungen einnimmt.
+|===
+Modell               qwen3.6:35b
+Host                 macstudio
+Tokens               7857
+Dauer in Sekunden    45,6
+Tokens je Sekunde    172,4
 
+### 1. Zur Frage: „Wie kann ich mit der Installation einen Tor-Client starten?“
 
+Die von dir gepostete Dateiliste entspricht dem **Standard-Tor-Browser-Bundle**. Im Gegensatz zu einem klassischen Server-Daemon (wie `systemd` oder `nginx`) ist TBB ein **selbstständiges Frontend**, das den eigentlichen Tor-Prozess (`tor.exe`) automatisch mitstartet und steuert.
+[cols="20%, 80%"]
+|===
+| Frage | Antwort
+|-------|---------
+| **Muss ich Tor manuell starten?** | Nein. Der Ordner enthält bereits eine konfigurierte `firefox.exe` bzw. ein Wrapper-Skript (z. B. `TorBrowser.exe`). Beim Start wird automatisch der embedded `tor.exe` (meist im Unterordner `TorBrowser\Tor\`) in den Hintergrund gelegt und per SOCKS5 angebunden.
+| **Welcher Port ist unter Windows aktiv?** | Standard: **`9150`** (`socks5://127.0.0.1:9150`). In Linux/macOS-Installationen ist es oft `9050`.
+| **Wie bekomme ich einen echten „System-Daemon“?** | TBB ist bewusst nicht als Windows-Dienst konzipiert. Soll er wirklich im Hintergrund laufen oder beim Systemstart starten, kannst du:<br>• `tor.exe` manuell aufrufen:<br>`start /B TorBrowser\Tor\tor.exe`<br>• Eine **Windows-Aufgabenplanung** (Task Scheduler) erstellen, die bei User-Login ein Batch-Script ausführt.<br>• Oder `tor.exe` mit [`nssm`](https://nssm.cc/) als echten Windows-Dienst registrieren.
+|===
+---
 
+### 2. Einfaches Java 21-Beispiel: SOCKS5-Proxy-Umleitung über Tor
+
+Das folgende Beispiel nutzt die moderne `HttpClient`-API (eingeführt in Java 11, Standard seitdem). Es ist sauber kompentiert, nutzt `var` für lesbaren Code und vermeidet Seiteneffekte.
+
+```java
+package demo;
+
+import java.io.IOException;
+import java.net.InetSocketAddress;
+import java.net.Proxy;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.time.Duration;
+import java.util.List;
+
+public class TorSocksExample {
+    // Windows-Standard des Tor Browsers ist 9150 (nicht 9050!)
+    private static final String TOR_HOST = "127.0.0.1";
+    private static final int TOR_PORT = 9150;
+
+    public static void main(String[] args) throws IOException, InterruptedException {
+
+        // Empfohlene Methode für separate Clients (kein globales Ändern der JVM-Properties)
+        Proxy torProxy = new Proxy(Proxy.Type.SOCKS, new InetSocketAddress(TOR_HOST, TOR_PORT));
+
+        var client = HttpClient.newBuilder()
+                .proxySelector(proxy -> List.of(torProxy).iterator())
+                .connectTimeout(Duration.ofSeconds(10))
+                .version(HttpClient.Version.HTTP_2)
+                .build();
+
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(java.net.URI.create("https://check.torproject.org/api/ip"))
+                .timeout(Duration.ofSeconds(15))
+                .GET()
+                .build();
+
+        // Synchroner Request (für einfache Skripte ausreichend)
+        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+
+        if (response.statusCode() == 200) {
+            System.out.println("✅ Erfolg. Deine Tor-IP ist: " + response.body().trim());
+        } else {
+            System.err.println("❌ Fehler. Status: " + response.statusCode());
+        }
+    }
+}
+```
+
+#### 🔍 Wichtige Hinweise zur Nutzung in Java
+1. **Port-Korrektur**: Unter Windows verwendet TBB standardmäßig `9150`. Verwendest du stattdessen `9050`, wird die Verbindung refused bzw. bleibt hängen.
+2. **DNS-Schutz (`socks5h`) ist Standard**: Der `HttpClient` leitet Anfragen über SOCKS5 an Tor weiter. Tor selbst führt dann die DNS-Auflösung **innerhalb** des Tor-Netzes durch, sodass kein lokaler DNS-Leak entsteht.
+3. **Circuit-Rotation**: Im Gegensatz zum Firefox im Browser rotiert dein Java-Clients **nicht automatisch** den Tor-Knoten. Für wiederholbare Requests bleibt die IP bis zum Reconnect gleich. Bei Bedarf kannst du über den Control-Port (`127.0.0.1:9151`) ein `NEWNYM`-Signal senden (requires password/auth config in `torrc`).
+4. **TLS/SNI & Java 21**: Moderne Sites prüfen SNI-TLS-Erweiterungen. Da Tor dies transparent handhabt, ist `HttpClient` komplett kompatibel. Vermeide jedoch explizite Header wie `X-Forwarded-For`, die von vielen Proxys/Tor-Netzwerken blockiert werden.
+
+Bei Fragen zur Automatisierung des Starts (Autostart-Script, Windows-Dienst, Task Scheduler) oder zur Steuerung des Controll-Ports sag gerne Bescheid!

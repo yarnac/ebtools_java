@@ -1,6 +1,6 @@
 package com.eb.apps.ebmusic.gobj;
 
-import com.eb.apps.ebchatclient.domain.chat.GlobaleEinstellungen;
+import com.eb.apps.ebchat_client.domain.chat.GlobaleEinstellungen;
 import com.eb.base.EbAppContext;
 import com.eb.base.inifile.api.IniFile;
 

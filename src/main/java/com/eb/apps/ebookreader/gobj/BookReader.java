@@ -1,6 +1,6 @@
 package com.eb.apps.ebookreader.gobj;
 
-import com.eb.apps.ebchatclient.domain.chat.GlobaleEinstellungen;
+import com.eb.apps.ebchat_client.domain.chat.GlobaleEinstellungen;
 
 public class BookReader {
 	

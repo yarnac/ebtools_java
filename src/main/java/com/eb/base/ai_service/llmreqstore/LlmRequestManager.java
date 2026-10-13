@@ -1,9 +1,8 @@
 package com.eb.base.ai_service.llmreqstore;
 
-import com.eb.apps.ebchatclient.domain.chat.AiChatMessage;
-import com.eb.apps.ebchatclient.domain.chat.AiEinstellungen;
+import com.eb.apps.ebchat_client.domain.chat.AiChatMessage;
+import com.eb.apps.ebchat_client.domain.chat.AiEinstellungen;
 import com.eb.base.ai_service.llm_client.api.LlmRequest;
-import com.eb.base.ai_service.llm_client.api.LlmResponse;
 import com.eb.base.extensions.FileExtensions;
 import com.eb.base.io.FileUtil;
 import com.fasterxml.jackson.databind.DeserializationFeature;
