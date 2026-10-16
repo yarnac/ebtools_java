@@ -28,6 +28,7 @@ import com.eb.apps.ebchat_client.domain.chat.AiChatManager;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
+import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.net.http.HttpClient;
 import java.util.ArrayList;
@@ -105,8 +106,9 @@ public class AiPlaygroundCtrl {
         decorator = window.getDecorator();
 
         decorator.setCurrentMenu("Datei");
-        decorator.addMenuItem("RUN",()->sendRequest(false), KeyEvent.VK_F5,0);
-        decorator.addMenuItem("Speichern",()->speichereRequest(), KeyEvent.VK_S,7);
+        decorator.addMenuItem("Abfrage neu starten",()->sendRequest(false), KeyEvent.VK_F5, InputEvent.SHIFT_DOWN_MASK);
+        decorator.addMenuItem("Abfrage fortsetzen",()->sendRequest(true), KeyEvent.VK_F5,0);
+        decorator.addMenuItem("Speichern",()->speichereRequest(), KeyEvent.VK_S,InputEvent.CTRL_DOWN_MASK);
         decorator.addOpenFileToolbarButton(tbName, "OpenAI Kosten", ICF.Monitor_Info, "https://platform.openai.com/home");
         decorator.addOpenFileToolbarButton(tbName, "Anthropic Kosten", ICF.Monitor_Properties, "https://platform.claude.com/dashboard");
 
@@ -116,6 +118,8 @@ public class AiPlaygroundCtrl {
         decorator.addToolbarButton(tbName,"Open append file window", ICF.BulletList, this::actionPerformed);
         decorator.addToolbarButton(tbName, "Kontexte", ICF.LinePoints_Add, this::openContextEditor);
         decorator.addToolbarButton(tbName, "Dummy", ICF.MaleHardHat_Lock, (s)->{});
+
+
 
         AiChatManager chatManager = AiChatManager.getCurrent();
         ContextManager contextManager = chatManager.getContextManager();
@@ -206,7 +210,7 @@ public class AiPlaygroundCtrl {
 
     private void sendRequest(boolean append) {
 
-        String inputString = window.getInputString();
+        String inputString = (!append || actLlmRequest==null) ? window.getNewInputString() : window.getInputString();
         if (!validateInput(inputString))
             return;
 
@@ -269,8 +273,11 @@ public class AiPlaygroundCtrl {
         executor.execute(() -> {
             try {
                 LlmResponse result = LlmRequestService.sendRequest(llmRequest);
-                String resultMessage = result.getAnswerWithDetails();
+                String resultMessage = result.getAnswer();
+                String statusMessage = result.getShortDetails();
+                window.getStatusBarOutputLabel().setText(statusMessage);
                 SetResult(resultMessage);
+
 
             } catch (Exception e) {
                 HandleException(e);

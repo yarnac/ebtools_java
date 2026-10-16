@@ -1,6 +1,7 @@
 package com.eb.apps.ebchat_client.app;
 
 import com.eb.apps.ebchat_client.domain.chat.GlobaleEinstellungen;
+import com.eb.base.extensions.StringExtensions;
 import com.eb.base.gui.GuiDecorator;
 import com.eb.base.gui.IC;
 import com.eb.base.gui.ICF;
@@ -15,28 +16,33 @@ import java.awt.*;
 
 public class AiPlaygroundWindow extends JFrame {
 
+    private IniFile myIniFile;
+    private JToolBar toolBar;
+
+
     @Getter
     private final GuiDecorator decorator;
-    
     @Getter
     private JTextPaneAdapter textPaneAdapterOutput;
-    @Getter
-    private JTextPane textPane1;
     @Getter
     private JTextPane textPaneInput;
     @Getter
     private JTextPane textPaneOutput;
-
     private JTree historyTree;
 
-    EbSplitPanel splitPanelMain;
+    private EbSplitPanel splitPanelInput;
     private EbSplitPanel splitPanelMessages;
-    private IniFile myIniFile;
-    private JToolBar toolBar;
+    private EbSplitPanel splitPanelMain;
 
     private PanelWithToolBar panelWithToolBarAuswahl;
     private PanelWithToolBar panelWithToolBarInput;
     private PanelWithToolBar panelWithToolBarOutput;
+    private JTextPane textFieldInputPraefix;
+    private JScrollPane scrollPaneInputPraefix;
+
+    private JScrollPane scrollPaneInputText;
+    @Getter
+    private JLabel statusBarOutputLabel;
 
 
     public AiPlaygroundWindow(IniFile iniFile)
@@ -65,9 +71,11 @@ public class AiPlaygroundWindow extends JFrame {
             font = new Font("Monospaced", Font.PLAIN, fontSize);
 
         // Font font = new Font("Arial", Font.PLAIN, fontSize);
-        getTextPane1().setFont(font);
+
         getTextPaneInput().setFont(font);
         getTextPaneOutput().setFont(font);
+        getTextFieldInputPraefix().setFont(font);
+        statusBarOutputLabel.setFont(font);
     }
 
     private void decorateMessagesInput() {
@@ -99,6 +107,14 @@ public class AiPlaygroundWindow extends JFrame {
 
     }
 
+    public String getNewInputString() {
+        StringBuilder builder = new StringBuilder();
+        if (!StringExtensions.ebIsNilOrEmpty(textFieldInputPraefix.getText()))
+            builder.append(textFieldInputPraefix.getText()).append("\n");
+        builder.append(textPaneInput.getText());
+        return builder.toString();
+    }
+
     public String getInputString() {
         return textPaneInput.getText();
     }
@@ -117,10 +133,13 @@ public class AiPlaygroundWindow extends JFrame {
     }
 
     public void registerPersister(IComponentPersister persister) {
+        persister.addComponentItem(getTextFieldInputPraefix(),"InputPraefix");
         persister.addComponentItem(textPaneInput,"Input");
         persister.addComponentItem(textPaneOutput,"Output");
         persister.addComponentItem(splitPanelMain.getSplitPane(), "SplitPanelMain");
         persister.addComponentItem(splitPanelMessages.getSplitPane(), "SplitPanelMessages");
+        persister.addComponentItem(splitPanelInput.getSplitPane(), "SplitPanelInput");
+
     }
 
 
@@ -173,9 +192,8 @@ public class AiPlaygroundWindow extends JFrame {
         setLocationRelativeTo(null); // Center the window
 
 
-
-
         createAndAddSplitPanelMain();
+
         createAndAddMenuBar();
         createAndAddMainToolBar();
     }
@@ -197,22 +215,33 @@ public class AiPlaygroundWindow extends JFrame {
     }
 
     private void createAndAddSplitPanelMain() {
-        textPane1 = new JTextPane();
+
         textPaneInput = new JTextPane();
         textPaneOutput = new JTextPane();
 
-        JScrollPane scrollPane1 = new JScrollPane(textPane1);
-        JScrollPane scrollPane2 = new JScrollPane(textPaneInput);
-        JScrollPane scrollPane3 = new JScrollPane(textPaneOutput);
+        scrollPaneInputText = new JScrollPane(textPaneInput);
+        JScrollPane scrollPaneOutput = new JScrollPane(textPaneOutput);
+        textPaneAdapterOutput = new JTextPaneAdapter(scrollPaneOutput, textPaneOutput);
 
-        textPaneAdapterOutput = new JTextPaneAdapter(scrollPane3, textPaneOutput);
-        
-        
+        UndoDecorator.registerForTextArea(getTextPaneInput());
+        UndoDecorator.registerForTextArea(getTextPaneOutput());
 
 
-        // Create the SplitPanel for Messages
-        splitPanelMessages = new EbSplitPanel("MessageSplitter", scrollPane2, scrollPane3, JSplitPane.VERTICAL_SPLIT);
+        splitPanelInput = new EbSplitPanel("splitPanelInput", getScrollPaneInputPraefix(), scrollPaneInputText, 0);
+
+        JPanel jPanelOutputAndStatus = new JPanel(new BorderLayout());
+        jPanelOutputAndStatus.add(scrollPaneOutput, BorderLayout.CENTER);
+        statusBarOutputLabel = new JLabel();
+        statusBarOutputLabel.setText("Status");
+        jPanelOutputAndStatus.add(statusBarOutputLabel, BorderLayout.SOUTH);
+
+        splitPanelMessages = new EbSplitPanel("MessageSplitter", splitPanelInput.getMainPanel(), jPanelOutputAndStatus, JSplitPane.VERTICAL_SPLIT);
         splitPanelMessages.setDividerLocation(200);
+
+        //jPanelMessage.add(splitPanelMessages.getMainPanel(), BorderLayout.CENTER);
+
+
+
 
         // Create the SplitPanem vor Auswahl and Messages
         splitPanelMain = new EbSplitPanel("MainSplitter", getHistoryTree() , splitPanelMessages.getMainPanel(), JSplitPane.HORIZONTAL_SPLIT);
@@ -220,8 +249,28 @@ public class AiPlaygroundWindow extends JFrame {
 
         add(splitPanelMain.getMainPanel(), BorderLayout.CENTER);
 
+
+
         splitPanelMain.getToolBar2().setVisible(false);
 
+    }
+
+    private JScrollPane getScrollPaneInputPraefix() {
+        if (scrollPaneInputPraefix==null) {
+            scrollPaneInputPraefix = new JScrollPane(getTextFieldInputPraefix());
+        }
+        return scrollPaneInputPraefix;
+    }
+
+    private JTextPane getTextFieldInputPraefix() {
+        if (textFieldInputPraefix == null) {
+            textFieldInputPraefix = new JTextPane();
+            Dimension fixedHeight = new Dimension(0, 40); // 0 = Breite passt sich an, 120px = feste Höhe
+            textFieldInputPraefix.setPreferredSize(fixedHeight);
+            textFieldInputPraefix.setMaximumSize(fixedHeight);
+            textFieldInputPraefix.setText("Übersetze ins Deutsche:");
+        }
+        return textFieldInputPraefix;
     }
 
     public JTree getHistoryTree() {

@@ -46,15 +46,24 @@ public class LlmResponse {
     @JsonIgnore
     public String getAnswerWithDetails() {
         StringBuilder strb = new StringBuilder();
-        strb.append("Modell               %s\n".formatted(model));
-        if (model.startsWith("q"))
-            strb.append("Host                 %s\n".formatted(OllamaClient.HOST));
-        strb.append("Tokens               %d\n".formatted(getTotalTokens()));
-        strb.append("Dauer in Sekunden    %.1f\n".formatted(getSecondsToRun()));
-        strb.append("Tokens je Sekunde    %.1f\n\n".formatted(getTokensPerSecond()));
+        strb.append(getShortDetails()).append("\n\n");
         strb.append(getAnswer());
         String res = strb.toString();
         return res;
+    }
+
+    @JsonIgnore
+    public String getShortDetails() {
+        StringBuilder strb = new StringBuilder();
+        strb.append("Modell: %s".formatted(model));
+        if (model.startsWith("q"))
+            strb.append(" (%s) ".formatted(OllamaClient.HOST));
+        else
+            strb.append("\t".formatted(OllamaClient.HOST));
+        strb.append("%dTk ".formatted(getTotalTokens()));
+        strb.append("%.1fs ".formatted(getSecondsToRun()));
+        strb.append("%.1fT/s".formatted(getTokensPerSecond()));
+        return strb.toString();
     }
 
     @JsonIgnore
