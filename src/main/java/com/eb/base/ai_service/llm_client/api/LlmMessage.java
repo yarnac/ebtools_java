@@ -23,6 +23,11 @@ public class LlmMessage {
 
     }
 
+    @Override
+    public String toString() {
+        return getMessageString();
+    }
+
     @JsonProperty("role")
     private String role; // z.B. "user", "system", "assistant"
 
