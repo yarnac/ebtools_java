@@ -43,6 +43,11 @@ public class AiPlaygroundWindow extends JFrame {
     private JScrollPane scrollPaneInputText;
     @Getter
     private JLabel statusBarOutputLabel;
+    @Getter
+    private JToolBar toolBarHistoryTree;
+    private JPanel treePanel;
+    @Getter
+    private String toolbarTreePanelName;
 
 
     public AiPlaygroundWindow(IniFile iniFile)
@@ -140,6 +145,10 @@ public class AiPlaygroundWindow extends JFrame {
         persister.addComponentItem(splitPanelMessages.getSplitPane(), "SplitPanelMessages");
         persister.addComponentItem(splitPanelInput.getSplitPane(), "SplitPanelInput");
 
+    }
+
+    public void setInputPraefixText(String userString) {
+        textFieldInputPraefix.setText(userString);
     }
 
 
@@ -246,6 +255,7 @@ public class AiPlaygroundWindow extends JFrame {
         // Create the SplitPanem vor Auswahl and Messages
         splitPanelMain = new EbSplitPanel("MainSplitter", getHistoryTree() , splitPanelMessages.getMainPanel(), JSplitPane.HORIZONTAL_SPLIT);
         splitPanelMain.setDividerLocation(400);
+        toolbarTreePanelName = splitPanelMain.getToolBar1Name();
 
         add(splitPanelMain.getMainPanel(), BorderLayout.CENTER);
 
@@ -271,6 +281,18 @@ public class AiPlaygroundWindow extends JFrame {
             textFieldInputPraefix.setText("Übersetze ins Deutsche:");
         }
         return textFieldInputPraefix;
+    }
+
+    public JPanel getTreePanel()
+    {
+        if (treePanel==null) {
+            treePanel = new JPanel(new BorderLayout());
+            toolBarHistoryTree = new JToolBar();
+
+            treePanel.add(toolBarHistoryTree, BorderLayout.NORTH);
+            treePanel.add(getHistoryTree());
+        }
+        return treePanel;
     }
 
     public JTree getHistoryTree() {

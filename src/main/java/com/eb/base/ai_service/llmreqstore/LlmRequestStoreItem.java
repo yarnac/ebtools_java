@@ -12,6 +12,11 @@ public class LlmRequestStoreItem {
     private String title;
     private String description;
 
+    @Override
+    public String toString() {
+        return requestId + "\t" + llmRequest + "\t" + title + "\t" + description + "\n";
+    }
+
     public LlmRequestStoreItem() {
 
     };

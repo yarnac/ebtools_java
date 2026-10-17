@@ -12,6 +12,7 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.type.CollectionType;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
+import java.io.File;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -65,6 +66,16 @@ public class LlmRequestManager {
         llmRequestStoreItemsMap.put(request.getRequestId(), llmRequestStoreItem);
     }
 
+    public void deleteRequest(LlmRequest actLlmRequest) {
+        LlmRequestStoreItem llmRequestStoreItem = findLlmRequestStoreItem(actLlmRequest);
+        llmRequestStoreItemList.remove(llmRequestStoreItem);
+        llmRequestStoreItemsMap.remove(actLlmRequest.getRequestId());
+        String storeFileName = "Request_" + llmRequestStoreItem.getLlmRequest().getRequestId() + ".json";
+        String storeFilePathName = FileExtensions.ebFileNameInDirectory(storeFileName, GetRequestsOrdner());
+        File file = new File(storeFilePathName);
+        file.delete();
+    }
+
     private void storeRequestStoreItem(LlmRequestStoreItem llmRequestStoreItem) {
         String storeFileName = "Request_" + llmRequestStoreItem.getLlmRequest().getRequestId() + ".json";
         llmRequestStoreItem.setRequestId(llmRequestStoreItem.getLlmRequest().getRequestId());
@@ -108,6 +119,7 @@ public class LlmRequestManager {
 
             CollectionType type = objectMapper.getTypeFactory().constructCollectionType(List.class, AiChatMessage.class);
             LlmRequestStoreItem result = objectMapper.readValue(json, LlmRequestStoreItem.class);
+            result.getLlmRequest().setRequestId(result.getRequestId());
             return result;
         } catch (Exception e) {
             return null;
@@ -122,4 +134,6 @@ public class LlmRequestManager {
         mapper.registerModule(new JavaTimeModule());
         return mapper;
     }
+
+
 }

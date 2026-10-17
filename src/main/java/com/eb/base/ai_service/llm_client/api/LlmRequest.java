@@ -1,7 +1,9 @@
 package com.eb.base.ai_service.llm_client.api;
 
+import com.eb.base.extensions.StringExtensions;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -9,6 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+@JsonPropertyOrder({ "contentMemo", "model", "parameters", "messages" }) // Reihenfolge festlegen
 @Getter
 @Setter
 public class LlmRequest {
@@ -16,6 +19,16 @@ public class LlmRequest {
     private String model;
     List<LlmMessage> messages;
     List<Parameter> parameters;
+
+    String contentMemo;
+
+    @Override
+    public String toString() {
+        if (StringExtensions.ebIsNilOrEmpty(contentMemo)) {
+            return getMessages().getFirst().getMessageString();
+        }
+        return contentMemo;
+    }
 
     public LlmRequest() {}
 
@@ -77,4 +90,14 @@ public class LlmRequest {
         message.setMessageInfo(response.getMessageInfo());
         getMessages().add(message);
     }
+
+    @JsonIgnore
+    public String getAllMessageString() {
+        StringBuilder sb = new StringBuilder();
+        for(LlmMessage message : getMessages()) {
+            sb.append(message.getMessageString()).append("\n");
+        }
+        return sb.toString();
+    }
+
 }

@@ -29,6 +29,8 @@ public class OllamaClient implements ILlmClient {
             HOST_MACSTUDIO,
             HOST_MACSTUDIO2,
             HOST_MACBOOK,
+            HOST_XT13,
+            "127.0.0.1"
             // HOST_MACBOOKAIR,
             // HOST_XT13
     };

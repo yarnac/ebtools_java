@@ -102,4 +102,18 @@ public class LlmMessage {
         }
         return stringBuilder.toString();
     }
+
+    public String getMessageString() {
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append("<%s>\n".formatted(role));
+        for (ContentPart contentPart : contentParts) {
+            if (contentPart instanceof ContentPartText) {
+                stringBuilder.append(((ContentPartText) contentPart).text()).append("\n");
+            }
+            else if (contentPart instanceof ContentPartImage) {
+                stringBuilder.append("Image ...\n");
+            }
+        }
+        return stringBuilder.toString();
+    }
 }

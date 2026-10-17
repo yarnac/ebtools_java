@@ -1,5 +1,6 @@
 package com.eb.base.gui;
 
+import com.eb.base.ai_service.llm_client.api.LlmRequest;
 import com.eb.base.inifile.api.IniFile;
 import com.eb.base.io.FileUtil;
 import lombok.Getter;
