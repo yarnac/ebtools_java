@@ -110,4 +110,14 @@ public final class ContextEditorPanel extends JPanel {
     public String getPromptText() {
         return edPrompt.getText();
     }
+
+    public static void main(String[] argc)
+    {
+        JFrame frame = new JFrame();
+        frame.setLocationRelativeTo(null);
+        frame.setSize(800, 600);
+        frame.add(new ContextEditorPanel());
+        frame.setVisible(true);
+        frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+    }
 }
