@@ -1,5 +1,6 @@
 package com.eb.apps.ebchat_client.app;
 
+import com.eb.apps.ebchat_client.domain.edrequest.EdRequestCtrl;
 import com.eb.apps.ebchat_utils.codegen.AiCodeGeneratorCtrl;
 import com.eb.apps.ebchat_client.domain.chat.GlobaleEinstellungen;
 import com.eb.apps.ebchat_client.domain.context.app.ContextEditDlg;
@@ -74,6 +75,17 @@ public class AiPlaygroundCtrl {
         IniFile iniFile = IniFileProvider.createIniFile("JavaAiPlaygroundCtrl.ini");
         window = new AiPlaygroundWindow(iniFile);
         window.setVisible(true);
+
+        decorator = window.getDecorator();
+
+        decorator.addEditIniFileButton("MainToolbar");
+        decorator.addToolbarButton("MainToolbar", "Speichern Main", IC.MB_PLAY, (x)->{});
+        decorator.addToolbarButton("MainToolbar", "Edit Requests", ICF.Flowchart, (x)->{new EdRequestCtrl();});
+        decorator.addToolbarButton("MainToolbar", "Edit Contexts", ICF.Code, (x)->{SwingUtilities.invokeLater(ContextEditDlg::Show);});
+
+
+
+
         decorateToolbarInput();
         decorateToolbarInputPart2();
         decorateToolbarOutput();
@@ -87,9 +99,8 @@ public class AiPlaygroundCtrl {
         persister.addComponentItem(cbContexts,"CbContexts");
         persister.addComponentItem(cbModelle,"CbModelle");
         window.registerPersister(persister);
-        persister.loadAndSetComponentItems();
         decorator.addCloseAction(persister::persistComponentItems);
-
+        persister.loadAndSetComponentItems();
 
 
         // ✅ Empfehlung der AI qwen3.5:9
@@ -163,7 +174,6 @@ public class AiPlaygroundCtrl {
     private void decorateToolbarInput() {
 
         String tbName = window.getPanelWithToolBarInput().getToolbar().getName();
-        decorator = window.getDecorator();
 
         decorator.setCurrentMenu("Datei");
         decorator.addMenuItem("Abfrage neu starten",()->sendRequest(false), KeyEvent.VK_F5, InputEvent.SHIFT_DOWN_MASK);

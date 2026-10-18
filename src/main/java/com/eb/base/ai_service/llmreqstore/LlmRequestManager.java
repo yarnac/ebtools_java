@@ -2,6 +2,7 @@ package com.eb.base.ai_service.llmreqstore;
 
 import com.eb.apps.ebchat_client.domain.chat.AiChatMessage;
 import com.eb.apps.ebchat_client.domain.chat.AiEinstellungen;
+import com.eb.base.ai_service.llm_client.api.LlmMessage;
 import com.eb.base.ai_service.llm_client.api.LlmRequest;
 import com.eb.base.extensions.FileExtensions;
 import com.eb.base.io.FileUtil;
@@ -21,6 +22,16 @@ import java.util.*;
 public class LlmRequestManager {
     private final List<LlmRequestStoreItem> llmRequestStoreItemList = new ArrayList<>();
     private final Map<Long, LlmRequestStoreItem> llmRequestStoreItemsMap = new HashMap<>();
+
+    private static LlmRequestManager currentLlmRequestManager;
+
+    public static LlmRequestManager current()
+    {
+        if (currentLlmRequestManager==null)
+            currentLlmRequestManager = new LlmRequestManager();
+
+        return currentLlmRequestManager;
+    }
 
     public LlmRequestManager() {
         loadRequests();

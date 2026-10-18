@@ -55,6 +55,7 @@ public class ContextEditDlg extends JFrame {
     }
 
     public static ContextEditDlg ShowWindow() {
+
         ContextEditDlg dlg = new ContextEditDlg();
         dlg.setNormalWindow();
         dlg.setContextList(AiContextProvider.getAvailableContexts());
@@ -202,7 +203,7 @@ public class ContextEditDlg extends JFrame {
 
     private void initializeView() {
         setTitle("Chat Kontexte bearbeiten");
-        setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setSize(1800, 600);
         setLocation(new Point(400,400));
 

@@ -2,19 +2,19 @@ package com.eb.apps.ebchat_client.app;
 
 import com.eb.apps.ebchat_client.domain.chat.GlobaleEinstellungen;
 import com.eb.base.extensions.StringExtensions;
-import com.eb.base.gui.GuiDecorator;
-import com.eb.base.gui.IC;
-import com.eb.base.gui.ICF;
+import com.eb.base.gui.*;
 import com.eb.base.gui.adapter.JTextPaneAdapter;
 import com.eb.base.gui.persist.IComponentPersister;
 import com.eb.base.inifile.api.IniFile;
-import com.eb.base.gui.EbSplitPanel;
 import lombok.Getter;
 
 import javax.swing.*;
+import javax.swing.plaf.DimensionUIResource;
 import java.awt.*;
 
 public class AiPlaygroundWindow extends JFrame {
+
+    public static int FONTSIZE = 14;
 
     private IniFile myIniFile;
     private JToolBar toolBar;
@@ -55,32 +55,30 @@ public class AiPlaygroundWindow extends JFrame {
         myIniFile = iniFile;
         initializeView();
 
-        setFontSizes(16);
+        setFontSizes(FONTSIZE);
 
 
 
         decorator = new GuiDecorator(this, myIniFile,"Einstellungen");
-        decorator.addEditIniFileButton("MainToolbar");
 
         decorateMainToolbar();
         decorateMessagesAuswahl();
         decorateMessagesOutput();
     }
 
+    private void setFontSizes(int fontSize, Component... components) {
+        Font font = FontUtil.determineMonospaceFont(fontSize, "JetBrains Mono", "Consolas", "Monospaces");
+        FontUtil.setFont(font, components);
+    }
+
     private void setFontSizes(int fontSize) {
-
-        Font font = new Font("JetBrains Mono", Font.PLAIN, fontSize);
-        if (!font.getFontName().equals("Jetbrains Mono"))
-            font = new Font("Consolas", Font.PLAIN, fontSize);
-        if (!font.getFontName().equals("Consolas"))
-            font = new Font("Monospaced", Font.PLAIN, fontSize);
-
-        // Font font = new Font("Arial", Font.PLAIN, fontSize);
-
-        getTextPaneInput().setFont(font);
-        getTextPaneOutput().setFont(font);
-        getTextFieldInputPraefix().setFont(font);
-        statusBarOutputLabel.setFont(font);
+        FontUtil.setMonospaceFont(fontSize,
+                getTextPaneInput(),
+                getTreePanel(),
+                getTextFieldInputPraefix(),
+                getTextPaneOutput(),
+                statusBarOutputLabel
+        );
     }
 
     private void decorateMessagesInput() {
@@ -96,7 +94,6 @@ public class AiPlaygroundWindow extends JFrame {
     }
 
     private void decorateMainToolbar() {
-        decorator.addToolbarButton("MainToolbar", "Speichern Main", IC.MB_PLAY, (x)->{});
     }
 
     public void setOutputText(String answer) {
@@ -250,16 +247,11 @@ public class AiPlaygroundWindow extends JFrame {
         //jPanelMessage.add(splitPanelMessages.getMainPanel(), BorderLayout.CENTER);
 
 
-
-
         // Create the SplitPanem vor Auswahl and Messages
-        splitPanelMain = new EbSplitPanel("MainSplitter", getHistoryTree() , splitPanelMessages.getMainPanel(), JSplitPane.HORIZONTAL_SPLIT);
-        splitPanelMain.setDividerLocation(400);
+        splitPanelMain = new EbSplitPanel("MainSplitter", getTreePanel() , splitPanelMessages.getMainPanel(), JSplitPane.HORIZONTAL_SPLIT);
         toolbarTreePanelName = splitPanelMain.getToolBar1Name();
 
         add(splitPanelMain.getMainPanel(), BorderLayout.CENTER);
-
-
 
         splitPanelMain.getToolBar2().setVisible(false);
 
@@ -275,9 +267,7 @@ public class AiPlaygroundWindow extends JFrame {
     private JTextPane getTextFieldInputPraefix() {
         if (textFieldInputPraefix == null) {
             textFieldInputPraefix = new JTextPane();
-            Dimension fixedHeight = new Dimension(0, 40); // 0 = Breite passt sich an, 120px = feste Höhe
-            textFieldInputPraefix.setPreferredSize(fixedHeight);
-            textFieldInputPraefix.setMaximumSize(fixedHeight);
+
             textFieldInputPraefix.setText("Übersetze ins Deutsche:");
         }
         return textFieldInputPraefix;
@@ -290,14 +280,17 @@ public class AiPlaygroundWindow extends JFrame {
             toolBarHistoryTree = new JToolBar();
 
             treePanel.add(toolBarHistoryTree, BorderLayout.NORTH);
-            treePanel.add(getHistoryTree());
+            JScrollPane pane = new JScrollPane(getHistoryTree());
+            treePanel.add(pane, BorderLayout.CENTER);
         }
         return treePanel;
     }
 
     public JTree getHistoryTree() {
-        if (historyTree == null)
+        if (historyTree == null) {
             historyTree = new JTree();
+            // historyTree.setMinimumSize(new Dimension(100,100));
+        }
         return historyTree;
     }
 }

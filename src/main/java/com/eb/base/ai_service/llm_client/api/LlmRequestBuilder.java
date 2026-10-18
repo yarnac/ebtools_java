@@ -66,8 +66,9 @@ public class LlmRequestBuilder implements LlmRequestBuilderSystemOrUserMsg,
         if (userMsg.startsWith("<<"))
         {
             int index = userMsg.indexOf(">>");
-            systemMsg = StringExtensions.ebTrimAll(userMsg.substring(index + 2));
-            userMsg = StringExtensions.ebTrimAll(userMsg.substring(2, index));
+            systemMsg = StringExtensions.ebTrimAll(userMsg.substring(2, index));
+            userMsg = StringExtensions.ebTrimAll(userMsg.substring(index + 2));
+
         }
 
         addSystemMsg(systemMsg);

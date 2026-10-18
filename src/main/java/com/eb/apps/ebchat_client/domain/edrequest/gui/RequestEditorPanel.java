@@ -22,8 +22,11 @@ public final class RequestEditorPanel extends JPanel {
     @Getter
     private JTextField edContentMemo;
 
-    @Getter     @Setter
+    @Getter
+    private JToolBar requestsToolBar;
+    @Getter
     private JToolBar messagesToolBar;
+
     private Runnable saveListener;
     @Getter
     private JList<LlmRequest> lstRequests;
@@ -31,6 +34,7 @@ public final class RequestEditorPanel extends JPanel {
     private JList<LlmMessage> lstMessages;
     @Getter
     private JTextField edModel;
+
 
     public RequestEditorPanel() {
         super(new GridBagLayout());
@@ -44,12 +48,17 @@ public final class RequestEditorPanel extends JPanel {
         setMinimumSize(new Dimension(20, 20));
 
         EbGridBagUtil util = new EbGridBagUtil(this, 0);
+        requestsToolBar = util.addLabeledFieldRow(new JToolBar(), "Rqsts", 0.0, GridBagConstraints.HORIZONTAL);
+        requestsToolBar.setFloatable(false);
 
-        lstRequests = util.addLabeledScrollPaneWithFieldRow(new JList<LlmRequest>(), "Rqsts", 1.0, GridBagConstraints.BOTH);
+        lstRequests = util.addLabeledScrollPaneWithFieldRow(new JList<LlmRequest>(), "", 1.0, GridBagConstraints.BOTH);
         edContentMemo = util.addLabeledFieldRow(new JTextField(), "Info", 0.0, GridBagConstraints.HORIZONTAL);
+
         edModel = util.addLabeledFieldRow(new JTextField(), "Model", 0.0, GridBagConstraints.HORIZONTAL);
-        messagesToolBar = util.addToolBarRow(false);
-        lstMessages = util.addLabeledScrollPaneWithFieldRow(new JList<LlmMessage>(), "Msgs", 1.0, GridBagConstraints.BOTH);
+        messagesToolBar = util.addLabeledFieldRow(new JToolBar(), "Msgs", 0.0, GridBagConstraints.HORIZONTAL);
+        messagesToolBar.setFloatable(false);
+        //messagesToolBar = util.addToolBarRow(false);
+        lstMessages = util.addLabeledScrollPaneWithFieldRow(new JList<LlmMessage>(), "", 1.0, GridBagConstraints.BOTH);
     }
 
     public void transferModelToView(LlmRequest request) {

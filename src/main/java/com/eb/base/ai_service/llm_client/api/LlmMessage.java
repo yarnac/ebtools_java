@@ -25,7 +25,7 @@ public class LlmMessage {
 
     @Override
     public String toString() {
-        return getMessageString();
+        return getMessageString().replace("\n"," ");
     }
 
     @JsonProperty("role")

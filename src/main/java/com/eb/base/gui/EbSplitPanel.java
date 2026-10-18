@@ -5,7 +5,7 @@ import lombok.Getter;
 import javax.swing.*;
 import java.awt.*;
 
-public class EbSplitPanel {
+public class EbSplitPanel extends JPanel {
 
     @Getter
     private JPanel mainPanel;
@@ -24,14 +24,16 @@ public class EbSplitPanel {
 
 
     public EbSplitPanel(String panelName, JComponent component1, JComponent component2, int splitOrientation) {
-        mainPanel = new JPanel();
+        mainPanel = this;
         mainPanel.setName(panelName);
         mainPanel.setLayout(new BorderLayout());
         splitPane = new JSplitPane(splitOrientation);
         splitPane.setResizeWeight(0.5);
         splitPane.setDividerSize(6);
         outerPanel1 = new JPanel();
+        outerPanel1.setMinimumSize(new Dimension(20, 20));
         outerPanel2 = new JPanel();
+        outerPanel2.setMinimumSize(new Dimension(20, 20));
         outerPanel1.setLayout(new BorderLayout());
 
         outerPanel1.setBorder(BorderFactory.createCompoundBorder(
@@ -65,9 +67,6 @@ public class EbSplitPanel {
         outerPanel1.add(panel1, BorderLayout.CENTER);
         outerPanel2.add(toolBar2, BorderLayout.NORTH );
         outerPanel2.add(panel2, BorderLayout.CENTER);
-        outerPanel2.add(new JPanel(), BorderLayout.WEST);
-        outerPanel2.add(new JPanel(), BorderLayout.EAST);
-
 
         splitPane.setLeftComponent(outerPanel1);
         splitPane.setRightComponent(outerPanel2);
