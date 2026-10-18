@@ -55,12 +55,8 @@ public class EdRequestCtrl {
         window.getEditPanel().getLstRequests().addListSelectionListener(x->handleSelectedRequest(x));
         window.getEditPanel().getLstMessages().addListSelectionListener(x->handleSelectedMessage(x));
 
-        setSelectedRequest(manager.getLlmRequests().getFirst());
-/*
-        window.getEditPanel().getLstRequests().getModel().addListDataListener(new ListSelectionHandler() {
-
-        });
-*/
+        if (!manager.getLlmRequests().isEmpty())
+            setSelectedRequest(manager.getLlmRequests().getFirst());
     }
 
     private void handleSelectedMessage(ListSelectionEvent x) {

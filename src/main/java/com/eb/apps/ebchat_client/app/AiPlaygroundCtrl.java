@@ -55,6 +55,8 @@ public class AiPlaygroundCtrl {
 
     private static final ExecutorService executor = Executors.newFixedThreadPool(4);
     private JComboBox<LlmRequest> cbRequests;
+    private AiChatManager chatManager;
+    private ContextManager contextManager;
 
     AiPlaygroundCtrl() {
         llmRequestManager = new LlmRequestManager();
@@ -82,9 +84,14 @@ public class AiPlaygroundCtrl {
         decorator.addToolbarButton("MainToolbar", "Speichern Main", IC.MB_PLAY, (x)->{});
         decorator.addToolbarButton("MainToolbar", "Edit Requests", ICF.Flowchart, (x)->{new EdRequestCtrl();});
         decorator.addToolbarButton("MainToolbar", "Edit Contexts", ICF.Code, (x)->{SwingUtilities.invokeLater(ContextEditDlg::Show);});
+        decorator.addToolbarButton("MainToolbar", "Open DataFiles", ICF.History_Edit, (x)-> {
+            FileUtil.open(chatManager.getLlmModelProvider().getModelFileName());
+        });
 
 
 
+        UndoDecorator.registerForTextArea(window.getTextPaneInput());
+        UndoDecorator.registerForTextArea(window.getTextPaneOutput());
 
         decorateToolbarInput();
         decorateToolbarInputPart2();
@@ -193,8 +200,8 @@ public class AiPlaygroundCtrl {
     private void decorateToolbarInputPart2() {
         String tbName = window.getPanelWithToolBarInput().getToolbar().getName();
         decorator = window.getDecorator();
-        AiChatManager chatManager = AiChatManager.getCurrent();
-        ContextManager contextManager = chatManager.getContextManager();
+        chatManager = AiChatManager.getCurrent();
+        contextManager = chatManager.getContextManager();
 
         LlmModelProvider modelProvider = new LlmModelProvider();
         cbChats = decorator.addToolbarComboBox(tbName,"Chats", chatManager.getAvailableChats(), this::setChat);

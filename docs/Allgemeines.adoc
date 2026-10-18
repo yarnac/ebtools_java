@@ -1,6 +1,21 @@
 = Einleitung
 
-== Test
+== RLB Probleme bei PAM Übertragung
+
+- Wo tritt der Fehler auf? Beim Laden der MPR Settings werden die aktuellen EuA Planungen abgerufen. Es wird das Setting im Beispiel PCO13EB mit der EuA Planung mit Id 2 verbunden.
+
+- Meine Idee ist es, die EuA Planungen in der Version für die RLB vollständig zu entfernen. Das heißt auch dass die Zuordnung einer EuA Planung bei einer lizensierten RLB Datenbank nicht stattfindet.
+
+- Aufrufe zum Laden von EuA Planungen liefern dann immer eine leere Liste
+
+- Damit wird das aktuelle Problem, dass wir anscheinend im Kontext der RLB keine JPA Repositories laden können umgangen.
+- Es sieht so aus, als ob diese Repositories bisher nur für EuA Planungen und für Intervalldefinitionen für die Strukturlimite benutzt werden. Letztere werden nicht referenziert.
+
+== Ai Anwendungen
+
+/Users/ekkart/Data/Develop/Java/ebtools/src/main/java/com/eb/apps/ebchatclient/app
+
+link:file:\\/Users/ekkart/Data/Develop/Java/ebtools/src/main/java/com/eb/apps/ebchatclient/app/AiPlaygroundCtrl.java#L100[Link zum Code]
 
 === Da sehen wirs
 

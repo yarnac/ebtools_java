@@ -30,7 +30,7 @@ public class LlmModelProvider {
     public LlmModelProvider()
     {
         try {
-            models = readModels(AiEinstellungen.getFilePath("AiServices/Modelle.txt"));
+            models = readModels(getModelFileName());
         } catch (IOException e) {
             models = new ArrayList<>();
         }
@@ -100,5 +100,9 @@ public class LlmModelProvider {
             return !model.isOpenAi();
 
         return true;
+    }
+
+    public String getModelFileName() {
+        return AiEinstellungen.getFilePath("AiServices/Modelle.txt");
     }
 }
