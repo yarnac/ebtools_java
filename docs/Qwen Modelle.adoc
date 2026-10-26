@@ -1,0 +1,46 @@
+== Qwen Modelle
+
+[cols="40%, 60%"]
+|===
+| Modell / Familie | Einsatzzweck
+| Qwen (v1, 2023) | Grundlegendes General-Purpose-LLM, Chat, Textgenerierung
+| Qwen1.5 | Verbesserte Mehrsprachigkeit, Instruktion-Following
+| Qwen2 / Qwen2.5 (0,5 B–72 B) | Allgemeiner Dialog, Reasoning, Koding, Agenten-Aufgaben; mehrere Größengraden für On-Device bis Server
+| Qwen3 (2025, MoE) | Neueste Generation; umschaltbarer „Thinking"-Modus, starkeres logisches Reasoning, Tool-Use
+| Qwen2.5-Coder / Qwen-Coder | Software-Engineering: Code-Generierung, -Refactor, -Debugging
+| Qwen2.5-Math / Qwen-Math | Mathematisches Reasoning, Beweisführung, Wettbewerbsmathematik
+| QwQ (z. B. QwQ-32B) | Tiefes Chain-of-Thought-Reasoning, anspruchsvolle Logik- und Matheaufgaben
+| Qwen-VL / Qwen2-VL / Qwen2.5-VL | Vision-Language: Bild-/Dokumentanalyse, OCR, multimodales Q&A
+| Qwen2-Audio / Qwen-Audio | Audio-Verstand: Spracherkennung, -verstehen, -beschreibung
+| Qwen2.5-1M / Qwen-Long | Sehr langer Kontext (bis 1 Mio. Token), Dokumentenanalyse, Summarization
+| Qwen-Image / Tongyi Wanxiang | Text-zu-Bild-Generierung und -bearbeitung
+| Qwen-Agent / Qwen-Function-Call | Autonomous Agents, Tool-Orchestrierung, API-Aufruf-Planung
+|===
+[cols="25%, 20%, 55%"]
+|===
+|Modell / Serie | Größe | Einsatzzweck
+|Qwen (v1) | 7 B / 14 B | Grundlegendes Sprachmodell, allgemeine Sprachaufnahme und Textgenerierung
+|Qwen 1.5 | 7 B / 14 B / 32 B / 72 B | Verbessertes Allzweck-LLM mit erweitertem Kontextfenster
+|Qwen 1.5-MoE | 57 B (14 B aktiv) | Mixture-of-Experts-Ansatz für effiziente Inferenz bei hoher Qualität
+|Qwen 2 | 0,5 B / 1,5 B / 7 B / 72 B | Allzweck-LLM mit stärkerer Logik undilingualen Fähigkeiten
+|Qwen 2-MoE | 57 B (14 B aktiv) | Effizientes MoE-Modell für Rechenzentrums- und Endgeräteeinsatz
+|Qwen 2-VL | 2 B / 7 B / 72 B | Multimodales Bild-Sprache-Modell, Visuelle Analyse und Textbeschreibung
+|Qwen 2-Audio | – | Audio-Verständnis und -verarbeitung (Spracherkennung, Beschreibung)
+|Qwen 2-Coder | 1,5 B / 7 B / 32 B | Code-Generierung, -verstehen und -refactorisierung in vielen Sprachen
+|Qwen 2-Math | 1,5 B / 7 B / 72 B | Mathematisches Reasoning, Beweisführung und Formelverarbeitung
+|Qwen 2.5 | 0,5 B / 1,5 B / 3 B / 7 B / 14 B / 32 B / 72 B | Allzweck-LLM, stark in Agenten- und Tool-Nutzung, langes Kontextfenster
+|Qwen 2.5-Coder | 3 B / 7 B / 14 B / 32 B | Spezialisiert auf Programmieren, Code-Debugging und Softwareentwicklung
+|Qwen 2.5-VL | 3 B / 7 B / 32 B / 72 B | Verbessertes Vision-Language-Modell, Diagramm- und Dokumentenanalyse
+|Qwen 2.5-Math | 1,5 B / 7 B / 72 B | Optimiert für komplexes mathematisches und logisches Schließen
+|Qwen 3 | 0,6 B / 1,7 B / 4 B / 8 B / 14 B / 32 B | Allzweck-LLM mit integriertem Denkmodus (Reasoning), Agenten-fähig
+|Qwen 3-235B-A22B | 235 B (22 B aktiv) | Sehr großes MoE-Modell für anspruchsvolle Reasoning- und Agenten-Aufgaben
+|Qwen 3-Max | nicht offen | Geschlossenes Top-Modell, höchste Leistung für Unternehmen und API-Nutzer
+|===
+
+**Hinweise zur Einordnung:**
+
+- **Serie Qwen (v1):** Ursprungsversion, 2023 veröffentlicht, diente als Basistest.
+- **Serie Qwen 1.5:** Erster großer Sprung in Kontextlänge und Qualität, erstmals MoE-Variante.
+- **Serie Qwen 2:** Modularisierung in Spezialmodelle (VL, Audio, Coder, Math); breiteres Größenspektrum.
+- **Serie Qwen 2.5:** Stärkung bei Agenten-Kapazitäten, Tool-Calling und Langkontext (bis 128 K Token); alle Spezialmodelle erhalten ein Update.
+- **Serie Qwen 3:** Neu eingeführter interner „Thinking"-Modus (erweitertes Schließen vor der Antwort), stark verbesserte Agenten- und Multi-Step-Kapazität; MoE-Variante mit 235 B Parametern; Qwen 3-Max als geschlossene Flaggschiff-Version für API-Nutzung.
