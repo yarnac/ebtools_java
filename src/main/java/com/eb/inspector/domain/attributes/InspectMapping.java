@@ -26,7 +26,12 @@ public class InspectMapping<T> {
     public String getName(T o) {
         if (toStringFunction == null)
             return getName();
-        return getName() + ": " + toStringFunction.apply(o);
+        try {
+            return getName() + ": " + toStringFunction.apply(o);
+        }
+        catch (Exception e) {
+            return getName() + " null ";
+        }
     }
 
     public List getSubObjects(T obj) {

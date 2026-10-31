@@ -20,6 +20,8 @@ public class InspectTreeNode implements TreeNode {
     Object object;
     InspectMapping mapping;
 
+    boolean completed;
+
     @Override
     public String toString() {
         return name;

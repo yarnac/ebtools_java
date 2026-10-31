@@ -3,13 +3,12 @@ package com.eb.inspector.domain.attributes;
 import com.eb.base.gui.GuiDecorator;
 import com.eb.base.inifile.api.IniFile;
 import com.eb.base.inifile.api.IniFileProvider;
-import com.eb.inspector.Example;
 
 import javax.swing.*;
 import javax.swing.tree.DefaultTreeModel;
+import java.lang.reflect.Array;
 import java.util.List;
 import java.util.Map;
-import java.lang.reflect.Array;
 
 public class InspectCtrl
 {
@@ -17,13 +16,36 @@ public class InspectCtrl
     private final IniFile myIniFile;
     private TableController tableController;
 
-    public InspectCtrl()
-    {
+    public InspectCtrl() {
         window = new InspectWindow();
         myIniFile = IniFileProvider.createIniFile("Inspect.ini");
         GuiDecorator decorator = new GuiDecorator(window, myIniFile, "Einstellungen");
 
         // tableController = new TableController(window);
+
+
+        JTree tree = window.getTree();
+        tree.getSelectionModel().addTreeSelectionListener(e ->
+                SwingUtilities.invokeLater(this::updateSelectedNode));
+
+
+    }
+
+    private void updateSelectedNode() {
+        InspectTreeNode node = window.getSelectedNode();
+        if (node == null) {
+            return;
+        }
+
+        if (!node.isCompleted())
+        {
+            InspectMapping mapping = node.getMapping();
+            List list = (List) mapping.getSubObjects(node.getObject());
+            if (list != null) {
+                addObjects(node, list);
+            }
+            node.setCompleted(true);
+        }
     }
 
     public static void main(String ...args)
@@ -36,6 +58,19 @@ public class InspectCtrl
         });
 
     }
+
+
+    public static void createWindow(Object obj)
+    {
+        InspectCtrl inspectCtrl = new InspectCtrl();
+        SwingUtilities.invokeLater(()->{
+            inspectCtrl.window.setVisible(true);
+            //inspectCtrl.setObject(Example.createExample());
+            inspectCtrl.setObject(obj);
+        });
+
+    }
+
 
     private void setObject(Object obj) {
         InspectTreeNode root = new InspectTreeNode("Root");
@@ -62,11 +97,6 @@ public class InspectCtrl
                 node.setMapping(mapping);
                 node.setName(mapping.getName(obj));
                 parent.getChildren().add(node);
-
-                List list = (List) mapping.getSubObjects(obj);
-                if (list != null) {
-                    addObjects(node, list);
-                }
             }
 
         }

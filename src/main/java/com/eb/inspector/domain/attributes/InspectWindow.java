@@ -4,6 +4,7 @@ import com.eb.base.gui.EbSplitPanel;
 import lombok.Getter;
 
 import javax.swing.*;
+import javax.swing.tree.TreePath;
 import java.awt.*;
 
 @Getter
@@ -20,9 +21,17 @@ public class InspectWindow extends JFrame {
         initializeView();
     }
 
+    public InspectTreeNode getSelectedNode() {
+        TreePath path = getTree().getSelectionPath();
+
+        Object lastComp = path.getLastPathComponent();
+
+        return lastComp instanceof InspectTreeNode ? (InspectTreeNode) lastComp : null;
+    }
+
     public void initializeView() {
         this.setTitle("Inspect Window");
-        this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        this.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         this.setBounds(100, 100, 450, 300);
         this.setLocationRelativeTo(null);
 

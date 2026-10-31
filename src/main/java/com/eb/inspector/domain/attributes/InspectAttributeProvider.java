@@ -2,7 +2,8 @@ package com.eb.inspector.domain.attributes;
 
 import java.util.ArrayList;
 import java.util.List;
-import com.eb.inspector.*;
+
+import com.eb.inspector.Example;
 
 /**
  * Generischer Provider, der Attribute für eine Zielklasse T bereitstellt.

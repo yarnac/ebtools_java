@@ -1,10 +1,11 @@
 
 package com.eb.inspector.domain.attributes;
 
+import com.eb.base.gui.EbGridBagUtil;
+
 import javax.swing.*;
 import javax.swing.tree.TreePath;
 import java.awt.*;
-import java.lang.reflect.Method;
 import java.util.List;
 
 public class PropertyDetailPane extends JPanel {
@@ -35,7 +36,7 @@ public class PropertyDetailPane extends JPanel {
     @SuppressWarnings("unchecked")
     private void updateDetailPanel() {
         TreePath path = window.getTree().getSelectionPath();
-        var mainPanel = (JPanel) scrollPane.getViewport().getView();
+        JPanel mainPanel = (JPanel) scrollPane.getViewport().getView();
 
         if (path == null || !(path.getLastPathComponent() instanceof InspectTreeNode node)) {
             clearDetailPanel(mainPanel);
@@ -49,6 +50,8 @@ public class PropertyDetailPane extends JPanel {
             return;
         }
 
+        EbGridBagUtil util = new EbGridBagUtil(mainPanel,0);
+
         List<InspectMappingAttribute> attrs = mapping.getAttributes();
         mainPanel.removeAll(); // Clean slate
 
@@ -56,7 +59,8 @@ public class PropertyDetailPane extends JPanel {
             for (var attr : attrs) {
                 String name = attr.getName();
                 Object value = attr.getValueProvider().apply(obj);
-
+                JTextArea area = createPropertyEdit(name, value);
+                util.addLabeledFieldRow(area, name, 0.25, GridBagConstraints.BOTH);
                 JPanel row = createPropertyRow(name, value);
                 mainPanel.add(row);
                 mainPanel.add(Box.createVerticalStrut(6)); // Abstand
@@ -71,6 +75,17 @@ public class PropertyDetailPane extends JPanel {
         panel.removeAll();
         revalidate();
         repaint();
+    }
+
+    private JTextArea createPropertyEdit(String name, Object value) {
+        String text = value == null ? "null" : value.toString();
+        JTextArea area = new JTextArea(text);
+        // area.setFont(VALUE_FONT);
+        area.setEditable(false);
+        area.setBackground(UIManager.getColor("Panel.background"));
+        area.setLineWrap(true);
+        area.setWrapStyleWord(true);
+        return area;
     }
 
     private JPanel createPropertyRow(String name, Object value) {

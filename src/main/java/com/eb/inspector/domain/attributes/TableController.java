@@ -1,6 +1,7 @@
 package com.eb.inspector.domain.attributes;
 
 import lombok.Getter;
+
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.tree.TreePath;
