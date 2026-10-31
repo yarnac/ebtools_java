@@ -61,8 +61,10 @@ public class PropertyDetailPane extends JPanel {
                 Object value = attr.getValueProvider().apply(obj);
                 JTextArea area = createPropertyEdit(name, value);
                 util.addLabeledFieldRow(area, name, 0.25, GridBagConstraints.BOTH);
+                /*
                 JPanel row = createPropertyRow(name, value);
                 mainPanel.add(row);
+                 */
                 mainPanel.add(Box.createVerticalStrut(6)); // Abstand
             }
         }
