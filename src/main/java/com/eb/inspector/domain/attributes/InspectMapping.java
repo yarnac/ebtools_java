@@ -25,12 +25,12 @@ public class InspectMapping<T> {
 
     public String getName(T o) {
         if (toStringFunction == null)
-            return getName();
+            return "" + o;
         try {
             return getName() + ": " + toStringFunction.apply(o);
         }
         catch (Exception e) {
-            return getName() + " null ";
+            return getName();
         }
     }
 

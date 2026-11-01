@@ -21,6 +21,10 @@ public class InspectWindow extends JFrame {
         initializeView();
     }
 
+    public void addInspectValueConverter(IInspectValueConverter inspectValueConverter) {
+        propertyDetailPane.addInspectValueConverter(inspectValueConverter);
+    }
+
     public InspectTreeNode getSelectedNode() {
         TreePath path = getTree().getSelectionPath();
 

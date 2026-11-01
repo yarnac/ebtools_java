@@ -6,11 +6,13 @@ import com.eb.base.gui.EbGridBagUtil;
 import javax.swing.*;
 import javax.swing.tree.TreePath;
 import java.awt.*;
+import java.util.ArrayList;
 import java.util.List;
 
 public class PropertyDetailPane extends JPanel {
     private final InspectWindow window;
     private final JScrollPane scrollPane;
+    private List<IInspectValueConverter> inspectValueConverterList = new ArrayList<>();
 
     public PropertyDetailPane(InspectWindow window) {
         this.window = window;
@@ -38,7 +40,9 @@ public class PropertyDetailPane extends JPanel {
         TreePath path = window.getTree().getSelectionPath();
         JPanel mainPanel = (JPanel) scrollPane.getViewport().getView();
 
-        if (path == null || !(path.getLastPathComponent() instanceof InspectTreeNode node)) {
+        if (path == null
+                || !(path.getLastPathComponent() instanceof InspectTreeNode node)
+                || node.getParent() == null) {
             clearDetailPanel(mainPanel);
             return;
         }
@@ -55,12 +59,27 @@ public class PropertyDetailPane extends JPanel {
         List<InspectMappingAttribute> attrs = mapping.getAttributes();
         mainPanel.removeAll(); // Clean slate
 
-        if (attrs != null) {
+        if (attrs == null || attrs.isEmpty()) {
+            String name = node.getName();
+            JComponent area = createPropertyEdit(name, "" + obj);
+            util.addLabeledFieldRow(area, name, 0, GridBagConstraints.HORIZONTAL);
+        }
+        else {
             for (var attr : attrs) {
                 String name = attr.getName();
                 Object value = attr.getValueProvider().apply(obj);
-                JTextArea area = createPropertyEdit(name, value);
-                util.addLabeledFieldRow(area, name, 0.25, GridBagConstraints.BOTH);
+
+                for (IInspectValueConverter converter : inspectValueConverterList) {
+                    value = converter.convertValue(value, mapping);
+                }
+
+                JComponent area = createPropertyEdit(name, value);
+                if (area instanceof JTextField)
+                    util.addLabeledScrollPaneWithFieldRow(area, name, 0.25, GridBagConstraints.BOTH);
+                else
+                    util.addLabeledFieldRow(area, name, 0, GridBagConstraints.HORIZONTAL);
+
+
                 /*
                 JPanel row = createPropertyRow(name, value);
                 mainPanel.add(row);
@@ -79,8 +98,27 @@ public class PropertyDetailPane extends JPanel {
         repaint();
     }
 
-    private JTextArea createPropertyEdit(String name, Object value) {
-        String text = value == null ? "null" : value.toString();
+    private JComponent createPropertyEdit(String name, Object value) {
+        String text;
+        if (name != null && name.equals("children")) {
+            text = "children";
+        }
+        else {
+            text = value == null ? "null" : createToString(value);
+        }
+
+        if (text.length() < 80 &&  !text.contains("\n")) {
+            JLabel textField = new JLabel(text);
+            textField.setBackground(UIManager.getColor("Panel.background"));
+            return textField;
+        }
+
+        if (text.length() < 80 &&  !text.contains("\n")) {
+            JTextField textField = new JTextField(text);
+            textField.setEditable(false);
+            textField.setBackground(UIManager.getColor("Panel.background"));
+            return textField;
+        }
         JTextArea area = new JTextArea(text);
         // area.setFont(VALUE_FONT);
         area.setEditable(false);
@@ -88,6 +126,13 @@ public class PropertyDetailPane extends JPanel {
         area.setLineWrap(true);
         area.setWrapStyleWord(true);
         return area;
+    }
+
+    private String createToString(Object value) {
+        if (value == null) return "null";
+        String text = value.toString();
+        if (text.length() > 20000) return text.substring(0, 20000) + "...";
+        return text;
     }
 
     private JPanel createPropertyRow(String name, Object value) {
@@ -178,5 +223,10 @@ public class PropertyDetailPane extends JPanel {
         */
 
        return row;
+    }
+
+
+    public void addInspectValueConverter(IInspectValueConverter inspectValueConverter) {
+        inspectValueConverterList.add(inspectValueConverter);
     }
 }

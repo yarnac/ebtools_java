@@ -12,6 +12,7 @@ import java.util.Map;
 
 public class InspectCtrl
 {
+    private static int maxSubObjectCount = 20;
     private final InspectWindow window;
     private final IniFile myIniFile;
     private TableController tableController;
@@ -20,6 +21,7 @@ public class InspectCtrl
         window = new InspectWindow();
         myIniFile = IniFileProvider.createIniFile("Inspect.ini");
         GuiDecorator decorator = new GuiDecorator(window, myIniFile, "Einstellungen");
+        GenericsInspectAttributeProvider.reset();
 
         // tableController = new TableController(window);
 
@@ -31,9 +33,13 @@ public class InspectCtrl
 
     }
 
+    public static void setMaxSubObjectCount(int m) {
+        maxSubObjectCount = m;
+    }
+
     private void updateSelectedNode() {
         InspectTreeNode node = window.getSelectedNode();
-        if (node == null) {
+        if (node == null || node.getParent() == null) {
             return;
         }
 
@@ -60,12 +66,13 @@ public class InspectCtrl
     }
 
 
-    public static void createWindow(Object obj)
+    public static void createInspectCtrl(Object obj, IInspectValueConverter erkInspectValueConverter)
     {
         InspectCtrl inspectCtrl = new InspectCtrl();
         SwingUtilities.invokeLater(()->{
             inspectCtrl.window.setVisible(true);
             //inspectCtrl.setObject(Example.createExample());
+            inspectCtrl.addInspectValueConverter(erkInspectValueConverter);
             inspectCtrl.setObject(obj);
         });
 
@@ -90,13 +97,29 @@ public class InspectCtrl
             addObjects(parent, obj);
         }
         else {
-            InspectMapping mapping = InspectAttributeProvider.getInspectMapping(obj.getClass());
-            if (mapping != null)
-            {
-                InspectTreeNode node = new InspectTreeNode(obj.getClass().getName(), obj);
-                node.setMapping(mapping);
-                node.setName(mapping.getName(obj));
+            String name = null;
+            if (obj instanceof Tupel) {
+                name = "" + ((Tupel<?, ?>) obj).getFirst();
+                obj = ((Tupel<?, ?>) obj).getSecond();
+            }
+            if (isListeOderArray(obj)) {
+                InspectTreeNode node = new InspectTreeNode(name, obj);
+                node.setParent(parent);
                 parent.getChildren().add(node);
+                addObjects(node, obj);
+            }
+            else {
+                InspectMapping mapping = InspectAttributeProvider.getInspectMapping(obj.getClass());
+                if (mapping != null) {
+                    InspectTreeNode node = new InspectTreeNode(obj.getClass().getName(), obj);
+                    node.setMapping(mapping);
+                    node.setParent(parent);
+                    if (name == null)
+                        name = mapping.getName(obj);
+
+                    node.setName(name);
+                    parent.getChildren().add(node);
+                }
             }
 
         }
@@ -114,18 +137,24 @@ public class InspectCtrl
 
         if (obj.getClass().isArray()) {
             int length = Array.getLength(obj);
-            for (int i = 0; i < length; i++) {
+            for (int i = 0; i < Math.max(maxSubObjectCount, length); i++) {
                 addObject(root, Array.get(obj, i));
             }
         } else if (obj instanceof Iterable<?> iterable) {
+            int i=0;
             for (Object item : iterable) {
-                addObject(root, item);
+                if (i++ < maxSubObjectCount) {
+                    addObject(root, item);
+                }
             }
         } else if (obj instanceof Map<?, ?> map) {
+            int i=0;
             // Bei Maps werden typischerweise die Werte (Values) inspiziert
-            for (Object value : map.values()) {
-                addObject(root, value);
-            }
+            map.forEach((x,y)->{
+                Tupel tupel = new Tupel(x,y);
+                addObject(root, tupel);
+
+            });
         }
     }
 
@@ -140,5 +169,9 @@ public class InspectCtrl
         return obj.getClass().isArray()
                 || obj instanceof Iterable<?>
                 || obj instanceof Map<?, ?>;
+    }
+
+    public void addInspectValueConverter(IInspectValueConverter inspectValueConverter) {
+        window.addInspectValueConverter(inspectValueConverter);
     }
 }

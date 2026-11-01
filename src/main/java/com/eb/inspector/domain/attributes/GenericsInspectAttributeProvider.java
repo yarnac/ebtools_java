@@ -29,6 +29,8 @@ public final class GenericsInspectAttributeProvider {
             return null;
         }
 
+        CACHE.clear();
+
         return CACHE.computeIfAbsent(clazz, GenericsInspectAttributeProvider::buildMapping);
     }
 
@@ -52,9 +54,7 @@ public final class GenericsInspectAttributeProvider {
 
             for (Field field : fields) {
 
-                if (field.getType().getName().startsWith("java.lang")) {
-                    continue;
-                }
+
                 // Nur Instanzfelder: Keine static, synthetic oder bridging-Kompiliererzeugnisse
                 if (java.lang.reflect.Modifier.isStatic(field.getModifiers()) || field.isSynthetic()) {
                     continue;
@@ -86,6 +86,9 @@ public final class GenericsInspectAttributeProvider {
     }
 
     static HashSet<Object> set = new HashSet<>();
+    public static void reset() {
+        CACHE.clear();
+    }
 
     @SuppressWarnings("unchecked")
     public static List<Object> getComplexObjectsNotNull(Object obj) {
@@ -101,6 +104,11 @@ public final class GenericsInspectAttributeProvider {
             for (Field field : currentClass.getDeclaredFields()) {
                 // Ignoriere statische Felder
                 if (java.lang.reflect.Modifier.isStatic(field.getModifiers())) continue;
+                if (currentClass.getSimpleName().equals("LogTreeNode"))
+                {
+                    if (field.getName().equals("parent"))
+                        continue;
+                }
 
                 try {
                     // Java 21: setAccessible bypass Module-Protection für interne UI-Inspektionen
@@ -110,7 +118,8 @@ public final class GenericsInspectAttributeProvider {
                     // Nur nicht-null Werte extrahieren & ggf. automatisch aufsplitten
                     if (value != null && !set.contains(value)) {
                         set.add(value);
-                        addNonNullSafe(value, result);
+                        Tupel<String, Object> tupel = new Tupel<>(field.getName(), value);
+                        addNonNullSafe(tupel, result);
                     }
 
                 } catch (IllegalAccessException ignored) {
