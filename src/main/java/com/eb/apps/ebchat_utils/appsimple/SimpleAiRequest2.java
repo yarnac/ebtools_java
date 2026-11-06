@@ -19,7 +19,7 @@ public class SimpleAiRequest2 {
                         Schreibe einen http Client für die Ollama API.
                         """,
                         OllamaClient.QWEN3_8,
-                        OllamaClient.HOST_MACBOOK);
+                        OllamaClient.HOST_MACSTUDIO);
                 PitMessageBox.show("Llm Request Antwort", response.getAnswerWithDetails());
             }
         });

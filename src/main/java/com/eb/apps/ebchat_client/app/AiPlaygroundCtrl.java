@@ -312,7 +312,7 @@ public class AiPlaygroundCtrl {
 
     private void setContext(ContextWithFiles s) {
 
-        window.setInputPraefixText(s.getUserString());
+        if (s!=null) window.setInputPraefixText(s.getUserString());
     }
 
     private void sendRequest(boolean append) {
