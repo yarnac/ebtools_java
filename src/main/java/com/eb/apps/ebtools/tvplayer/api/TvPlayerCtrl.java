@@ -13,19 +13,21 @@ import com.eb.apps.ebtools.tvplayer.view.TvPlayerView;
 import lombok.Getter;
 
 import javax.swing.*;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Getter
 public class TvPlayerCtrl {
 
+    public static final Set<String> SCHROTT_KATEGORIEN_SET = Set.of("Schrott", "x", "Musik", "Shops", "Religion");
+    public static final String HTTPS_WWW_HOERZU_DE_TV_PROGRAMM_JETZT = "https://www.hoerzu.de/tv-programm/jetzt";
+    private static String getTvKategorisierungFilePfad() {return GlobaleEinstellungen.getDataPfadJUser("Tv/TvListeAll.txt");}
+    private static String getTvM3uFilePfad() {return GlobaleEinstellungen.getDataPfadJUser("Tv/tv.m3u");}
+
     private final IniFile myIniFile;
     private List<TvItem> tvM3UItems;
     private TvKategorisierung kategorisierung;
-    private TvPlayerView view;
+    private final TvPlayerView view;
     private boolean shouldShowAll;
     private boolean ignoreChangeKategorien;
 
@@ -37,11 +39,8 @@ public class TvPlayerCtrl {
 
         GuiDecorator decorator = new GuiDecorator();
         decorate(decorator);
-        decorator.addMouseDoubleClickAction(view.getLstTvItems(), ()->onShowFile(view.getSelectedTvItem()));
 
         view.getCbKategorien().addListSelectionListener(e -> kategorieChanged());
-
-        //view.getLstTvItems().addListSelectionListener(e -> onShowFile(e));
 
         reload();
     }
@@ -52,30 +51,25 @@ public class TvPlayerCtrl {
 
         decorator.addToolbarButton("main", "Hörzu", IC.VIDEO_LIBRARY_SEARCH, x->openHoerzu());
         decorator.addToolbarButton("main", "Open Tv File", IC.EDITDOC, x->tvFileBearbeiten());
-        decorator.addToolbarButton("main", "HÖRZU", IC.HELP_BLUE, x->openHoerzu());
         decorator.addToolbarButton("main", "Reload", IC.REFRESHPAGE, x->reload());
         decorator.addToolbarButton("main", "Export", IC.SAVE_ADD, x->copyScript());
         decorator.addToolbarButton("main", "Toggle Show All", IC.FILTER, x->toggleShowAll());
-
-
+        decorator.addMouseDoubleClickAction(view.getLstTvItems(), ()->onShowFile(view.getSelectedTvItem()));
     }
 
     private void openHoerzu() {
-        FileUtil.showWebseite("https://www.hoerzu.de/tv-programm/jetzt");
+        FileUtil.showWebseite(HTTPS_WWW_HOERZU_DE_TV_PROGRAMM_JETZT);
     }
 
-    private void tvFileBearbeiten() {
-        FileUtil.open(GlobaleEinstellungen.getDataPfadJUser("Tv/TvListeAll.txt"));
-    }
+    private void tvFileBearbeiten() {FileUtil.open(getTvKategorisierungFilePfad());}
 
     private void copyScript() {
 
     }
 
     private void kategorieChanged() {
-        if (ignoreChangeKategorien) {
-            return;
-        }
+        if (ignoreChangeKategorien) {return;}
+
         String cat = view.getCbKategorien().getSelectedValue();
         if (cat!=null)
         {
@@ -92,12 +86,11 @@ public class TvPlayerCtrl {
         showFile(item);
     }
 
-
     private void transferKategorien()
     {
         String oldValue = view.getCbKategorien().getSelectedValue();
         ignoreChangeKategorien = true;
-        view.setVisibleKategorien(kategorisierung.getKategorien().stream().filter(x->isAllowedKategorie(x)).toList());
+        view.setVisibleKategorien(kategorisierung.getKategorien().stream().filter(this::isAllowedKategorie).toList());
         ignoreChangeKategorien = false;
         view.getCbKategorien().setSelectedValue(oldValue,true);
     }
@@ -105,41 +98,33 @@ public class TvPlayerCtrl {
     private void transfer() {
         String cat = myIniFile.getSectionValue("Einstellungen", "LastCategory", null);
         view.getCbKategorien().setSelectedValue(cat, true);
-        view.setVisibleTvItems(getTvM3UItems().stream().filter(x->isAllowedItem(x)).collect(Collectors.toList()));
+        view.setVisibleTvItems(getTvM3UItems().stream().filter(this::isAllowedItem).collect(Collectors.toList()));
     }
 
-    Set<String> schrottKategorien = Arrays.stream("Schrott,x,Musik,Shops,Religion".split(",")).collect(Collectors.toSet());
     private boolean isAllowedKategorie(String x) {
-        if (shouldShowAll || x.endsWith("*"))
-            return true;
-
-        if (schrottKategorien.contains(x))
-            return false;
-
+        if (shouldShowAll || x.endsWith("*")) return true;
+        if (SCHROTT_KATEGORIEN_SET.contains(x)) return false;
         return !kategorisierung.getKategorien().contains(x + "*");
     }
 
     private boolean isAllowedItem(TvItem x) {
-        String kategorie = (String) view.getCbKategorien().getSelectedValue();
-        if (kategorie == null) {
-            return true;
-        }
-        List <String> kategorien = getKategorisierung().getItemToKategorien().get(x.getName());
-        if (kategorien==null)
-            return true;
+        String kategorie = view.getCbKategorien().getSelectedValue();
+        if (kategorie == null) return true;
+
+        List<String> kategorien = Optional.ofNullable(getKategorisierung())
+                .map(TvKategorisierung::getItemToKategorien)
+                .map(map -> map.get(x.getName()))
+                .orElse(Collections.emptyList());
+
         for (String k : kategorien) {
-            if (k.startsWith(kategorie)) {
-                return true;
-            }
+            if (k.startsWith(kategorie)) return true;
         }
         return false;
     }
 
-
     private void loadKategorisierung(String ebToolsFileName) {
         kategorisierung = TvKategorizer.read(ebToolsFileName);
     }
-
 
     private void loadTvList(String fileName) {
         tvM3UItems = TvItemReader.readTvM3UItems(fileName);
@@ -159,8 +144,9 @@ public class TvPlayerCtrl {
     }
 
     public void reload() {
-        loadTvList(GlobaleEinstellungen.getDataPfadJUser("CSharp/EbTool/Medien/tv.m3u"));
-        loadKategorisierung(GlobaleEinstellungen.getDataPfadJUser("CSharp/EbTool/Medien/TvListeAll.txt"));
+
+        loadTvList(getTvM3uFilePfad());
+        loadKategorisierung(getTvKategorisierungFilePfad());
         transferKategorien();
         transfer();
     }
