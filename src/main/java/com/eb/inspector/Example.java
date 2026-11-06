@@ -1,3 +1,11 @@
+/*
+ * Copyright parcIT GmbH
+ *
+ * Dieser Source-Code steht unter dem alleinigen Urheberschutz der parcIT GmbH.
+ * Die Nutzung und Weitergabe ist nur mit ausdrücklicher Erlaubnis der parcIT GmbH gestattet.
+ *
+ */
+
 package com.eb.inspector;
 
 import lombok.Getter;
@@ -39,6 +47,10 @@ public class Example {
         Example child = new Example();
         child.name = s;
         children.add(child);
+    }
+
+    public int getChildrenCount(){
+        return children.size();
     }
 
 }
