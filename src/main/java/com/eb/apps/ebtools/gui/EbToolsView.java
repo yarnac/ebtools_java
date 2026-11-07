@@ -1,5 +1,6 @@
 package com.eb.apps.ebtools.gui;
 
+import com.eb.apps.ebchat_client.domain.chat.GlobaleEinstellungen;
 import com.eb.base.gui.ICF;
 
 import javax.swing.*;
@@ -69,8 +70,6 @@ public class EbToolsView {
 		getFrame().setTitle("Tools");
 		Image image = getImage("Tools");
 		getFrame().setIconImage(image);
-		Taskbar taskbar = Taskbar.getTaskbar();
-		taskbar.setIconImage(image);
 		getFrame().setBounds(100, 100, 450, 75);
 		getFrame().setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		
