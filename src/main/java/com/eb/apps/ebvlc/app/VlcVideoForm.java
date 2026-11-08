@@ -61,7 +61,7 @@ public class VlcVideoForm {
         if (mainToolBar == null) {
             mainToolBar = new JToolBar();
             mainToolBar.setName("MainToolbar");
-            mainToolBar.setLayout(new FlowLayout(FlowLayout.LEFT));
+            mainToolBar.setFloatable(false);
             mainToolBar.revalidate();
             mainToolBar.repaint();
         }
@@ -125,5 +125,9 @@ public class VlcVideoForm {
         if (n<0)
             return;
         model.remove(n);
+    }
+
+    public JToolBar getFilesToolBar() {
+        return mainSplitPanel.getToolBar1();
     }
 }

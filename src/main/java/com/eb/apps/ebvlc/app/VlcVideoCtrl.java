@@ -81,17 +81,23 @@ public class VlcVideoCtrl {
 
         cbDirectories = guiDecorator.addToolbarComboBox("MainToolbar", "Verzeichnisse", verzeichnisse, x -> handleChangedVerzeichnis(x));
 
-        guiDecorator.addToolbarButton("MainToolbar", "Delete selected files", IC.DELETE_RED, e -> deleteSelectedFiles());
-        guiDecorator.addToolbarButton("MainToolbar", "Play files", IC.MB_PLAY, e -> SelectAndPlayNextFiles(0));
-        guiDecorator.addToolbarButton("MainToolbar", "Select previous files", IC.PREV, e -> SelectAndPlayNextFiles(-1));
-        guiDecorator.addToolbarButton("MainToolbar", "Select next files", IC.NEXT, e -> SelectAndPlayNextFiles(1));
-        guiDecorator.addToolbarButton("MainToolbar", "Shuffle Files", IC.MALE_USER, e -> ShuffleFiles());
         guiDecorator.addToolbarButton("MainToolbar", "Refresh", IC.REFRESHPAGE, e -> DeleteShowedFiles());
         guiDecorator.addToolbarButton("MainToolbar", "Refresh", IC.REFRESHPAGE, e -> ShowActVlcFile());
 
         guiDecorator.addMouseDoubleClickAction(vlcVideoForm.getLstFiles(), this::playSelectedFiles);
         guiDecorator.addKeyPressAction(vlcVideoForm.getLstFiles(),"N",()->SelectAndPlayNextFiles(1));
         guiDecorator.addKeyPressAction(vlcVideoForm.getLstFiles(),"P",()->SelectAndPlayNextFiles(-1));
+
+        guiDecorator.addContainer("FilesToolBar", vlcVideoForm.getFilesToolBar());
+        guiDecorator.addToolbarButton("FilesToolBar", "Play files", IC.MB_PLAY, e -> SelectAndPlayNextFiles(0));
+        guiDecorator.addToolbarButton("FilesToolBar", "Select previous files", IC.PREV, e -> SelectAndPlayNextFiles(-1));
+        guiDecorator.addToolbarButton("FilesToolBar", "Select next files", IC.NEXT, e -> SelectAndPlayNextFiles(1));
+        guiDecorator.addToolbarButton("FilesToolBar", "Shuffle Files", IC.MALE_USER, e -> ShuffleFiles());
+        guiDecorator.addToolbarButton("FilesToolBar", "Delete selected files", IC.DELETE_RED, e -> deleteSelectedFiles());
+        guiDecorator.addToolbarButton("FilesToolBar", "Refresh", IC.REFRESHPAGE, e -> DeleteShowedFiles());
+
+
+
         return cbDirectories;
     }
 
