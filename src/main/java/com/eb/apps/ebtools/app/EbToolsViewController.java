@@ -1,5 +1,6 @@
 package com.eb.apps.ebtools.app;
 
+import com.eb.apps.ebchat_client.domain.chat.GlobaleEinstellungen;
 import com.eb.apps.ebtools.tobj.DownloadsManager;
 import com.eb.apps.ebtools.tobj.EbToolsManager;
 import com.eb.apps.ebtools.tobj.Util;
@@ -35,7 +36,11 @@ public class EbToolsViewController {
 		IC.Size = 24;
 		decorator = new GuiDecorator(view.getFrame(), manager.getIniFile(), "Einstellungen");
 		view.getFrame().setIconImage(decorator.getImage(IC.TOOLS));
-		Taskbar.getTaskbar().setIconImage(decorator.getImage(IC.TOOLS,32));
+
+		if (GlobaleEinstellungen.isMacOs()) {
+			Taskbar.getTaskbar().setIconImage(decorator.getImage(IC.TOOLS,32));
+		}
+
 
 		addToolbarButtons();
 		addMenus();
