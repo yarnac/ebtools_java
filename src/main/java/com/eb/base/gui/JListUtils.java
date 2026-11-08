@@ -8,10 +8,13 @@ public class JListUtils {
 
     public static void selectNextBlock(JList<?> list, int direction) {
         int size = list.getModel().getSize();
-
         if (size == 0) return;
 
+        if (direction == 0 && !list.getSelectedValuesList().isEmpty()) return;
+
         int selectionSize = list.getMaxSelectionIndex()-list.getMinSelectionIndex();
+        if (selectionSize == 0)
+            selectionSize = 10;
 
         int newMinselecktionIndex = list.getMinSelectionIndex() + selectionSize * direction + direction;
         int newMaxselectionIndex = list.getMaxSelectionIndex() + selectionSize * direction + direction;

@@ -1,13 +1,13 @@
 package com.eb.apps.ebvlc.app;
 
-import com.eb.base.gui.GuiDecorator;
-import com.eb.base.gui.IC;
+import com.eb.base.gui.*;
+import com.eb.base.gui.persist.ComponentPersisterFactory;
+import com.eb.base.gui.persist.IComponentPersister;
 import com.eb.base.inifile.api.IniFile;
 import com.eb.base.inifile.api.IniFileProvider;
 import com.eb.base.io.FileUtil;
 import com.eb.apps.ebchat_client.domain.chat.GlobaleEinstellungen;
 import com.eb.apps.ebmusic.tobj.MusicPlayer;
-import com.eb.base.gui.JListUtils;
 import lombok.Getter;
 
 import javax.swing.*;
@@ -16,9 +16,9 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 
 import static java.lang.System.out;
@@ -38,34 +38,51 @@ public class VlcVideoCtrl {
     @Getter
     private final GuiDecorator guiDecorator;
     private final VlcVideoForm vlcVideoForm;
+    private final JComboBox<String> cbDirectories;
+    private final VlcVideoManager vlcManager;
     List<String> allFileNames;
 
     public static void main(String[] args) {
-
         new VlcVideoCtrl();
     }
 
     public VlcVideoCtrl() {
         vlcVideoForm = new VlcVideoForm();
-        iniFile = IniFileProvider.createIniFile(GlobaleEinstellungen.getDataPfadJUser("VlcVideoCtrl.ini"));
 
+        iniFile = IniFileProvider.createIniFile(GlobaleEinstellungen.getDataPfadJUser("VlcVideoCtrl.ini"));
+        vlcManager = new VlcVideoManager(iniFile);
 
         // vlcVideoForm.setFileNames(allFileNames);
-        toolBar = vlcVideoForm.getToolBar();
+        toolBar = vlcVideoForm.getMainToolBar();
         frame = vlcVideoForm.getFrame();
+        initIcon();
+        toolBar.invalidate();
+        toolBar.repaint();
+
 
         guiDecorator = new GuiDecorator(frame, iniFile, "Einstellungen");
+        cbDirectories = decorate(vlcManager.getVerzeichnisse());
+
+        IComponentPersister persister = ComponentPersisterFactory.createIniFilePersister(iniFile);
+        persister.addComponentItem(cbDirectories,"SelectedVerzeichnis");
+        persister.loadAndSetComponentItems();
+        guiDecorator.addCloseAction(persister::persistComponentItems);
+
+    }
+
+    private JComboBox<String> decorate(List<String> verzeichnisse) {
+        final JComboBox<String> cbDirectories;
         frame.setIconImage(guiDecorator.getImage(IC.Triangle_Red));
-        Taskbar.getTaskbar().setIconImage(guiDecorator.getImage(IC.Triangle_Red, 32));
+
 
         guiDecorator.addContainer("MainToolbar", toolBar);
 
         guiDecorator.addEditIniFileButton("MainToolbar");
-        List<String> verzeichnisse = iniFile.getSectionValues("Verzeichnisse");
-        guiDecorator.addToolbarComboBox("MainToolbar", "Verzeichnisse", verzeichnisse, x -> handleChangedVerzeichnis(x));
+
+        cbDirectories = guiDecorator.addToolbarComboBox("MainToolbar", "Verzeichnisse", verzeichnisse, x -> handleChangedVerzeichnis(x));
 
         guiDecorator.addToolbarButton("MainToolbar", "Delete selected files", IC.DELETE_RED, e -> deleteSelectedFiles());
-        guiDecorator.addToolbarButton("MainToolbar", "Play files", IC.MB_PLAY, e -> SelectAndPlayNextFiles(-1));
+        guiDecorator.addToolbarButton("MainToolbar", "Play files", IC.MB_PLAY, e -> SelectAndPlayNextFiles(0));
         guiDecorator.addToolbarButton("MainToolbar", "Select previous files", IC.PREV, e -> SelectAndPlayNextFiles(-1));
         guiDecorator.addToolbarButton("MainToolbar", "Select next files", IC.NEXT, e -> SelectAndPlayNextFiles(1));
         guiDecorator.addToolbarButton("MainToolbar", "Shuffle Files", IC.MALE_USER, e -> ShuffleFiles());
@@ -75,14 +92,28 @@ public class VlcVideoCtrl {
         guiDecorator.addMouseDoubleClickAction(vlcVideoForm.getLstFiles(), this::playSelectedFiles);
         guiDecorator.addKeyPressAction(vlcVideoForm.getLstFiles(),"N",()->SelectAndPlayNextFiles(1));
         guiDecorator.addKeyPressAction(vlcVideoForm.getLstFiles(),"P",()->SelectAndPlayNextFiles(-1));
+        return cbDirectories;
+    }
 
-        toolBar.invalidate();
-        toolBar.repaint();
-
-        if (!verzeichnisse.isEmpty()) {
-            handleChangedVerzeichnis(verzeichnisse.get(0));
+    private static void initIcon() {
+        Image image = new ImageIcon(ICF.Tablet.getImage(24)).getImage();
+        frame.setIconImage(image);
+        if (GlobaleEinstellungen.isMacOs()) {
+            Taskbar taskbar = Taskbar.getTaskbar();
+            taskbar.setIconImage(image);
         }
+    }
 
+    private List<String> getSelectedFileNames()
+    {
+        return vlcVideoForm.getSelectedFiles()
+                .stream()
+                .map(x-> Path.of(getVerzeichnis(), x).toString())
+                .toList();
+    }
+
+    private String getVerzeichnis() {
+        return cbDirectories.getSelectedItem().toString();
     }
 
     private void deleteSelectedFiles() {
@@ -122,8 +153,22 @@ public class VlcVideoCtrl {
     }
 
     private void handleChangedVerzeichnis(String fileName) {
-        loadVideoFiles(fileName);
-        ShuffleFiles();
+        vlcManager.setVerzeichnis(fileName);
+
+        List<String> temp = FileUtil.getFileNamesAll(fileName);
+        Collections.shuffle(temp);
+        setFileNames(temp);
+    }
+
+    private void setFileNames(List<String> fileFullNames) {
+
+        List<String> temp = fileFullNames
+                .stream()
+                .map(x -> x.replace(cbDirectories.getSelectedItem().toString() + "/", ""))
+                .toList();
+
+
+        vlcVideoForm.setFileNames(temp);
     }
 
 
@@ -148,7 +193,8 @@ public class VlcVideoCtrl {
     List<String> showedFiles = new ArrayList<>();
     private void loadVideoFiles(String fileName) {
         List<String> temp = FileUtil.getFileNamesAll(fileName);
-        temp.sort(Comparator.naturalOrder());
+
+        Collections.shuffle(temp);
 
 
 
@@ -177,12 +223,13 @@ public class VlcVideoCtrl {
 
 
     private void playSelectedFiles() {
-        List<String> selectedFileNames = vlcVideoForm.getSelectedFiles();
-        if (selectedFileNames.size()<=1)
-        {
-            JListUtils.selectLineInterval(vlcVideoForm.getLstFiles(), 8);
-            selectedFileNames = vlcVideoForm.getSelectedFiles();
+        List<String> selectedFileNames = getSelectedFileNames();
+        if (selectedFileNames == null || selectedFileNames.isEmpty()) {
+            return;
         }
+
+        JListUtils.selectLineInterval(vlcVideoForm.getLstFiles(), 8);
+        selectedFileNames = getSelectedFileNames();
 
         saveShowedFiles(selectedFileNames);
         new MusicPlayer().play(selectedFileNames);
