@@ -75,15 +75,6 @@ public class MusicPlayer {
 			command.add("-a");
 			command.add("VLC");
 			command.add("--args");
-
-
-			StringBuilder strb = new StringBuilder();
-			for(String filename : filenamesToPlay) {
-				strb.append("\"" + filename + "\"");
-				strb.append(" ");
-			}
-			//command.add(strb.toString());
-			// Alle Dateien anhängen
 			command.addAll(filenamesToPlay);
 
 			ProcessBuilder pb = new ProcessBuilder(command);
