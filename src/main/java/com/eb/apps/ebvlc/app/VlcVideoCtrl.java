@@ -16,7 +16,6 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -51,6 +50,8 @@ public class VlcVideoCtrl {
 
         iniFile = IniFileProvider.createIniFile(GlobaleEinstellungen.getDataPfadJUser("VlcVideoCtrl.ini"));
         vlcManager = new VlcVideoManager(iniFile);
+
+        vlcVideoForm.setDeletedFiles(vlcManager.getDeletedFileNames());
 
         // vlcVideoForm.setFileNames(allFileNames);
         toolBar = vlcVideoForm.getMainToolBar();
@@ -93,12 +94,59 @@ public class VlcVideoCtrl {
         guiDecorator.addToolbarButton("FilesToolBar", "Select previous files", IC.PREV, e -> SelectAndPlayNextFiles(-1));
         guiDecorator.addToolbarButton("FilesToolBar", "Select next files", IC.NEXT, e -> SelectAndPlayNextFiles(1));
         guiDecorator.addToolbarButton("FilesToolBar", "Shuffle Files", IC.MALE_USER, e -> ShuffleFiles());
+        guiDecorator.addToolbarButton("FilesToolBar", "Delete selected files", ICF.Database_Delete, e -> markLockedFile());
         guiDecorator.addToolbarButton("FilesToolBar", "Delete selected files", IC.DELETE_RED, e -> deleteSelectedFiles());
         guiDecorator.addToolbarButton("FilesToolBar", "Refresh", IC.REFRESHPAGE, e -> DeleteShowedFiles());
+
+        guiDecorator.addContainer("DeletedFilesToolBar", vlcVideoForm.getDeletedFilesToolBar());
+        guiDecorator.addToolbarButton("DeletedFilesToolBar", "Play files", IC.MB_PLAY, e -> SelectAndPlayNextFiles(0));
+        guiDecorator.addToolbarButton("DeletedFilesToolBar", "Undo delete", ICF.UndoBlue, e -> UndoDelete());
+
+        guiDecorator.addContainer("FavoritenToolBar", vlcVideoForm.getFavoritenToolBar());
+        guiDecorator.addToolbarButton("FavoritenToolBar", "Play files", IC.MB_PLAY, e -> SelectAndPlayNextFiles(0));
+        guiDecorator.addToolbarButton("FilesToolBar", "Delete selected files", ICF.Database_Delete, e -> deleteSelectedDeletedFiles());
 
 
 
         return cbDirectories;
+    }
+
+    private void deleteSelectedDeletedFiles() {
+        List<String> selectedFileNames = vlcVideoForm.getSelectedDeletedFiles();
+        for(String selectedFileName : selectedFileNames) {
+            if (new File(selectedFileName).delete())
+                vlcVideoForm.deleteDeletedFileName(selectedFileName);
+        }
+    }
+
+    private void deleteSelectedFiles() {
+        List<String> selectedFileNames = vlcVideoForm.getSelectedFiles();
+        for(String selectedFileName : selectedFileNames) {
+            if (new File(selectedFileName).delete())
+                vlcVideoForm.deleteFileName(selectedFileName);
+        }
+
+    }
+
+    private void UndoDelete() {
+        List<String> deletedSelectedFiles = vlcVideoForm.getSelectedDeletedFiles();
+        for(String deletedFile : deletedSelectedFiles) {
+            vlcVideoForm.removeDeletedFile(deletedFile);
+        }
+        vlcManager.save();
+    }
+
+    private void markLockedFile() {
+        List<String> fileNames = vlcVideoForm.getSelectedFiles();
+        List<String> deletedFiles = vlcManager.getDeletedFileNames();
+
+        for(String fileName : fileNames) {
+            if (!deletedFiles.contains(fileName)) {
+                vlcVideoForm.addDeletedFileName(fileName);
+                vlcVideoForm.deleteFileName(fileName);
+            }
+        }
+        vlcManager.save();
     }
 
     private static void initIcon() {
@@ -112,22 +160,12 @@ public class VlcVideoCtrl {
 
     private List<String> getSelectedFileNames()
     {
-        return vlcVideoForm.getSelectedFiles()
-                .stream()
-                .map(x-> Path.of(getVerzeichnis(), x).toString())
-                .toList();
+        return vlcVideoForm.getSelectedFiles();
     }
+
 
     private String getVerzeichnis() {
         return cbDirectories.getSelectedItem().toString();
-    }
-
-    private void deleteSelectedFiles() {
-        List<String> selectedFileNames = vlcVideoForm.getSelectedFiles();
-        for(String selectedFileName : selectedFileNames) {
-            vlcVideoForm.deleteFileName(selectedFileName);
-        }
-
     }
 
     private void ShowActVlcFile() {
@@ -158,23 +196,17 @@ public class VlcVideoCtrl {
         }
     }
 
-    private void handleChangedVerzeichnis(String fileName) {
-        vlcManager.setVerzeichnis(fileName);
+    private void handleChangedVerzeichnis(String dirName) {
+        vlcManager.setVerzeichnis(dirName);
 
-        List<String> temp = FileUtil.getFileNamesAll(fileName);
-        Collections.shuffle(temp);
+        List<String> temp = vlcManager.loadAllFileNames();
+        // Collections.shuffle(temp);
         setFileNames(temp);
     }
 
     private void setFileNames(List<String> fileFullNames) {
 
-        List<String> temp = fileFullNames
-                .stream()
-                .map(x -> x.replace(cbDirectories.getSelectedItem().toString() + "/", ""))
-                .toList();
-
-
-        vlcVideoForm.setFileNames(temp);
+        vlcVideoForm.setFileNames(fileFullNames);
     }
 
 

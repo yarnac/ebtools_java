@@ -8,6 +8,7 @@ import lombok.Getter;
 import javax.swing.*;
 import java.awt.*;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class VlcVideoForm {
 
@@ -16,18 +17,30 @@ public class VlcVideoForm {
     @Getter
     private JToolBar mainToolBar;
     @Getter
-    JList<String> lstFiles;
+    JList<VlcFileItem> lstFiles;
+    @Getter
+    private List<String> deletedFiles;
+    private JList<VlcFileItem> lstFavoriten;
+
+    private JList<VlcFileItem> lstDeletedFiles;
 
     List<String> allFiles;
-    private DefaultListModel<String> model;
+    private DefaultListModel<VlcFileItem> modelAllFiles;
+    private DefaultListModel<VlcFileItem> modelDeleted;
+    private DefaultListModel<VlcFileItem> modelFavoriten;
+
     private EbSplitPanel mainSplitPanel;
     private EbSplitPanel secondSplitPanel;
     private JScrollPane scrollPaneDeleted;
     private JScrollPane scrollPaneFiles;
+    private JScrollPane scrollPaneFavoriten;
+
+
+
 
     public void setFileNames(List<String> files) {
-        model.clear();
-        model.addAll(files);
+        modelAllFiles.clear();
+        modelAllFiles.addAll(getVlcFileItems(files));
     }
 
     public VlcVideoForm() {
@@ -52,7 +65,7 @@ public class VlcVideoForm {
         JScrollPane scrollPaneFiles = getScrollPaneFiles();
         JScrollPane scrollPaneDeleted = getScrollPaneDeleted();
 
-        secondSplitPanel =  new EbSplitPanel("SecondSplitPanel", scrollPaneDeleted, new JPanel(),0);
+        secondSplitPanel =  new EbSplitPanel("SecondSplitPanel", scrollPaneDeleted, getScrollPaneFavoriten(),0);
         mainSplitPanel = new EbSplitPanel("MainSplitPanel", scrollPaneFiles, secondSplitPanel, 1);
         frame.getContentPane().add(mainSplitPanel, BorderLayout.CENTER);
     }
@@ -90,15 +103,25 @@ public class VlcVideoForm {
     }
 
     private JScrollPane getScrollPaneDeleted() {
-        JList<String> lstDeleted = new JList<String>();
-        lstDeleted.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
+        lstDeletedFiles = new JList<VlcFileItem>();
+        lstDeletedFiles.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
         // DragSelectionDecorator.enableDragSelection(lstFiles);
 
-        DefaultListModel<String> modelDeleted = new DefaultListModel<String>();
-        modelDeleted.add(0,"Dummy");
-        lstDeleted.setModel(modelDeleted);
-        scrollPaneDeleted = new JScrollPane(lstDeleted);
+        modelDeleted = new DefaultListModel<VlcFileItem>();
+        lstDeletedFiles.setModel(modelDeleted);
+        scrollPaneDeleted = new JScrollPane(lstDeletedFiles);
         return scrollPaneDeleted;
+    }
+
+    private JScrollPane getScrollPaneFavoriten() {
+        lstFavoriten = new JList<>();
+        lstFavoriten.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
+        // DragSelectionDecorator.enableDragSelection(lstFiles);
+
+        modelFavoriten = new DefaultListModel<VlcFileItem>();
+        lstFavoriten.setModel(modelFavoriten);
+        scrollPaneFavoriten = new JScrollPane(lstFavoriten);
+        return scrollPaneFavoriten;
     }
 
     private JScrollPane getScrollPaneFiles() {
@@ -108,26 +131,82 @@ public class VlcVideoForm {
             lstFiles.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
             // DragSelectionDecorator.enableDragSelection(lstFiles);
 
-            model = new DefaultListModel<String>();
-            model.add(0,"Dummy");
-            lstFiles.setModel(model);
+            modelAllFiles = new DefaultListModel<>();
+            lstFiles.setModel(modelAllFiles);
             scrollPaneFiles = new JScrollPane(lstFiles);
         }
         return scrollPaneFiles;
     }
 
+    void setDeletedFiles(List<String> fileNames){
+        deletedFiles = fileNames;
+        modelDeleted = new DefaultListModel<>();
+        modelDeleted.addAll(getVlcFileItems(fileNames));
+        lstDeletedFiles.setModel(modelDeleted);
+    }
+
+    private static List<VlcFileItem> getVlcFileItems(List<String> fileNames) {
+        return fileNames
+                .stream()
+                .map(VlcFileItem::new)
+                .toList();
+    }
+
+    private static List<String> getFileNames(List<VlcFileItem> fileItems) {
+        return fileItems
+                .stream()
+                .map(VlcFileItem::getFileName)
+                .toList();
+    }
+
+
     public List<String> getSelectedFiles() {
-        return lstFiles.getSelectedValuesList();
+        return lstFiles.getSelectedValuesList().stream().map(VlcFileItem::getFileName).collect(Collectors.toList());
     }
 
     public void deleteFileName(String selectedFileName) {
-        int n = model.indexOf(selectedFileName);
+        VlcFileItem item = new VlcFileItem(selectedFileName);
+        int n = modelAllFiles.indexOf(item);
         if (n<0)
             return;
-        model.remove(n);
+        modelAllFiles.remove(n);
+    }
+
+    public void deleteDeletedFileName(String selectedFileName) {
+        VlcFileItem item = new VlcFileItem(selectedFileName);
+        int n = modelDeleted.indexOf(item);
+        if (n<0)
+            return;
+        modelDeleted.remove(n);
     }
 
     public JToolBar getFilesToolBar() {
         return mainSplitPanel.getToolBar1();
+    }
+
+    public JToolBar getDeletedFilesToolBar() {
+        return secondSplitPanel.getToolBar1();
+    }
+
+    public JToolBar getFavoritenToolBar() {
+        return secondSplitPanel.getToolBar2();
+    }
+
+    public void addDeletedFileName(String fileName) {
+        modelDeleted.add(0, new VlcFileItem(fileName));
+        deletedFiles.add(fileName);
+        lstDeletedFiles.setModel(modelDeleted);
+    }
+
+    public List<String> getSelectedDeletedFiles() {
+        return lstDeletedFiles.getSelectedValuesList().stream().map(VlcFileItem::getFileName).collect(Collectors.toList());
+    }
+
+    public void removeDeletedFile(String deletedFile) {
+        VlcFileItem item = new VlcFileItem(deletedFile);
+        deletedFiles.remove(deletedFile);
+        int index = modelDeleted.indexOf(item);
+        modelDeleted.remove(index);
+        // lstDeletedFiles.remove(index);
     }
 }
