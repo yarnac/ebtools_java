@@ -101,7 +101,7 @@ public class VlcVideoCtrl {
 
 
         guiDecorator.addContainer("DeletedFilesToolBar", vlcVideoForm.getDeletedFilesToolBar());
-        guiDecorator.addToolbarButton("DeletedFilesToolBar", "Play files", IC.MB_PLAY, e -> SelectAndPlayNextFiles(0));
+        guiDecorator.addToolbarButton("DeletedFilesToolBar", "Play files", IC.MB_PLAY, e -> playDeletedFiles());
         guiDecorator.addToolbarButton("DeletedFilesToolBar", "Undo delete", ICF.UndoBlue, e -> UndoDelete());
         guiDecorator.addToolbarButton("DeletedFilesToolBar", "Delete selected files", ICF.DeleteRed, e -> deleteSelectedDeletedFiles());
 
@@ -114,10 +114,11 @@ public class VlcVideoCtrl {
         return cbDirectories;
     }
 
+
     private void deleteSelectedDeletedFiles() {
         List<String> selectedFileNames = vlcVideoForm.getSelectedDeletedFiles();
         for(String selectedFileName : selectedFileNames) {
-            if (new File(selectedFileName).delete())
+            if (vlcManager.deleteFile(selectedFileName))
                 vlcVideoForm.deleteDeletedFileName(selectedFileName);
         }
     }
@@ -133,9 +134,10 @@ public class VlcVideoCtrl {
     private void UndoDelete() {
         List<String> deletedSelectedFiles = vlcVideoForm.getSelectedDeletedFiles();
         for(String deletedFile : deletedSelectedFiles) {
+            vlcManager.removeDeleteFile(deletedFile);
             vlcVideoForm.removeDeletedFile(deletedFile);
         }
-        vlcManager.save();
+        vlcManager.saveDeletedFiles();
     }
 
     private void markFileAsDeleted() {
@@ -148,7 +150,7 @@ public class VlcVideoCtrl {
                 vlcVideoForm.deleteFileName(fileName);
             }
         }
-        vlcManager.save();
+        vlcManager.saveDeletedFiles();
     }
 
     private static void initIcon() {
@@ -260,6 +262,10 @@ public class VlcVideoCtrl {
             return false;
 
         return !lowerCase.endsWith(".ini");
+    }
+
+    private void playDeletedFiles() {
+        new MusicPlayer().play(vlcVideoForm.getSelectedDeletedFiles());
     }
 
 

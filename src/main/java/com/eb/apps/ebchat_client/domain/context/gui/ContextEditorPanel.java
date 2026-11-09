@@ -38,14 +38,6 @@ public final class ContextEditorPanel extends JPanel {
     private void initializeComponents() {
         setBorder(BorderFactory.createEmptyBorder(2, 4, 4, 4));
 
-
-        JScrollPane systemPromptScroll = new JScrollPane(edPrompt);
-        JScrollPane outputPromptScroll = new JScrollPane(edOutput);
-
-        // Die bevorzugte Höhe des System-Prompts.
-        systemPromptScroll.setPreferredSize(new Dimension(300, 80));
-
-
         EbGridBagUtil util = new EbGridBagUtil(this, 0);
 
         toolBar = util.addToolBarRow(false);

@@ -99,7 +99,12 @@ public class PromptDesignDlg extends JFrame {
 
     private void setOutputContent(ActionEvent actionEvent) {
         String code = contextEditorPanel.getEdPrompt().getText();
-        String expanded = JsonFileAppendUtil.appendFiles(code, new ArrayList<>());
+        String expanded = JsonFileAppendUtil.appendDirectoryFiles(code);
+        if (!expanded.equals(code)) {
+            contextEditorPanel.getEdPrompt().setText(expanded);
+            return;
+        }
+        expanded = JsonFileAppendUtil.appendFiles(expanded, new ArrayList<>());
         if (expanded != null) {
 
             if (code.contains("\n<$D")) {
