@@ -19,6 +19,7 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 import static java.lang.System.out;
 
@@ -96,8 +97,13 @@ public class VlcVideoCtrl {
         guiDecorator.addToolbarButton("FilesToolBar", "Select previous files", IC.PREV, e -> SelectAndPlayNextFiles(-1));
         guiDecorator.addToolbarButton("FilesToolBar", "Select next files", IC.NEXT, e -> SelectAndPlayNextFiles(1));
         guiDecorator.addToolbarButton("FilesToolBar", "Shuffle Files", IC.MALE_USER, e -> ShuffleFiles());
-        guiDecorator.addToolbarButton("FilesToolBar", "Delete selected files", ICF.Database_Delete, e -> markFileAsDeleted());
-        guiDecorator.addToolbarButton("FilesToolBar", "Refresh", IC.REFRESHPAGE, e -> DeleteShowedFiles());
+
+        guiDecorator.addToolbarButton("FilesToolBar", "Delete selected files", ICF.DeleteRed, e -> markFileAsDeleted(true));
+        guiDecorator.addToolbarButton("FilesToolBar", "Delete selected files", ICF.Database_Delete, e -> markFileAsDeleted(false));
+
+        guiDecorator.addToolbarButton("FilesToolBar", "Select previous files", ICF.MediaButtonRewindBlue, e -> VLCStatus.sendCommand("pl_previous"));
+        guiDecorator.addToolbarButton("FilesToolBar", "Select next files", ICF.MediaButtonFastForwardBlue, e ->VLCStatus.sendCommand("pl_next"));
+
 
 
         guiDecorator.addContainer("DeletedFilesToolBar", vlcVideoForm.getDeletedFilesToolBar());
@@ -140,9 +146,23 @@ public class VlcVideoCtrl {
         vlcManager.saveDeletedFiles();
     }
 
-    private void markFileAsDeleted() {
+    private void markFileAsDeleted(boolean activeFile) {
         List<String> fileNames = vlcVideoForm.getSelectedFiles();
         List<String> deletedFiles = vlcManager.getDeletedFileNames();
+
+        if (activeFile) {
+            String activeFileName = VLCStatus.getVlcFileName();
+            Optional<String> foundFileName = fileNames.stream().filter(fileName -> fileName.endsWith(activeFileName))
+                    .findFirst();
+            if (foundFileName.isPresent()) {
+                String fileName = foundFileName.get();
+                vlcVideoForm.addDeletedFileName(fileName);
+                vlcVideoForm.deleteFileName(fileName);
+                VLCStatus.sendCommand("pl_next");
+                return;
+            }
+            return;
+        }
 
         for(String fileName : fileNames) {
             if (!deletedFiles.contains(fileName)) {
