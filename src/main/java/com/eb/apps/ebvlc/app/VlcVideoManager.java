@@ -5,6 +5,9 @@ import com.eb.base.inifile.api.IniFile;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.io.File;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -13,8 +16,8 @@ import java.util.stream.Collectors;
 public class VlcVideoManager {
 
     private final String favoriten;
-    private final List<String> deletedFileNames;
-    private final List<String> verzeichnisse;
+    private List<String> deletedFileNames;
+    private List<String> verzeichnisse;
     private final IniFile iniFile;
 
     private String lastVerzeichnis;
@@ -44,11 +47,17 @@ public class VlcVideoManager {
 
     public VlcVideoManager(IniFile iniFile) {
         this.iniFile = iniFile;
-        deletedFileNames = iniFile.getSectionValues("DeletedFiles");
+
         lastVerzeichnis = iniFile.getSectionValue("Einstellungen", "Verzeichnis", "");
         verzeichnisse = iniFile.getSectionValues("Verzeichnisse");
         favoriten = iniFile.getSectionValue("Einstellungen", "Favoriten", "");
 
+        String delFileFileName = getFileNameDeletedFiles();
+        loadDeletedFiles();
+    }
+
+    private String getFileNameDeletedFiles() {
+        return FileExtensions.ebFileNameInDirectory(".deletedFiles", getLastVerzeichnis());
     }
 
     public void setVerzeichnis(String fileName) {
@@ -57,11 +66,43 @@ public class VlcVideoManager {
             lastVerzeichnis = fileName;
             iniFile.setSectionValue("Einstellungen", "Verzeicnis", lastVerzeichnis);
             iniFile.Write();
+            loadDeletedFiles();
         }
+    }
+
+    public void loadDeletedFiles()
+    {
+
+        String delFileFileName = getFileNameDeletedFiles();
+        if (FileExtensions.ebFileExists(delFileFileName)) {
+            deletedFileNames = Arrays.stream(FileExtensions.ebGetFileTextLines(delFileFileName)).collect(Collectors.toList());
+        }
+        else
+            deletedFileNames = new ArrayList<>();
+
+    }
+
+    public void saveDeletedFiles()
+    {
+        FileExtensions.ebWriteFileLinesUTF8(getFileNameDeletedFiles(), getDeletedFileNames());
     }
 
     public void save() {
         iniFile.setSectionValues("DeletedFiles", getDeletedFileNames());
         iniFile.Write();
+    }
+
+    public boolean deleteFile(String selectedFileName) {
+        if (new File(selectedFileName).delete())
+        {
+            deletedFileNames.remove(selectedFileName);
+            save();
+            return true;
+        }
+        return false;
+    }
+
+    public void removeDeleteFile(String deletedFile) {
+        deletedFileNames.remove(deletedFile);
     }
 }

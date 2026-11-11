@@ -19,6 +19,7 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 import static java.lang.System.out;
 
@@ -96,12 +97,17 @@ public class VlcVideoCtrl {
         guiDecorator.addToolbarButton("FilesToolBar", "Select previous files", IC.PREV, e -> SelectAndPlayNextFiles(-1));
         guiDecorator.addToolbarButton("FilesToolBar", "Select next files", IC.NEXT, e -> SelectAndPlayNextFiles(1));
         guiDecorator.addToolbarButton("FilesToolBar", "Shuffle Files", IC.MALE_USER, e -> ShuffleFiles());
-        guiDecorator.addToolbarButton("FilesToolBar", "Delete selected files", ICF.Database_Delete, e -> markFileAsDeleted());
-        guiDecorator.addToolbarButton("FilesToolBar", "Refresh", IC.REFRESHPAGE, e -> DeleteShowedFiles());
+
+        guiDecorator.addToolbarButton("FilesToolBar", "Delete selected files", ICF.DeleteRed, e -> markFileAsDeleted(true));
+        guiDecorator.addToolbarButton("FilesToolBar", "Delete selected files", ICF.Database_Delete, e -> markFileAsDeleted(false));
+
+        guiDecorator.addToolbarButton("FilesToolBar", "Select previous files", ICF.MediaButtonRewindBlue, e -> VLCStatus.sendCommand("pl_previous"));
+        guiDecorator.addToolbarButton("FilesToolBar", "Select next files", ICF.MediaButtonFastForwardBlue, e ->VLCStatus.sendCommand("pl_next"));
+
 
 
         guiDecorator.addContainer("DeletedFilesToolBar", vlcVideoForm.getDeletedFilesToolBar());
-        guiDecorator.addToolbarButton("DeletedFilesToolBar", "Play files", IC.MB_PLAY, e -> SelectAndPlayNextFiles(0));
+        guiDecorator.addToolbarButton("DeletedFilesToolBar", "Play files", IC.MB_PLAY, e -> playDeletedFiles());
         guiDecorator.addToolbarButton("DeletedFilesToolBar", "Undo delete", ICF.UndoBlue, e -> UndoDelete());
         guiDecorator.addToolbarButton("DeletedFilesToolBar", "Delete selected files", ICF.DeleteRed, e -> deleteSelectedDeletedFiles());
 
@@ -114,10 +120,11 @@ public class VlcVideoCtrl {
         return cbDirectories;
     }
 
+
     private void deleteSelectedDeletedFiles() {
         List<String> selectedFileNames = vlcVideoForm.getSelectedDeletedFiles();
         for(String selectedFileName : selectedFileNames) {
-            if (new File(selectedFileName).delete())
+            if (vlcManager.deleteFile(selectedFileName))
                 vlcVideoForm.deleteDeletedFileName(selectedFileName);
         }
     }
@@ -133,14 +140,29 @@ public class VlcVideoCtrl {
     private void UndoDelete() {
         List<String> deletedSelectedFiles = vlcVideoForm.getSelectedDeletedFiles();
         for(String deletedFile : deletedSelectedFiles) {
+            vlcManager.removeDeleteFile(deletedFile);
             vlcVideoForm.removeDeletedFile(deletedFile);
         }
-        vlcManager.save();
+        vlcManager.saveDeletedFiles();
     }
 
-    private void markFileAsDeleted() {
+    private void markFileAsDeleted(boolean activeFile) {
         List<String> fileNames = vlcVideoForm.getSelectedFiles();
         List<String> deletedFiles = vlcManager.getDeletedFileNames();
+
+        if (activeFile) {
+            String activeFileName = VLCStatus.getVlcFileName();
+            Optional<String> foundFileName = fileNames.stream().filter(fileName -> fileName.endsWith(activeFileName))
+                    .findFirst();
+            if (foundFileName.isPresent()) {
+                String fileName = foundFileName.get();
+                vlcVideoForm.addDeletedFileName(fileName);
+                vlcVideoForm.deleteFileName(fileName);
+                VLCStatus.sendCommand("pl_next");
+                return;
+            }
+            return;
+        }
 
         for(String fileName : fileNames) {
             if (!deletedFiles.contains(fileName)) {
@@ -148,7 +170,7 @@ public class VlcVideoCtrl {
                 vlcVideoForm.deleteFileName(fileName);
             }
         }
-        vlcManager.save();
+        vlcManager.saveDeletedFiles();
     }
 
     private static void initIcon() {
@@ -260,6 +282,10 @@ public class VlcVideoCtrl {
             return false;
 
         return !lowerCase.endsWith(".ini");
+    }
+
+    private void playDeletedFiles() {
+        new MusicPlayer().play(vlcVideoForm.getSelectedDeletedFiles());
     }
 
 

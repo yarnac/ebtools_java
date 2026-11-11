@@ -25,7 +25,6 @@ public class ContextTreePanel extends JPanel {
     private JTree contextTree;
     private JToolBar toolBar;
     private List<ContextWithFiles> contextList;
-    @Getter
     private ContextWithFiles selectedContext;
 
     @Setter

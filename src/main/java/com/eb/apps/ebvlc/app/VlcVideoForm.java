@@ -14,7 +14,6 @@ public class VlcVideoForm {
 
     @Getter
     private JFrame frame;
-    @Getter
     private JToolBar mainToolBar;
     @Getter
     JList<VlcFileItem> lstFiles;
