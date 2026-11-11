@@ -71,6 +71,18 @@ public class GuiDecorator {
 		JMenu menu = getMenu(menuString);
 		
 		JMenuItem item = new JMenuItem(label);
+
+		item.addActionListener(x->object.run());
+		menu.add(item);
+		return item;
+	}
+
+
+	public JCheckBoxMenuItem addJCheckBoxMenuItem(String menuString, String label, Runnable object) {
+		JMenu menu = getMenu(menuString);
+
+		JCheckBoxMenuItem item = new JCheckBoxMenuItem(label);
+
 		item.addActionListener(x->object.run());
 		menu.add(item);
 		return item;
@@ -256,6 +268,12 @@ public class GuiDecorator {
 		return item;
 	}
 
+	public JCheckBoxMenuItem addJCheckBoxMenuItem(String string, Runnable object, int key, int mask) {
+		JCheckBoxMenuItem item = addJCheckBoxMenuItem(currentMenuName, string, object);
+		item.setAccelerator( KeyStroke.getKeyStroke(key, mask) );
+		return item;
+	}
+
 	public void addMenuSeparator() {
 		addMenuSeparator(currentMenuName);
 		
@@ -369,16 +387,22 @@ public class GuiDecorator {
 		jFrame.setAlwaysOnTop(!jFrame.isAlwaysOnTop());
 	}
 
-	public void addEditIniFileButton(String toolBarName, String fileName) {
-		addToolbarButton(toolBarName, "Edit Inifile", IC.EDITDOC, x->OpenFile(fileName));
-		
-	}
 
-	public void addEditIniFileButton(String toolBarName) {
+	public void addEditIniFileButton(String toolBarName, String ... fileNames) {
 		if (iniFile==null)
 			throw (new RuntimeException("Ini File not set."));
-		addToolbarButton(toolBarName, "Edit Inifile", IC.EDITDOC, x->OpenFile(iniFile.getFileName()));
+		if (fileNames==null || fileNames.length==0)
+			addToolbarButton(toolBarName, "Edit Inifile", IC.EDITDOC, x->OpenFile(iniFile.getFileName()));
+		else
+			addToolbarButton(toolBarName, "Edit Inifile", IC.EDITDOC, x->OpenFiles(fileNames));
 
+	}
+
+	private void OpenFiles(String[] fileNames) {
+		for (String fileName : fileNames) {
+			OpenFile(fileName);
+		}
+		OpenFile(iniFile.getFileName());
 	}
 
 	private void OpenFile(String fileName) {

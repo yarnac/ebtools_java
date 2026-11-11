@@ -1,5 +1,6 @@
 package com.eb.apps.ebchat_client.app;
 
+import com.eb.apps.ebchat_client.components.CodeBlockReplacer;
 import com.eb.apps.ebchat_client.domain.edrequest.EdRequestCtrl;
 import com.eb.apps.ebchat_utils.codegen.AiCodeGeneratorCtrl;
 import com.eb.apps.ebchat_client.domain.chat.GlobaleEinstellungen;
@@ -57,9 +58,12 @@ public class AiPlaygroundCtrl {
     private JComboBox<LlmRequest> cbRequests;
     private AiChatManager chatManager;
     private ContextManager contextManager;
+    private JCheckBoxMenuItem chkBoxProtokoll;
 
     AiPlaygroundCtrl() {
         llmRequestManager = new LlmRequestManager();
+        chatManager = AiChatManager.getCurrent();
+
 
         try {
             if (!GlobaleEinstellungen.isWindows()) {
@@ -80,15 +84,13 @@ public class AiPlaygroundCtrl {
 
         decorator = window.getDecorator();
 
-        decorator.addEditIniFileButton("MainToolbar");
+        decorator.addEditIniFileButton("MainToolbar", chatManager.getLlmModelProvider().getModelFileName());
         decorator.addToolbarButton("MainToolbar", "Speichern Main", IC.MB_PLAY, (x)->{});
         decorator.addToolbarButton("MainToolbar", "Edit Requests", ICF.Flowchart, (x)->{new EdRequestCtrl();});
         decorator.addToolbarButton("MainToolbar", "Edit Contexts", ICF.Code, (x)->{SwingUtilities.invokeLater(ContextEditDlg::Show);});
         decorator.addToolbarButton("MainToolbar", "Open DataFiles", ICF.History_Edit, (x)-> {
             FileUtil.open(chatManager.getLlmModelProvider().getModelFileName());
         });
-
-
 
         UndoDecorator.registerForTextArea(window.getTextPaneInput());
         UndoDecorator.registerForTextArea(window.getTextPaneOutput());
@@ -183,8 +185,9 @@ public class AiPlaygroundCtrl {
         String tbName = window.getPanelWithToolBarInput().getToolbar().getName();
 
         decorator.setCurrentMenu("Datei");
-        decorator.addMenuItem("Abfrage neu starten",()->sendRequest(false), KeyEvent.VK_F5, InputEvent.SHIFT_DOWN_MASK);
-        decorator.addMenuItem("Abfrage fortsetzen",()->sendRequest(true), KeyEvent.VK_F5,0);
+        decorator.addMenuItem("Abfrage neu starten",()->sendRequest(false), KeyEvent.VK_F5, 0);
+        decorator.addMenuItem("Abfrage fortsetzen",()->sendRequest(true), KeyEvent.VK_F4,0);
+        chkBoxProtokoll = decorator.addJCheckBoxMenuItem("Abfragen protokollieren", ()->{},0,0);
         decorator.addMenuItem("Speichern",()->speichereRequest(), KeyEvent.VK_S,InputEvent.CTRL_DOWN_MASK);
         decorator.addOpenFileToolbarButton(tbName, "OpenAI Kosten", ICF.Monitor_Info, "https://platform.openai.com/home");
         decorator.addOpenFileToolbarButton(tbName, "Anthropic Kosten", ICF.Monitor_Properties, "https://platform.claude.com/dashboard");
@@ -200,7 +203,6 @@ public class AiPlaygroundCtrl {
     private void decorateToolbarInputPart2() {
         String tbName = window.getPanelWithToolBarInput().getToolbar().getName();
         decorator = window.getDecorator();
-        chatManager = AiChatManager.getCurrent();
         contextManager = chatManager.getContextManager();
 
         LlmModelProvider modelProvider = new LlmModelProvider();
@@ -227,7 +229,8 @@ public class AiPlaygroundCtrl {
     private void transferRequestToView() {
         if (showFullView)
         {
-            window.setOutputText(actLlmRequest.getAllMessageString());
+            String text = CodeBlockReplacer.replaceCodeBlocks(actLlmRequest.getAllMessageString());
+            window.setOutputText(text);
         }
         else
         {

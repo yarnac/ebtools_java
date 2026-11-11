@@ -48,6 +48,7 @@ public class JasonFileContentProvider {
         // Dateiinhalt lesen
         List<Codedatei> codedateien = new ArrayList<>();
         for(String fn : fileNames) {
+
             String fileContent = Files.readString(Paths.get(fn));
 
             // Dateiendung extrahieren
@@ -65,10 +66,11 @@ public class JasonFileContentProvider {
         }
 
         StringBuilder strb = new StringBuilder();
-        strb.append("```json\n");
-        // Als JSON-String serialisieren
-        strb.append(mapper.writeValueAsString(codedateien)).append("\n");
-        strb.append("```\n");
+        for(Codedatei codedateien1 : codedateien) {
+            strb.append("```json\n[");
+            strb.append(mapper.writeValueAsString(codedateien));
+            strb.append("]```\n");
+        }
         return strb.toString();
     }
 

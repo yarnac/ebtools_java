@@ -214,9 +214,6 @@ public class AiPlaygroundWindow extends JFrame {
     private void createAndAddMenuBar() {
         // Create menu and toolbar
         JMenuBar menuBar = new JMenuBar();
-        JMenu fileMenu = new JMenu("Datei");
-
-        menuBar.add(fileMenu);
         setJMenuBar(menuBar);
     }
 
