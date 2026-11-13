@@ -1,13 +1,27 @@
 package com.eb.apps.ebchat_client.domain.chat;
 
+import com.eb.base.ai_service.llm_client.infrastructure.LlmClientFactory;
+import com.eb.base.crypt.Crypt;
+import com.eb.base.crypt.CryptDES;
+import com.eb.base.crypt.algorithmes.Twofish_Crypter;
 import com.eb.base.extensions.FileExtensions;
+
+import java.nio.charset.StandardCharsets;
 
 public class GlobaleEinstellungen {
     private static String AIPFAD;
     private static String JAVA_DATAPFAD;
     private static String USER_DATAPFAD;
     private static String SHARED_DATA;
+    private static String simplePwd;
 
+    public static String getSimplePassword()
+    {
+        if (simplePwd == null)
+            simplePwd = FileExtensions.ebGetFileText(getDataPfadJUser("mykey_crypted.txt")).substring(10, 32);
+
+        return simplePwd;
+    }
 
     public static String getPfad(String localIniFilePath) {
         return FileExtensions.ebFullFileNameInDirectory(localIniFilePath, getAiPfad());

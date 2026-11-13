@@ -1,5 +1,6 @@
 package com.eb.base.ai_service.llm_client.infrastructure;
 
+import com.eb.apps.ebchat_client.domain.chat.GlobaleEinstellungen;
 import com.eb.base.ai_service.AiServiceConfig;
 import com.eb.base.ai_service.llm_client.api.LlmRequest;
 import com.eb.base.ai_service.llm_client.infrastructure.anthropic.AnthropicClient;
@@ -24,10 +25,10 @@ public class LlmClientFactory {
             String fileName = AiServiceConfig.current().getGeheimnisFileName();
             List<String> lines = Files.readAllLines(Path.of((fileName)));
             String line0 = lines.get(0);
-            String decrypted0 = new Twofish_Crypter().decryptString(line0, "ekkartist33924840");
+            String decrypted0 = new Twofish_Crypter().decryptString(line0, GlobaleEinstellungen.getSimplePassword());
             openAiKey = decrypted0.substring(decrypted0.indexOf("=")+1);
             String line1 = lines.get(1);
-            String decrypted1 = new Twofish_Crypter().decryptString(line1, "ekkartist33924840");
+            String decrypted1 = new Twofish_Crypter().decryptString(line1, GlobaleEinstellungen.getSimplePassword());
             anthropicKey = decrypted1.substring(decrypted1.indexOf("=")+1);
         } catch (IOException e) {
             throw new RuntimeException(e);

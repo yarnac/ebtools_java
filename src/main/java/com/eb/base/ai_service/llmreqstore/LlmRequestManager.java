@@ -2,9 +2,12 @@ package com.eb.base.ai_service.llmreqstore;
 
 import com.eb.apps.ebchat_client.domain.chat.AiChatMessage;
 import com.eb.apps.ebchat_client.domain.chat.AiEinstellungen;
+import com.eb.apps.ebchat_client.domain.chat.GlobaleEinstellungen;
 import com.eb.base.ai_service.llm_client.api.LlmMessage;
 import com.eb.base.ai_service.llm_client.api.LlmRequest;
+import com.eb.base.crypt.Crypt;
 import com.eb.base.extensions.FileExtensions;
+import com.eb.base.extensions.StringExtensions;
 import com.eb.base.io.FileUtil;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.MapperFeature;
@@ -20,6 +23,7 @@ import java.nio.file.Paths;
 import java.util.*;
 
 public class LlmRequestManager {
+
     private final List<LlmRequestStoreItem> llmRequestStoreItemList = new ArrayList<>();
     private final Map<Long, LlmRequestStoreItem> llmRequestStoreItemsMap = new HashMap<>();
 
@@ -81,14 +85,14 @@ public class LlmRequestManager {
         LlmRequestStoreItem llmRequestStoreItem = findLlmRequestStoreItem(actLlmRequest);
         llmRequestStoreItemList.remove(llmRequestStoreItem);
         llmRequestStoreItemsMap.remove(actLlmRequest.getRequestId());
-        String storeFileName = "Request_" + llmRequestStoreItem.getLlmRequest().getRequestId() + ".json";
+        String storeFileName = "Request_" + llmRequestStoreItem.getLlmRequest().getRequestId() + ".dat";
         String storeFilePathName = FileExtensions.ebFileNameInDirectory(storeFileName, GetRequestsOrdner());
         File file = new File(storeFilePathName);
         file.delete();
     }
 
     private void storeRequestStoreItem(LlmRequestStoreItem llmRequestStoreItem) {
-        String storeFileName = "Request_" + llmRequestStoreItem.getLlmRequest().getRequestId() + ".json";
+        String storeFileName = "Request_" + llmRequestStoreItem.getLlmRequest().getRequestId() + ".dat";
         llmRequestStoreItem.setRequestId(llmRequestStoreItem.getLlmRequest().getRequestId());
         String storeFilePathName = FileExtensions.ebFileNameInDirectory(storeFileName, GetRequestsOrdner());
 
@@ -96,7 +100,8 @@ public class LlmRequestManager {
             String jsonString;
             jsonString = createMapper().writeValueAsString(llmRequestStoreItem);
             FileUtil.ensureDirectory(GetRequestsOrdner());
-            Files.writeString(Paths.get(storeFilePathName), jsonString, StandardCharsets.UTF_8);
+            Crypt.saveEncryptedFile(storeFilePathName, GlobaleEinstellungen.getSimplePassword(), jsonString);
+            // Files.writeString(Paths.get(storeFilePathName), jsonString, StandardCharsets.UTF_8);
 
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -112,7 +117,7 @@ public class LlmRequestManager {
         ObjectMapper objectMapper = createMapper();
         llmRequestStoreItemList.clear();
         llmRequestStoreItemsMap.clear();
-        String[] fileNames = FileExtensions.ebGetFiles(GetRequestsOrdner(), "Request_*.json");
+        String[] fileNames = FileExtensions.ebGetFiles(GetRequestsOrdner(), "Request_*.dat");
         llmRequestStoreItemList.addAll(Arrays.stream(fileNames)
                 .map(x->readItem(x, objectMapper) )
                 .toList());
@@ -124,7 +129,7 @@ public class LlmRequestManager {
 
     private static LlmRequestStoreItem readItem(String filePath, ObjectMapper objectMapper) {
         try {
-            String json = Files.readString(Paths.get(filePath), StandardCharsets.UTF_8);
+            String json = Crypt.loadEncryptedFile(filePath, GlobaleEinstellungen.getSimplePassword());
             // In C#: AiChatSerializer.DeserializeAiChatMessages(json)
             // Here we assume direct mapping to AiChatMessage list.
 
