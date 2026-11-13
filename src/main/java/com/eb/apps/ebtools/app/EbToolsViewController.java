@@ -66,17 +66,10 @@ public class EbToolsViewController {
 		String jarFile = "/Users/ekkart/Data/Develop/Java/ebtools/target/EbTools-0.0.1-SNAPSHOT.jar";
 
 		view.addMenuItem("Aktionen", "Inidatei bearbeiten", x -> manager.iniFileBearbeiten());
-		view.addMenuItem("Aktionen", "Ai Playground öffnen",
-				x -> startJava("com.eb.apps.ebchatclient.app.AiPlaygroundApp"));
-		view.addMenuItem("Aktionen", "EbMusicPlayer öffnen",
-				x -> startJava("com.eb.apps.ebmusic.app.EbMusicPlayerApp"));
-		view.addMenuItem("Aktionen", "EbReader  öffnen",
-				x -> startJava("com.eb.apps.ebookreader.app.EbReaderApp"));
-		view.addMenuItem("Aktionen", "Wörterbuch öffnen",
-				x -> startJava("com.eb.apps.ebwoerterbuch.app.WbApp"));
-
-
-
+		view.addMenuItem("Aktionen", "Ai Playground öffnen",x -> startJava("com.eb.apps.ebchatclient.app.AiPlaygroundApp"));
+		view.addMenuItem("Aktionen", "EbMusicPlayer öffnen",x -> startJava("com.eb.apps.ebmusic.app.EbMusicPlayerApp"));
+		view.addMenuItem("Aktionen", "EbReader  öffnen",x -> startJava("com.eb.apps.ebookreader.app.EbReaderApp"));
+		view.addMenuItem("Aktionen", "Wörterbuch öffnen",x -> startJava("com.eb.apps.ebwoerterbuch.app.WbApp"));
 
 		// Removed useless Santanderbank menu item
 		// Or replace with actual functionality:
