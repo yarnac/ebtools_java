@@ -20,7 +20,7 @@ public class EbToolsApp {
 				try {
 					EbToolsView window = new EbToolsView();
 					new EbToolsViewController(window);
-					window.getFrame().setVisible(true);
+					window.setVisible(true);
 				} catch (Exception e) {
 					e.printStackTrace();
 				}

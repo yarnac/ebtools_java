@@ -34,8 +34,8 @@ public class EbToolsViewController {
 		manager = new EbToolsManager();
 
 		IC.Size = 24;
-		decorator = new GuiDecorator(view.getFrame(), manager.getIniFile(), "Einstellungen");
-		view.getFrame().setIconImage(decorator.getImage(IC.TOOLS));
+		decorator = new GuiDecorator(view, manager.getIniFile(), "Einstellungen");
+		view.setIconImage(decorator.getImage(IC.TOOLS));
 
 		if (GlobaleEinstellungen.isMacOs()) {
 			Taskbar.getTaskbar().setIconImage(decorator.getImage(IC.TOOLS,32));
@@ -92,7 +92,7 @@ public class EbToolsViewController {
 
 	private void addToolbarButtons() {
 		decorator.addContainer("main", view.getToolBar());
-		decorator.addTopMostButton("main", view.getFrame());
+		decorator.addTopMostButton("main", view);
 
 		// Clean up downloads
 		decorator.addToolbarButton("main", "Clean up downloads", IC.CONTRAST_ADJUST,

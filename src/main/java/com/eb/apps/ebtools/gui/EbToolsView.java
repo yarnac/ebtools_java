@@ -10,9 +10,8 @@ import java.util.Dictionary;
 import java.util.Hashtable;
 
 
-public class EbToolsView {
+public class EbToolsView extends JFrame {
 
-	private JFrame frame;
 	private JMenuBar menuBar;	
 	private JToolBar toolBar;	
 	private Dictionary<String, JMenu> menuDict = new Hashtable<>();
@@ -24,7 +23,7 @@ public class EbToolsView {
 
 	private JMenu addMenu(String string) {
 		JMenu menu = new JMenu(string);
-		menuBar.add(menu);
+		getJMenuBar().add(menu);
 		return menu;
 	}
 
@@ -66,40 +65,33 @@ public class EbToolsView {
 	 * Initialize the contents of the frame.
 	 */
 	private void initialize() {
-		setFrame(new JFrame());
-		getFrame().setTitle("Tools");
+		setTitle("Tools");
 		Image image = getImage("Tools");
-		getFrame().setIconImage(image);
-		getFrame().setBounds(100, 100, 450, 75);
-		getFrame().setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		
-		menuBar = new JMenuBar();
-		getFrame().setJMenuBar(menuBar);
-		setToolBar(new JToolBar());
-		getFrame().getContentPane().add(getToolBar(), BorderLayout.NORTH);
+		setIconImage(image);
+		setBounds(100, 100, 450, 75);
+		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+
+		setJMenuBar(new JMenuBar());
+
+		add(getToolBar(),BorderLayout.NORTH);
+
 		{
 			tvPanel = new JPanel();
-			getFrame().getContentPane().add(tvPanel, BorderLayout.CENTER);
+			getContentPane().add(tvPanel, BorderLayout.CENTER);
 		}
 		
 	}
 
 	public JToolBar getToolBar() {
+		if (toolBar == null) {
+			toolBar = new JToolBar();
+			toolBar.setFloatable(false);
+		}
 		return toolBar;
 	}
 
 	public void setToolBar(JToolBar toolBar) {
 		this.toolBar = toolBar;
-	}
-
-
-	public JFrame getFrame() {
-		return frame;
-	}
-
-
-	public void setFrame(JFrame frame) {
-		this.frame = frame;
 	}
 
 }

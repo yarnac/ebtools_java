@@ -1,6 +1,7 @@
 package com.eb.apps.ebtools.tvplayer.view;
 
 import com.eb.apps.ebtools.tvplayer.domain.TvItem;
+import com.eb.base.gui.EbSplitPanel;
 import lombok.Getter;
 
 import javax.swing.*;
@@ -14,41 +15,32 @@ public class TvPlayerView {
     private DefaultListModel<String> cbKategorienModel;
     private JList<TvItem> lstTvItems;
     private DefaultListModel<TvItem> lstTvItemsModel;
-    private JToolBar toolBar;
+    private EbSplitPanel ebSplitPanel;
+
 
     public void initView(JPanel tvPanel)
     {
+
         tvPanel.setLayout(new BorderLayout());
-        {
 
-            Component leftSplitPanel = new JPanel();
-            Component rightSplitPanel = new JPanel();
-            JSplitPane splitPane = new JSplitPane(
-                    JSplitPane.HORIZONTAL_SPLIT,
-                    leftSplitPanel,
-                    rightSplitPanel
-            );
+        cbKategorien = new JList<>();
+        cbKategorienModel = new DefaultListModel<>();
+        cbKategorien.setModel(cbKategorienModel);
+        JScrollPane scrollPaneLeft = new JScrollPane(cbKategorien);
 
-            cbKategorien = new JList<>();
-            cbKategorienModel = new DefaultListModel<>();
-            cbKategorien.setModel(cbKategorienModel);
+        lstTvItems = new JList<>();
+        lstTvItemsModel = new DefaultListModel<TvItem>();
+        lstTvItems.setModel(lstTvItemsModel);
+        JScrollPane scrollPaneRight = new JScrollPane(lstTvItems);
 
-            lstTvItems = new JList<>();
-            lstTvItemsModel = new DefaultListModel<TvItem>();
-            lstTvItems.setModel(lstTvItemsModel);
-            JScrollPane scrollPane = new JScrollPane(lstTvItems);
-            splitPane.setLeftComponent(cbKategorien);
-            splitPane.setRightComponent(scrollPane);
-            splitPane.setDividerLocation(100);
-
-            toolBar = new JToolBar();
-            tvPanel.add(toolBar, BorderLayout.NORTH);
-            tvPanel.add(splitPane, BorderLayout.CENTER);
-
-            //tvPanel.add(cbKategorien, BorderLayout.WEST);
-            //tvPanel.add(scrollPane, BorderLayout.CENTER);
-        }
+        EbSplitPanel.BORDER_SIZE = 2;
+        ebSplitPanel = new EbSplitPanel("mainPanel", scrollPaneLeft, scrollPaneRight, 1);
+        tvPanel.add(ebSplitPanel, BorderLayout.CENTER);
+        ebSplitPanel.setDividerLocation(250);
     }
+
+    public JToolBar getToolBarLeft(){return ebSplitPanel.getToolBar1();}
+    public JToolBar getToolBarRight(){return ebSplitPanel.getToolBar2();}
 
     public TvItem getSelectedTvItem() {
         return getLstTvItems().getSelectedValue();
@@ -62,9 +54,5 @@ public class TvPlayerView {
     public void setVisibleKategorien(List<String> collect) {
         cbKategorienModel.clear();
         cbKategorienModel.addAll(collect);
-    }
-
-    public JToolBar getToolBar() {
-        return toolBar;
     }
 }

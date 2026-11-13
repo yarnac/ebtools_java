@@ -47,25 +47,23 @@ public class TvPlayerCtrl {
 
     private void decorate(GuiDecorator decorator) {
 
-        decorator.addContainer("main", getView().getToolBar());
+        decorator.addContainer("main", getView().getToolBarLeft());
 
         decorator.addToolbarButton("main", "Hörzu", IC.VIDEO_LIBRARY_SEARCH, x->openHoerzu());
         decorator.addToolbarButton("main", "Open Tv File", IC.EDITDOC, x->tvFileBearbeiten());
         decorator.addToolbarButton("main", "Reload", IC.REFRESHPAGE, x->reload());
         decorator.addToolbarButton("main", "Export", IC.SAVE_ADD, x->copyScript());
         decorator.addToolbarButton("main", "Toggle Show All", IC.FILTER, x->toggleShowAll());
-        decorator.addMouseDoubleClickAction(view.getLstTvItems(), ()->onShowFile(view.getSelectedTvItem()));
+        decorator.addMouseDoubleClickAction(view.getLstTvItems(), this::showSelectedItem);
+
+        decorator.addContainer("SenderListe", getView().getToolBarRight());
+        decorator.addToolbarButton("SenderListe", "Play", IC.PLAY, x->showSelectedItem());
     }
 
-    private void openHoerzu() {
-        FileUtil.showWebseite(HTTPS_WWW_HOERZU_DE_TV_PROGRAMM_JETZT);
-    }
-
+    private void showSelectedItem() {onShowFile(view.getSelectedTvItem()); }
+    private void openHoerzu(){FileUtil.showWebseite(HTTPS_WWW_HOERZU_DE_TV_PROGRAMM_JETZT);}
     private void tvFileBearbeiten() {FileUtil.open(getTvKategorisierungFilePfad());}
-
-    private void copyScript() {
-
-    }
+    private void copyScript() {}
 
     private void kategorieChanged() {
         if (ignoreChangeKategorien) {return;}

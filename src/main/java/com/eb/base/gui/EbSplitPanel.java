@@ -23,6 +23,8 @@ public class EbSplitPanel extends JPanel {
     private JPanel outerPanel2;
 
 
+    public static int BORDER_SIZE = 5;
+
     public EbSplitPanel(String panelName, JComponent component1, JComponent component2, int splitOrientation) {
         mainPanel = this;
         mainPanel.setName(panelName);
@@ -36,12 +38,13 @@ public class EbSplitPanel extends JPanel {
         outerPanel2.setMinimumSize(new Dimension(20, 20));
         outerPanel1.setLayout(new BorderLayout());
 
+        int n = BORDER_SIZE;
         outerPanel1.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createEmptyBorder(5, 5, 5, 5), // Oben, Links, Unten, Rechts
+                BorderFactory.createEmptyBorder(n, n, n, n), // Oben, Links, Unten, Rechts
                 BorderFactory.createLineBorder(Color.BLACK, 1)
         ));
         outerPanel2.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createEmptyBorder(5, 5, 5, 5), // Oben, Links, Unten, Rechts
+                BorderFactory.createEmptyBorder(n, n, n, n), // Oben, Links, Unten, Rechts
                 BorderFactory.createLineBorder(Color.BLACK, 1)
         ));
 
