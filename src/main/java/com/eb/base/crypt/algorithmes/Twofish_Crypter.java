@@ -96,6 +96,7 @@ public class Twofish_Crypter
 		}
 		catch (IOException e) {
 
+
 			Logger.log(e);
 		}
 		return null;

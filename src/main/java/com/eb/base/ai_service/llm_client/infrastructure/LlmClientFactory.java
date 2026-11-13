@@ -23,12 +23,15 @@ public class LlmClientFactory {
     {
         try {
             String fileName = AiServiceConfig.current().getGeheimnisFileName();
+            String pwd = GlobaleEinstellungen.getSimplePassword();
             List<String> lines = Files.readAllLines(Path.of((fileName)));
             String line0 = lines.get(0);
-            String decrypted0 = new Twofish_Crypter().decryptString(line0, GlobaleEinstellungen.getSimplePassword());
+            String decrypted0 = new Twofish_Crypter().decryptString(line0, pwd);
+
             openAiKey = decrypted0.substring(decrypted0.indexOf("=")+1);
             String line1 = lines.get(1);
-            String decrypted1 = new Twofish_Crypter().decryptString(line1, GlobaleEinstellungen.getSimplePassword());
+            String decrypted1 = new Twofish_Crypter().decryptString(line1, pwd);
+
             anthropicKey = decrypted1.substring(decrypted1.indexOf("=")+1);
         } catch (IOException e) {
             throw new RuntimeException(e);

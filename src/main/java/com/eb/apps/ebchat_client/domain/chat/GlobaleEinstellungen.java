@@ -1,5 +1,6 @@
 package com.eb.apps.ebchat_client.domain.chat;
 
+import com.eb.base.ai_service.AiServiceConfig;
 import com.eb.base.ai_service.llm_client.infrastructure.LlmClientFactory;
 import com.eb.base.crypt.Crypt;
 import com.eb.base.crypt.CryptDES;
@@ -18,9 +19,25 @@ public class GlobaleEinstellungen {
     public static String getSimplePassword()
     {
         if (simplePwd == null)
-            simplePwd = FileExtensions.ebGetFileText(getDataPfadJUser("mykey_crypted.txt")).substring(10, 32);
+        {
+            String pwd1 = AiServiceConfig.current().getData1();
+            String pwd2 = AiServiceConfig.current().getData2();
+            Twofish_Crypter crypter = new Twofish_Crypter();
+
+            simplePwd = crypter.encryptString(pwd2, pwd1+"1#2+3AiCh");
+        }
 
         return simplePwd;
+    }
+
+    public static String getPassword()
+    {
+
+        String pwd1 = AiServiceConfig.current().getData1();
+        String pwd2 = AiServiceConfig.current().getData2();
+        Twofish_Crypter crypter = new Twofish_Crypter();
+
+        return crypter.encryptString(pwd1, pwd2+"*231*3?2#");
     }
 
     public static String getPfad(String localIniFilePath) {

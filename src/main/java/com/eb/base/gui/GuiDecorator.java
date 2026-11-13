@@ -449,4 +449,25 @@ public class GuiDecorator {
 	public void addCloseAction(Runnable action) {
 		closeActions.add(action);
 	}
+
+	public void addOnEnterOrReturnPressed(JComponent component, Runnable runnable) {
+		component.addKeyListener(new KeyAdapter() {
+			@Override
+			public void keyPressed(KeyEvent e) {
+				if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+					System.out.println("Return oder Enter wurde gedrückt!");
+					runnable.run();
+				}
+			}
+		});
+	}
+
+	static class ReturnEnterKeyListener extends KeyAdapter {
+		@Override
+		public void keyPressed(KeyEvent e) {
+			if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+				System.out.println("Return oder Enter wurde gedrückt!");
+			}
+		}
+	}
 }
