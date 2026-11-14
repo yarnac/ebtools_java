@@ -271,8 +271,7 @@ public class WbPanelView extends JPanel {
 		gridBagLayout.rowWeights = new double[]{0.0, 0.0, 0.0, 0.0};
 		setLayout(gridBagLayout);
 		
-		setToolbarMain(new JToolBar());
-		getToolbarMain().setRollover(true);
+
 		GridBagConstraints gbc_toolBar = new GridBagConstraints();
 		gbc_toolBar.fill = GridBagConstraints.VERTICAL;
 		gbc_toolBar.anchor = GridBagConstraints.NORTHWEST;
@@ -289,8 +288,7 @@ public class WbPanelView extends JPanel {
 		gbc_edWort.gridx = 0;
 		gbc_edWort.gridy = 1;
 		add(wordPanel, gbc_edWort);
-		
-		setToolBarWord(new JToolBar());
+
 		wordPanel.add(getToolBarWord(), BorderLayout.CENTER);
 		
 		edWort = new JTextField();
@@ -369,7 +367,7 @@ public class WbPanelView extends JPanel {
 		
 		panelText2.add(edText2);
 		
-		setToolbarVokabeln(new JToolBar());
+
 		getToolbarVokabeln().setOrientation(SwingConstants.VERTICAL);
 		GridBagConstraints gbc_toolBar_1 = new GridBagConstraints();
 		gbc_toolBar_1.anchor = GridBagConstraints.NORTH	;
@@ -399,20 +397,24 @@ public class WbPanelView extends JPanel {
 	}
 
 	public JToolBar getToolbarMain() {
+		if (toolbarMain == null) {
+			toolbarMain = new JToolBar();
+			toolbarMain.setFloatable(false);
+		}
 		return toolbarMain;
 	}
 
-	public void setToolbarMain(JToolBar toolbarMain) {
-		this.toolbarMain = toolbarMain;
-	}
+
 
 	public JToolBar getToolbarVokabeln() {
+		if (toolbarVokabeln == null) {
+			toolbarVokabeln = new JToolBar();
+			toolbarVokabeln.setFloatable(false);
+		}
 		return toolbarVokabeln;
 	}
 
-	public void setToolbarVokabeln(JToolBar toolbarVokabeln) {
-		this.toolbarVokabeln = toolbarVokabeln;
-	}
+
 
 	public GuiDecorator getDecorator() {
 		return decorator;
@@ -424,13 +426,16 @@ public class WbPanelView extends JPanel {
 
 
 	public JToolBar getToolBarWord() {
+
+		if (toolBarWord == null) {
+			toolBarWord = new JToolBar();
+			toolBarWord.setFloatable(false);
+		}
 		return toolBarWord;
 	}
 
 
-	public void setToolBarWord(JToolBar toolBarWord) {
-		this.toolBarWord = toolBarWord;
-	}
+
 
 
 	public JTree getTree() {

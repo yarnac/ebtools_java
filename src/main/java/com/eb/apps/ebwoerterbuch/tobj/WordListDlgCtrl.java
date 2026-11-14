@@ -28,9 +28,11 @@ public class WordListDlgCtrl {
 		// TODO Auto-generated constructor stub
 	}
 	private void decorate() {
-		btnTopMost = decorator.addToggleButton("Main", "TopMost", IC.PIN_ORANGE, IC.PIN_RED, x->topMostChanged());
-		decorator.addToolbarButton("Main", "Delete", IC.DELETE_RED, x->deleteWord());
-		decorator.addToolbarButton("Main", "Save Add", IC.SAVE_ADD, x->save());
+
+		decorator.setCurrentContainer("Main");
+		btnTopMost = decorator.addToggleButton("TopMost", IC.PIN_ORANGE, IC.PIN_RED, x->topMostChanged());
+		decorator.addToolbarButton("Delete", IC.DELETE_RED, x->deleteWord());
+		decorator.addToolbarButton("Save Add", IC.SAVE_ADD, x->save());
 	}
 	private Object save() {
 		// TODO Auto-generated method stub

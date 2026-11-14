@@ -22,10 +22,10 @@ public class AiCodeGeneratorCtrl {
         GuiDecorator decorator = new GuiDecorator(frame, myIniFile, "Einstellungen");
         decorator.setFrame(frame);
         decorator.addContainer("tbGen", frame.getToolBar());
-        decorator.addToolbarButton("tbGen", "Generiere Code", ICF.ArrowFlowVertical,this::handleGenerateCode);
+        decorator.addToolbarButton( "Generiere Code", ICF.ArrowFlowVertical,this::handleGenerateCode);
 
         decorator.addContainer("tbCode", frame.getToolBarCode());
-        decorator.addToolbarButton("tbCode", "Generiere Code", ICF.ArrowFlowVertical,this::handleSwitchLinespaces);
+        decorator.addToolbarButton("Generiere Code", ICF.ArrowFlowVertical,this::handleSwitchLinespaces);
 
         IComponentPersister persister = ComponentPersisterFactory.createIniFilePersister(myIniFile);
         persister.addComponentItem(frame.getEdNamespace(),"Namespace");

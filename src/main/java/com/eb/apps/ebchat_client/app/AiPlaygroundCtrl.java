@@ -84,11 +84,12 @@ public class AiPlaygroundCtrl {
 
         decorator = window.getDecorator();
 
-        decorator.addEditIniFileButton("MainToolbar", chatManager.getLlmModelProvider().getModelFileName());
-        decorator.addToolbarButton("MainToolbar", "Speichern Main", IC.MB_PLAY, (x)->{});
-        decorator.addToolbarButton("MainToolbar", "Edit Requests", ICF.Flowchart, (x)->{new EdRequestCtrl();});
-        decorator.addToolbarButton("MainToolbar", "Edit Contexts", ICF.Code, (x)->{SwingUtilities.invokeLater(ContextEditDlg::Show);});
-        decorator.addToolbarButton("MainToolbar", "Open DataFiles", ICF.History_Edit, (x)-> {
+        decorator.setCurrentContainer("MainToolbar");
+        decorator.addEditIniFileButton(chatManager.getLlmModelProvider().getModelFileName());
+        decorator.addToolbarButton("Speichern Main", IC.MB_PLAY, (x)->{});
+        decorator.addToolbarButton("Edit Requests", ICF.Flowchart, (x)->{new EdRequestCtrl();});
+        decorator.addToolbarButton("Edit Contexts", ICF.Code, (x)->{SwingUtilities.invokeLater(ContextEditDlg::Show);});
+        decorator.addToolbarButton("Open DataFiles", ICF.History_Edit, (x)-> {
             FileUtil.open(chatManager.getLlmModelProvider().getModelFileName());
         });
 
@@ -121,7 +122,8 @@ public class AiPlaygroundCtrl {
 
     private void decorateToolbarTree() {
         String tbName = window.getToolbarTreePanelName();
-        cbRequests = window.getDecorator().addToolbarComboBox(tbName,"Requests", llmRequestManager.getLlmRequests(),x->handleRequestChanged(x));
+        window.getDecorator().setCurrentContainer(tbName);
+        cbRequests = window.getDecorator().addToolbarComboBox("Requests", llmRequestManager.getLlmRequests(),x->handleRequestChanged(x));
     }
 
     private void handleRequestChanged(LlmRequest request) {
@@ -135,11 +137,12 @@ public class AiPlaygroundCtrl {
 
     private void decorateToolbarOutput() {
         String tbOutputName = window.getPanelWithToolBarOutput().getToolbar().getName();
-        decorator.addToolbarButton(tbOutputName,"Generate Code", ICF.ArrowFlowVertical_Add, this::handleGenerateCode);
-        decorator.addToolbarButton(tbOutputName,"Toggle Full View", ICF.SelectMinus, this::switchFullView);
-        decorator.addToolbarButton(tbOutputName,"Generate Content Description", ICF.Wizard, this::generateContentDescription);
-        decorator.addToolbarButton(tbOutputName,"Save Content Description", ICF.Wizard_Save, this::saveContentDescription);
-        decorator.addToolbarButton(tbOutputName,"Delete Request", ICF.DeleteRed, this::deleteRequest);
+        decorator.setCurrentContainer(tbOutputName);
+        decorator.addToolbarButton("Generate Code", ICF.ArrowFlowVertical_Add, this::handleGenerateCode);
+        decorator.addToolbarButton("Toggle Full View", ICF.SelectMinus, this::switchFullView);
+        decorator.addToolbarButton("Generate Content Description", ICF.Wizard, this::generateContentDescription);
+        decorator.addToolbarButton("Save Content Description", ICF.Wizard_Save, this::saveContentDescription);
+        decorator.addToolbarButton("Delete Request", ICF.DeleteRed, this::deleteRequest);
     }
 
     private void deleteRequest(ActionEvent actionEvent) {
@@ -192,30 +195,32 @@ public class AiPlaygroundCtrl {
         decorator.addOpenFileToolbarButton(tbName, "OpenAI Kosten", ICF.Monitor_Info, "https://platform.openai.com/home");
         decorator.addOpenFileToolbarButton(tbName, "Anthropic Kosten", ICF.Monitor_Properties, "https://platform.claude.com/dashboard");
 
-        decorator.addToolbarButton(tbName,"Run", IC.PLAY, (s) -> sendRequest(false));
-        decorator.addToolbarButton(tbName,"Run again", IC.MB_PLAY,  (s) -> sendRequest(true));
-        decorator.addToolbarButton(tbName,"Get Ollama Models", ICF.Help,  (s) -> showOllamaModelsFromClient());
-        decorator.addToolbarButton(tbName,"Open append file window", ICF.BulletList, this::actionPerformed);
-        decorator.addToolbarButton(tbName, "Kontexte", ICF.LinePoints_Add, this::openContextEditor);
-        decorator.addToolbarButton(tbName, "Dummy", ICF.MaleHardHat_Lock, (s)->{});
+        decorator.setCurrentContainer(tbName);
+        decorator.addToolbarButton("Run", IC.PLAY, (s) -> sendRequest(false));
+        decorator.addToolbarButton("Run again", IC.MB_PLAY,  (s) -> sendRequest(true));
+        decorator.addToolbarButton("Get Ollama Models", ICF.Help,  (s) -> showOllamaModelsFromClient());
+        decorator.addToolbarButton("Open append file window", ICF.BulletList, this::actionPerformed);
+        decorator.addToolbarButton( "Kontexte", ICF.LinePoints_Add, this::openContextEditor);
+        decorator.addToolbarButton( "Dummy", ICF.MaleHardHat_Lock, (s)->{});
     }
 
     private void decorateToolbarInputPart2() {
         String tbName = window.getPanelWithToolBarInput().getToolbar().getName();
         decorator = window.getDecorator();
+        decorator.setCurrentContainer(tbName);
         contextManager = chatManager.getContextManager();
 
         LlmModelProvider modelProvider = new LlmModelProvider();
-        cbChats = decorator.addToolbarComboBox(tbName,"Chats", chatManager.getAvailableChats(), this::setChat);
+        cbChats = decorator.addToolbarComboBox("Chats", chatManager.getAvailableChats(), this::setChat);
         int height = cbChats.getHeight();
-        cbContexts = decorator.addToolbarComboBox(tbName,"Kontext", contextManager.getContextList(), this::setContext);
-        cbModelle = decorator.addToolbarComboBox(tbName,"Modell", modelProvider.getModels(), this::setModel);
+        cbContexts = decorator.addToolbarComboBox("Kontext", contextManager.getContextList(), this::setContext);
+        cbModelle = decorator.addToolbarComboBox("Modell", modelProvider.getModels(), this::setModel);
 
         cbChats.setPreferredSize(new Dimension(20, height));
         cbModelle.setPreferredSize(new Dimension(20, height));
         cbContexts.setPreferredSize(new Dimension(20, height));
 
-        progressBar = decorator.addToolbarProgressBar(tbName,"Huhu");
+        progressBar = decorator.addToolbarProgressBar("Huhu");
     }
 
     boolean showFullView;

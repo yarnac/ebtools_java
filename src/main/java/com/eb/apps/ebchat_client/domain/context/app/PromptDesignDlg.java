@@ -85,16 +85,16 @@ public class PromptDesignDlg extends JFrame {
         decorator.addMenuItem("Copy Prompt", ()->copyPrompt(e), KeyEvent.VK_C, InputEvent.CTRL_DOWN_MASK | InputEvent.SHIFT_DOWN_MASK);
 
         decorator.addContainer("mainToolBar", toolBarMain);
-        decorator.addContainer("editorToolBar", contextEditorPanel.getToolBar());
-
-        decorator.addToolbarButton("mainToolBar", "New Context", ICF.BlankDocument_Add, this::createNewContext);
-        decorator.addToolbarButton("mainToolBar", "New Context", ICF.BlankDocument_Delete, this::deleteContext);
+        decorator.addToolbarButton("New Context", ICF.BlankDocument_Add, this::createNewContext);
+        decorator.addToolbarButton("New Context", ICF.BlankDocument_Delete, this::deleteContext);
         String[] Inhalte = new String[]{"Alle", "Prompts", "Snippets"};
-        comboBox = decorator.addToolbarComboBox("mainToolBar", "Inhalt",Inhalte, x->setFilter());
+        comboBox = decorator.addToolbarComboBox( "Inhalt",Inhalte, x->setFilter());
         comboBox.setMaximumSize(new Dimension(100,20));
-        decorator.addToolbarButton("editorToolBar", "Save Context", ICF.Save, this::saveContext);
-        decorator.addToolbarButton("editorToolBar", "Undo", ICF.UndoBlue, this::undoEdit);
-        decorator.addToolbarButton("editorToolBar", "Get Output", ICF.MediaButtonPlayGreen, this::setOutputContent);
+
+        decorator.addContainer("editorToolBar", contextEditorPanel.getToolBar());
+        decorator.addToolbarButton("Save Context", ICF.Save, this::saveContext);
+        decorator.addToolbarButton("Undo", ICF.UndoBlue, this::undoEdit);
+        decorator.addToolbarButton("Get Output", ICF.MediaButtonPlayGreen, this::setOutputContent);
     }
 
     private void setOutputContent(ActionEvent actionEvent) {

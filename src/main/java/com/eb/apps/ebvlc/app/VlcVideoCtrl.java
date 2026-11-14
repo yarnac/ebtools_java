@@ -83,37 +83,37 @@ public class VlcVideoCtrl {
 
         guiDecorator.addEditIniFileButton("MainToolbar");
 
-        cbDirectories = guiDecorator.addToolbarComboBox("MainToolbar", "Verzeichnisse", verzeichnisse, x -> handleChangedVerzeichnis(x));
+        cbDirectories = guiDecorator.addToolbarComboBox("Verzeichnisse", verzeichnisse, x -> handleChangedVerzeichnis(x));
 
-        guiDecorator.addToolbarButton("MainToolbar", "Refresh", IC.REFRESHPAGE, e -> DeleteShowedFiles());
-        guiDecorator.addToolbarButton("MainToolbar", "Refresh", IC.REFRESHPAGE, e -> ShowActVlcFile());
+        guiDecorator.addToolbarButton("Refresh", IC.REFRESHPAGE, e -> DeleteShowedFiles());
+        guiDecorator.addToolbarButton("Refresh", IC.REFRESHPAGE, e -> ShowActVlcFile());
 
         guiDecorator.addMouseDoubleClickAction(vlcVideoForm.getLstFiles(), this::playSelectedFiles);
         guiDecorator.addKeyPressAction(vlcVideoForm.getLstFiles(),"N",()->SelectAndPlayNextFiles(1));
         guiDecorator.addKeyPressAction(vlcVideoForm.getLstFiles(),"P",()->SelectAndPlayNextFiles(-1));
 
         guiDecorator.addContainer("FilesToolBar", vlcVideoForm.getFilesToolBar());
-        guiDecorator.addToolbarButton("FilesToolBar", "Play files", IC.MB_PLAY, e -> SelectAndPlayNextFiles(0));
-        guiDecorator.addToolbarButton("FilesToolBar", "Select previous files", IC.PREV, e -> SelectAndPlayNextFiles(-1));
-        guiDecorator.addToolbarButton("FilesToolBar", "Select next files", IC.NEXT, e -> SelectAndPlayNextFiles(1));
-        guiDecorator.addToolbarButton("FilesToolBar", "Shuffle Files", IC.MALE_USER, e -> ShuffleFiles());
+        guiDecorator.addToolbarButton("Play files", IC.MB_PLAY, e -> SelectAndPlayNextFiles(0));
+        guiDecorator.addToolbarButton("Select previous files", IC.PREV, e -> SelectAndPlayNextFiles(-1));
+        guiDecorator.addToolbarButton("Select next files", IC.NEXT, e -> SelectAndPlayNextFiles(1));
+        guiDecorator.addToolbarButton("Shuffle Files", IC.MALE_USER, e -> ShuffleFiles());
 
-        guiDecorator.addToolbarButton("FilesToolBar", "Delete selected files", ICF.DeleteRed, e -> markFileAsDeleted(true));
-        guiDecorator.addToolbarButton("FilesToolBar", "Delete selected files", ICF.Database_Delete, e -> markFileAsDeleted(false));
+        guiDecorator.addToolbarButton("Delete selected files", ICF.DeleteRed, e -> markFileAsDeleted(true));
+        guiDecorator.addToolbarButton("Delete selected files", ICF.Database_Delete, e -> markFileAsDeleted(false));
 
-        guiDecorator.addToolbarButton("FilesToolBar", "Select previous files", ICF.MediaButtonRewindBlue, e -> VLCStatus.sendCommand("pl_previous"));
-        guiDecorator.addToolbarButton("FilesToolBar", "Select next files", ICF.MediaButtonFastForwardBlue, e ->VLCStatus.sendCommand("pl_next"));
+        guiDecorator.addToolbarButton("Select previous files", ICF.MediaButtonRewindBlue, e -> VLCStatus.sendCommand("pl_previous"));
+        guiDecorator.addToolbarButton("Select next files", ICF.MediaButtonFastForwardBlue, e ->VLCStatus.sendCommand("pl_next"));
 
 
 
         guiDecorator.addContainer("DeletedFilesToolBar", vlcVideoForm.getDeletedFilesToolBar());
-        guiDecorator.addToolbarButton("DeletedFilesToolBar", "Play files", IC.MB_PLAY, e -> playDeletedFiles());
-        guiDecorator.addToolbarButton("DeletedFilesToolBar", "Undo delete", ICF.UndoBlue, e -> UndoDelete());
-        guiDecorator.addToolbarButton("DeletedFilesToolBar", "Delete selected files", ICF.DeleteRed, e -> deleteSelectedDeletedFiles());
+        guiDecorator.addToolbarButton("Play files", IC.MB_PLAY, e -> playDeletedFiles());
+        guiDecorator.addToolbarButton("Undo delete", ICF.UndoBlue, e -> UndoDelete());
+        guiDecorator.addToolbarButton("Delete selected files", ICF.DeleteRed, e -> deleteSelectedDeletedFiles());
 
 
         guiDecorator.addContainer("FavoritenToolBar", vlcVideoForm.getFavoritenToolBar());
-        guiDecorator.addToolbarButton("FavoritenToolBar", "Play files", IC.MB_PLAY, e -> SelectAndPlayNextFiles(0));
+        guiDecorator.addToolbarButton("Play files", IC.MB_PLAY, e -> SelectAndPlayNextFiles(0));
 
 
 

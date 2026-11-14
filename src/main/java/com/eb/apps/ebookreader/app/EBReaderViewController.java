@@ -102,36 +102,36 @@ public class EBReaderViewController  {
 		
 		decorator.addContainer("Upper", getView().getFrame().getTbUpper());
 		
-		decorator.addTopMostButton("Upper", getView().getFrame());
-		decorator.addEditIniFileButton("Upper", getIniFile().getFileName());
-		decorator.addToolbarButton("Upper", "Edit Booksession", IC.TABLE, x->editSessionFile());
-		decorator.addToolbarButton("Upper", "Test Zipper", IC.HELP_BLUE, x->ShowHelp());
+		decorator.addTopMostButton(getView().getFrame());
+		decorator.addEditIniFileButton(getIniFile().getFileName());
+		decorator.addToolbarButton("Edit Booksession", IC.TABLE, x->editSessionFile());
+		decorator.addToolbarButton("Test Zipper", IC.HELP_BLUE, x->ShowHelp());
 		
 		
-		decorator.addToolbarButton("Upper", "Reload", IC.REFRESHPAGE, x->getView() .resetText());
-		decorator.addToolbarButton("Upper", "Speichern", IC.SAVE_ADD, x->saveChanges());
+		decorator.addToolbarButton("Reload", IC.REFRESHPAGE, x->getView() .resetText());
+		decorator.addToolbarButton("Speichern", IC.SAVE_ADD, x->saveChanges());
 		
-		decorator.addToolbarButton("Upper", "Vorheriges Kapitel", IC.MB_REVERSE, x->nextChapter(-1));
+		decorator.addToolbarButton("Vorheriges Kapitel", IC.MB_REVERSE, x->nextChapter(-1));
 		
-		decorator.addToolbarButton("Upper", "Test Zipper", IC.Dictionary_HW, x->testZipper());
+		decorator.addToolbarButton("Test Zipper", IC.Dictionary_HW, x->testZipper());
 		
-		decorator.addToolbarButton("Upper", "Nächstes Kapitel", IC.MB_PLAY, x->nextChapter(1));
+		decorator.addToolbarButton("Nächstes Kapitel", IC.MB_PLAY, x->nextChapter(1));
 		
-		decorator.addToolbarButton("Upper", "Seite zurück", IC.MB_DOWN_BLUE, x->getView().nextPage(-1));
-		decorator.addToolbarButton("Upper", "Seite vor", IC.MB_UP_BLUE, x->getView().nextPage(1));		
+		decorator.addToolbarButton("Seite zurück", IC.MB_DOWN_BLUE, x->getView().nextPage(-1));
+		decorator.addToolbarButton("Seite vor", IC.MB_UP_BLUE, x->getView().nextPage(1));
 		
-		decorator.addToolbarSeparator("Upper");
+		decorator.addToolbarSeparator();
 		
-		decorator.addToolbarButton("Upper", "Analyzer starten", IC.TOOLS, x->startAnalyzer());
+		decorator.addToolbarButton("Analyzer starten", IC.TOOLS, x->startAnalyzer());
 		
-		decorator.addToolbarSeparator("Upper");
+		decorator.addToolbarSeparator();
 		
-		cbBuecher = decorator.addToolbarComboBox("Upper", "Bücher", iniFile.getSectionValues("BOOKS"), x->bookChanged(x));
+		cbBuecher = decorator.addToolbarComboBox("Bücher", iniFile.getSectionValues("BOOKS"), x->bookChanged(x));
 		
 		
 		
-		decorator.addToolbarButton("Upper", "Start eclipse", IC.BOX_FLOW, x->startEclipse());		
-		decorator.addToolbarButton("Upper", "Test Zipper", IC.Calendar, x->testZipper());
+		decorator.addToolbarButton("Start eclipse", IC.BOX_FLOW, x->startEclipse());
+		decorator.addToolbarButton("Test Zipper", IC.Calendar, x->testZipper());
 
 		getView().getFrame().setIconImage(decorator.getImage(IC.BookOpen));
 	}

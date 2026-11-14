@@ -49,15 +49,18 @@ public class TvPlayerCtrl {
 
         decorator.addContainer("main", getView().getToolBarLeft());
 
-        decorator.addToolbarButton("main", "Hörzu", IC.VIDEO_LIBRARY_SEARCH, x->openHoerzu());
-        decorator.addToolbarButton("main", "Open Tv File", IC.EDITDOC, x->tvFileBearbeiten());
-        decorator.addToolbarButton("main", "Reload", IC.REFRESHPAGE, x->reload());
-        decorator.addToolbarButton("main", "Export", IC.SAVE_ADD, x->copyScript());
-        decorator.addToolbarButton("main", "Toggle Show All", IC.FILTER, x->toggleShowAll());
+        decorator.setCurrentContainer("main");
+        decorator.addToolbarButton("Hörzu", IC.VIDEO_LIBRARY_SEARCH, x->openHoerzu());
+        decorator.addToolbarButton("Open Tv File", IC.EDITDOC, x->tvFileBearbeiten());
+        decorator.addToolbarButton("Reload", IC.REFRESHPAGE, x->reload());
+        decorator.addToolbarButton("Export", IC.SAVE_ADD, x->copyScript());
+        decorator.addToolbarButton("Toggle Show All", IC.FILTER, x->toggleShowAll());
         decorator.addMouseDoubleClickAction(view.getLstTvItems(), this::showSelectedItem);
 
         decorator.addContainer("SenderListe", getView().getToolBarRight());
-        decorator.addToolbarButton("SenderListe", "Play", IC.PLAY, x->showSelectedItem());
+        decorator.setCurrentContainer("SenderListe");
+
+        decorator.addToolbarButton("Play", IC.PLAY, x->showSelectedItem());
     }
 
     private void showSelectedItem() {onShowFile(view.getSelectedTvItem()); }

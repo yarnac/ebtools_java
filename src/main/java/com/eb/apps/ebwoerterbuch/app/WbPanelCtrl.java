@@ -89,38 +89,43 @@ public class WbPanelCtrl {
 	}
 
 	private void addToolbarItemsVokabeln(GuiDecorator decorator) {
-		decorator.addToolbarButton("Vokabeln", "Cleanup", IC.BLANK_DOC, x->cleanUpVokabel());
-		decorator.addToolbarButton("Vokabeln", "Save Add", IC.SAVE_ADD, x->saveVokabel());
-		decorator.addToolbarButton("Vokabeln", "Save Replace", IC.SAVE_DEL, x->saveReplaceVokabel());
+		decorator.setCurrentContainer("Vokabeln");
+		decorator.addToolbarButton("Cleanup", IC.BLANK_DOC, x->cleanUpVokabel());
+		decorator.addToolbarButton("Save Add", IC.SAVE_ADD, x->saveVokabel());
+		decorator.addToolbarButton("Save Replace", IC.SAVE_DEL, x->saveReplaceVokabel());
 	}
 
 	private void addToolbarItemsWord(GuiDecorator decorator) {
-		btnPrev = decorator.addToolbarButton("Word", "Prev", IC.MB_REVERSE, x->showPreviousSuchwort());
-		btnNext = decorator.addToolbarButton("Word", "Next", IC.MB_PLAY, x->showNextSuchwort());	
+		decorator.setCurrentContainer("Word");
+		btnPrev = decorator.addToolbarButton("Prev", IC.MB_REVERSE, x->showPreviousSuchwort());
+		btnNext = decorator.addToolbarButton("Next", IC.MB_PLAY, x->showNextSuchwort());
 		
-		decorator.addToolbarButton("Word", "Sprachsuche", IC.MALE_USER, x->showSprachsuche());
-		decorator.addToolbarButton("Word", "Google Bilder", IC.PHOTO, x->showBildersuche());
-		decorator.addToolbarButton("Word", "Google Suche", IC.WEB, x->showWebsuche());
-		decorator.addToolbarButton("Word", "Verbix", IC.TABLE, x->showVerbixsuche());		
+		decorator.addToolbarButton("Sprachsuche", IC.MALE_USER, x->showSprachsuche());
+		decorator.addToolbarButton("Google Bilder", IC.PHOTO, x->showBildersuche());
+		decorator.addToolbarButton("Google Suche", IC.WEB, x->showWebsuche());
+		decorator.addToolbarButton("Verbix", IC.TABLE, x->showVerbixsuche());
 	}
 
 	private void addToolbarItemsMain(GuiDecorator decorator) {
-		decorator.addToggleButton("Main", "TopMost",IC.PIN_ORANGE, IC.PIN_RED,x->getTopMostHandler().setTopMost(x.booleanValue()));
-		btnWatchClipboard = decorator.addToggleButton("Main", "Copy", IC.CLIPBOARD_DEL, IC.CLIPBOARD_UP, x->setFollowClipboard(x.booleanValue()));
-		decorator.addToggleButton("Main", "Use All Woerterbücher", IC.BOOKS, IC.BOOKS_RED, x->setUseAllLoaded(x.booleanValue()));
-				
-		decorator.addToolbarSeparator("Main");
-		decorator.addToolbarButton("Main", "Delete", IC.DELETE_RED, x->getManager().getAktWbSession().deleteVokabel(getWort()));
+		decorator.setCurrentContainer("Main");
+		decorator.addToolbarSeparator();
+
+		decorator.addToggleButton("TopMost",IC.PIN_ORANGE, IC.PIN_RED,x->getTopMostHandler().setTopMost(x.booleanValue()));
+		btnWatchClipboard = decorator.addToggleButton("Copy", IC.CLIPBOARD_DEL, IC.CLIPBOARD_UP, x->setFollowClipboard(x.booleanValue()));
+		decorator.addToggleButton("Use All Woerterbücher", IC.BOOKS, IC.BOOKS_RED, x->setUseAllLoaded(x.booleanValue()));
+
+
+		decorator.addToolbarButton("Delete", IC.DELETE_RED, x->getManager().getAktWbSession().deleteVokabel(getWort()));
 		
-		cbSprache = decorator.addToolbarComboBox("Main", "Sprache", getManager().getSprachen(),x->{cbSpracheChanged(x);});
-		decorator.addToolbarComboBox("Main", "Richtung",WbDirection.values(),x->{directionChanged(x);});
-		cbSearchStrategies = decorator.addToolbarComboBox("Main", "Searcher", getManager().getAktWbSession().getSearcher(),x->searchStrategyChanged(x));
+		cbSprache = decorator.addToolbarComboBox("Sprache", getManager().getSprachen(),x->{cbSpracheChanged(x);});
+		decorator.addToolbarComboBox("Richtung",WbDirection.values(),x->{directionChanged(x);});
+		cbSearchStrategies = decorator.addToolbarComboBox("Searcher", getManager().getAktWbSession().getSearcher(),x->searchStrategyChanged(x));
 		
 		
-		decorator.addToolbarSeparator("Main");
-		decorator.addToolbarButton("Main", "Wörter", IC.WORDS, x->getManager().openWordListDlg(getStack().getStrings()));
-		decorator.addToolbarButton("Main", "Crypt", IC.GLASSES, x->getManager().openCrypter("" + cache));
-		decorator.addToolbarButton("Main", "Java", IC.BOX_FLOW, x->getManager().openJava());	
+		decorator.addToolbarSeparator();
+		decorator.addToolbarButton("Wörter", IC.WORDS, x->getManager().openWordListDlg(getStack().getStrings()));
+		decorator.addToolbarButton("Crypt", IC.GLASSES, x->getManager().openCrypter("" + cache));
+		decorator.addToolbarButton("Java", IC.BOX_FLOW, x->getManager().openJava());
 		
 	}	
 

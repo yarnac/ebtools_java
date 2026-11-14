@@ -21,12 +21,13 @@ public class VlcVidCtrl {
         frame = new VlcVidFrame();
         GuiDecorator decorator = new GuiDecorator(frame, myIniFile, "Einstellungen");
         decorator.addContainer("tbMain", frame.getToolBarMain());
-        decorator.addContainer("tbLeft", frame.getSplitPanelMain().getToolBar1());
-        decorator.addContainer("tbRight", frame.getSplitPanelMain().getToolBar2());
+        decorator.addEditIniFileButton();
 
-        decorator.addEditIniFileButton("tbMain");
-        decorator.addEditIniFileButton("tbLeft");
-        decorator.addEditIniFileButton("tbRight");
+        decorator.addContainer("tbLeft", frame.getSplitPanelMain().getToolBar1());
+        decorator.addEditIniFileButton();
+
+        decorator.addContainer("tbRight", frame.getSplitPanelMain().getToolBar2());
+        decorator.addEditIniFileButton();
 
 
         SwingUtilities.invokeLater(()-> {

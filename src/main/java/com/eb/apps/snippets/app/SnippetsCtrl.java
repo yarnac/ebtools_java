@@ -46,12 +46,15 @@ public class SnippetsCtrl {
 
     private GuiDecorator initializeView() {
         GuiDecorator decorator = new GuiDecorator(frame, myIniFile, "Einstellungen");
+
         decorator.addContainer("mainToolBar", frame.getMainToolBar());
+        decorator.addToolbarButton("Speichern", ICF.SaveAll, (e)->{});
+
         decorator.addContainer("treeToolBar", frame.getSplitPanel().getToolBar1());
+        decorator.addToolbarButton("Speichern", ICF.SaveAll, (e)->{});
+
         decorator.addContainer("editToolBar", frame.getSplitPanel().getToolBar2());
-        decorator.addToolbarButton("mainToolBar", "Speichern", ICF.SaveAll, (e)->{});
-        decorator.addToolbarButton("treeToolBar", "Speichern", ICF.SaveAll, (e)->{});
-        decorator.addToolbarButton("editToolBar", "Speichern", ICF.SaveAll, (e)->{});
+        decorator.addToolbarButton("Speichern", ICF.SaveAll, (e)->{});
         return decorator;
     }
 }

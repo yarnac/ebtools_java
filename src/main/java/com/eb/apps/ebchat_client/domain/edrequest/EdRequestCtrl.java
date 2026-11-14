@@ -34,10 +34,10 @@ public class EdRequestCtrl {
 
 
         decorator.addContainer("tbRequests", window.getRequestsToolBar());
-        decorator.addContainer("tbMessages", window.getMessagesToolBar());
+        decorator.addToolbarButton("Delete Request", ICF.DeleteRed, this::deleteRequestClicked);
 
-        decorator.addToolbarButton("tbRequests", "Delete Request", ICF.DeleteRed, this::deleteRequestClicked);
-        decorator.addToolbarButton("tbMessages", "Delete Message", ICF.DeleteRed, this::deleteMessageClicked);
+        decorator.addContainer("tbMessages", window.getMessagesToolBar());
+        decorator.addToolbarButton("Delete Message", ICF.DeleteRed, this::deleteMessageClicked);
 
         IComponentPersister persister = ComponentPersisterFactory.createIniFilePersister(myIniFile);
         persister.addComponentItem(window.getSplitPane(),"SplitMain");

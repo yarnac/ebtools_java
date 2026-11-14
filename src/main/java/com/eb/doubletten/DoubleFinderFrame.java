@@ -61,7 +61,7 @@ public class DoubleFinderFrame extends JFrame {
 				
 		GuiDecorator decorator = new GuiDecorator();
 		decorator.addContainer("main", getMainToolBar());
-		decorator.addTopMostButton("main", this);					
+		decorator.addTopMostButton( this);
 	}
 	
 	

@@ -28,7 +28,8 @@ public class VokabelTrainerCtrl {
 		GuiDecorator decorator = new GuiDecorator();
 		decorator.setFrame(trainer);
 		decorator.addMenuItem("Datei", "Huhu", ()->{});
-		decorator.addToolbarButton("Main", "Leer", IC.BLANK_DOC, (x)->openWoerterbuch());
+		decorator.setCurrentContainer("Main");
+		decorator.addToolbarButton("Leer", IC.BLANK_DOC, (x)->openWoerterbuch());
 	}
 	
 	private void openWoerterbuch() {

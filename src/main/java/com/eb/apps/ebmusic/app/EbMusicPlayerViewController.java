@@ -103,15 +103,16 @@ public class EbMusicPlayerViewController {
 	private void decorateToolStrip(JToolBar toolBar) {
 		GuiDecorator decorator = new GuiDecorator();
 		decorator.addContainer("main", getView().getToolBar());
-		decorator.addTopMostButton("main", getView().getFrame());
-		decorator.addToolbarButton("main", "Edit Inifile", IC.EDITDOC, (x)->editIniFile());
-		decorator.addToolbarButton("main", "Reload IniFile", IC.REFRESHPAGE, (x)->transferModelToView());
-		decorator.addToolbarButton("main", "Play Selection", IC.PLAY,  (x)->playSelection());
-		decorator.addToolbarButton("main", "Previous Track", IC.PREV, (x)->previousTrack());
-		decorator.addToolbarButton("main", "Pause Track", IC.PAUSE, (x)->pauseTrack());
-		decorator.addToolbarButton("main", "Next Track", IC.NEXT, (x)->nextTrack());
-		decorator.addToolbarButton("main", "Stop Music", IC.STOP, (x)->stopMusic());
-		decorator.addToolbarButton("main", "Reload Bibliothek", IC.FROM_DB, (x)->reloadBibliothek());
+		decorator.setCurrentContainer("main");
+		decorator.addTopMostButton(getView().getFrame());
+		decorator.addToolbarButton("Edit Inifile", IC.EDITDOC, (x)->editIniFile());
+		decorator.addToolbarButton("Reload IniFile", IC.REFRESHPAGE, (x)->transferModelToView());
+		decorator.addToolbarButton("Play Selection", IC.PLAY,  (x)->playSelection());
+		decorator.addToolbarButton("Previous Track", IC.PREV, (x)->previousTrack());
+		decorator.addToolbarButton("Pause Track", IC.PAUSE, (x)->pauseTrack());
+		decorator.addToolbarButton("Next Track", IC.NEXT, (x)->nextTrack());
+		decorator.addToolbarButton("Stop Music", IC.STOP, (x)->stopMusic());
+		decorator.addToolbarButton("Reload Bibliothek", IC.FROM_DB, (x)->reloadBibliothek());
 
 		getView().getFrame().setIconImage(decorator.getImage(IC.MusicLibraryPlay));
 	}

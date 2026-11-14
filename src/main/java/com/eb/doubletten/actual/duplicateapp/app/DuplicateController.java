@@ -38,13 +38,12 @@ public class DuplicateController {
 
         GuiDecorator decorator = new GuiDecorator(view, inifile, "Einstellungen");
         decorator.addContainer("main", view.getMainToolBar());
-        decorator.addContainer("left", view.getLeftToolBar());
-        decorator.addContainer("right", view.getRightToolBar());
         decorator.addEditIniFileButton("main");
-        decorator.addToolbarButton("main", "Hilfe", IC.HELP_BLUE, (e)->{});
-        decorator.addToolbarButton("left", "Hilfe", IC.HELP_BLUE, (e)->{});
-        decorator.addToolbarButton("right", "Hilfe", IC.HELP_BLUE, (e)->{});
-
+        decorator.addToolbarButton("Hilfe", IC.HELP_BLUE, (e)->{});
+        decorator.addContainer("left", view.getLeftToolBar());
+        decorator.addToolbarButton("Hilfe", IC.HELP_BLUE, (e)->{});
+        decorator.addContainer("right", view.getRightToolBar());
+        decorator.addToolbarButton("Hilfe", IC.HELP_BLUE, (e)->{});
 
         transferInifileToView(view);
         wireEvents();
