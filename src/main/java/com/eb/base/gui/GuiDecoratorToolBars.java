@@ -9,19 +9,19 @@ import java.util.List;
 
 import static java.lang.System.out;
 
-class ComponentDecorator {
+class GuiDecoratorToolBars {
     private final Dictionary<String, JMenu> nameToMenuBarDictionary = new Hashtable<>();
     private final Dictionary<String, Container> nameToContainerDictionary = new Hashtable<>();
     private String currentMenuName;
     private Container currentContainer;
     private JFrame frame;
 
-    ComponentDecorator(JFrame frame) {
+    GuiDecoratorToolBars(JFrame frame) {
         this.frame = frame;
     }
 
 
-    public JButton addToolbarButton(String tooltipText, ICF ic, ActionListener listener) {
+    JButton addToolbarButton(String tooltipText, ICF ic, ActionListener listener) {
 
         Container toolbar = currentContainer;
 
@@ -61,4 +61,12 @@ class ComponentDecorator {
         return nameToContainerDictionary.get(toolbarName);
     }
 
+    public void setCurrentContainer(Container currentContainer) {
+        this.currentContainer  = currentContainer;
+    }
+
+    public void addContainer(String string, Container toolbarVokabeln) {
+        nameToContainerDictionary.put(string, toolbarVokabeln);
+        setCurrentContainer(toolbarVokabeln);
+    }
 }

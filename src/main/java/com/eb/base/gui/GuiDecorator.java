@@ -8,7 +8,6 @@ import lombok.Setter;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.Hashtable;
@@ -26,7 +25,7 @@ public class GuiDecorator {
 	@Setter
     private JMenuBar menuBar;
 
-	ComponentDecorator componentDecorator;
+	GuiDecoratorToolBars toolBarDecorator;
 
 	private final Dictionary<String, JMenu> nameToMenuBarDictionary = new Hashtable<>();
 	private final Dictionary<String, Container> nameToContainerDictionary = new Hashtable<>();
@@ -44,7 +43,7 @@ public class GuiDecorator {
 		iniFile = newIniFile;
 
 		GuiPersister.registerAndLoadStatus(frame, newIniFile,einstellungen);
-		componentDecorator = new ComponentDecorator(frame);
+		toolBarDecorator = new GuiDecoratorToolBars(frame);
 
 		WindowAdapter adapter = new WindowAdapter() {
 			@Override
@@ -95,25 +94,7 @@ public class GuiDecorator {
 
 	public JButton addToolbarButton(String tooltipText, ICF ic, ActionListener listener) {
 
-		Container toolbar = currentContainer;
-
-		JButton btn = new JButton();
-
-		try {
-			btn.setIcon(ic.getImageIcon());
-		} catch (Exception e) {
-			out.println("Image nicht gefunden: " + ic);
-		}
-		btn.setToolTipText(tooltipText);
-		toolbar.add(btn);
-		btn.addActionListener(listener);
-
-		if (!(toolbar instanceof JToolBar)) {
-			toolbar.revalidate();
-			toolbar.repaint();
-		}
-
-		return btn;
+		return toolBarDecorator.addToolbarButton(tooltipText, ic, listener);
 	}
 
 	public JButton addOpenFileToolbarButton(String tooltipText, IC ic, String fileName) {
@@ -226,14 +207,13 @@ public class GuiDecorator {
 
     public void addContainer(String string, Container toolbarVokabeln) {
 		nameToContainerDictionary.put(string, toolbarVokabeln);
+		toolBarDecorator.addContainer(string, toolbarVokabeln);
 		setCurrentContainer(string);
 	}
 
 	public void addMenuSeparator(String string) {
 		JMenu menu = getMenu(string);
 		menu.add(new JSeparator());
-		
-		
 	}
 
 	public void setCurrentMenu(String string) {
@@ -443,6 +423,7 @@ public class GuiDecorator {
 
 	public void setCurrentContainer(String main) {
 		currentContainer = fetchContainer(main);
+		toolBarDecorator.setCurrentContainer(currentContainer);
 	}
 
 	static class ReturnEnterKeyListener extends KeyAdapter {
