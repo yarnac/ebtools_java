@@ -38,8 +38,6 @@ public class GuiDecorator implements GuiDecoratorToolBarMethods {
 		iniFile = null;
 	}
 
-
-
 	public GuiDecorator(JFrame frame) {
 		toolBarDecorator = new GuiDecoratorToolBars(frame);
 		iniFile = null;
@@ -49,10 +47,6 @@ public class GuiDecorator implements GuiDecoratorToolBarMethods {
 		toolBarDecorator = new GuiDecoratorToolBars(panel);
 		iniFile = null;
 	}
-
-
-
-
 
 	public GuiDecorator(JFrame frame, IniFile newIniFile, String einstellungen) {
 		this.frame = frame;
