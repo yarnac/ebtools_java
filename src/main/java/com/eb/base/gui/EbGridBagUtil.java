@@ -1,6 +1,7 @@
 package com.eb.base.gui;
 
-import com.eb.apps.ebchat_client.domain.context.gui.ContextEditorPanel;
+import com.eb.apps.ebchat_client.domain.context.gui.ContextEditDetailsPanel;
+import lombok.Setter;
 
 import javax.swing.*;
 import java.awt.*;
@@ -9,6 +10,11 @@ public class EbGridBagUtil {
     private Container currentContainer;
     int currentRow = 0;
 
+    @Setter
+    boolean ignoreNextRow;
+    @Setter
+    boolean ignoreLabels;
+
     public EbGridBagUtil(Container container, int row) {
         currentContainer = container;
         currentContainer.setLayout(new GridBagLayout());
@@ -16,6 +22,7 @@ public class EbGridBagUtil {
     }
 
     public JToolBar addToolBarRow(boolean floatable) {
+
         GridBagConstraints gbc = new GridBagConstraints();
 
         JToolBar toolBar = new JToolBar();
@@ -35,8 +42,14 @@ public class EbGridBagUtil {
         gbc.anchor = GridBagConstraints.NORTHWEST;
         gbc.insets = new Insets(12, 4, 4, 0);
 
-        currentContainer.add(toolBar, gbc);
-        currentRow++;
+        if (ignoreNextRow) {
+            ignoreNextRow = false;
+        }
+        else
+        {
+            currentContainer.add(toolBar, gbc);
+            currentRow++;
+        }
 
         return toolBar;
     }
@@ -58,9 +71,28 @@ public class EbGridBagUtil {
     }
 
     public <T extends JComponent> T addLabeledFieldRow(T edName, String fieldLabel, double weight, int constraints) {
-        addLabel(currentContainer, fieldLabel, currentRow);
-        addField(currentContainer, edName, currentRow, weight, constraints);
-        currentRow++;
+        if (!ignoreLabels) {
+            addLabel(currentContainer, fieldLabel, currentRow);
+        }
+
+        if (ignoreNextRow) {
+            ignoreNextRow = false;
+        }
+        else
+        {
+            addField(currentContainer, edName, currentRow, weight, constraints);
+            currentRow++;
+        }
+
+        return edName;
+    }
+
+    public <T extends JComponent> T addFieldRow(T edName, double weight, int constraints) {
+        if (!ignoreNextRow) {
+            addField(currentContainer, edName, currentRow, weight, constraints);
+            currentRow++;
+
+        }
         return edName;
     }
 
@@ -68,9 +100,16 @@ public class EbGridBagUtil {
 
         JScrollPane scrollPaneWithField = new JScrollPane(edName);
 
-        addLabel(currentContainer, fieldLabel, currentRow);
-        addField(currentContainer, scrollPaneWithField, currentRow, weight, constraints);
-        currentRow++;
+        if (!ignoreLabels) {
+            addLabel(currentContainer, fieldLabel, currentRow);
+        }
+        if (ignoreNextRow) {
+            ignoreNextRow = false;
+        }
+        else {
+            addField(currentContainer, scrollPaneWithField, currentRow, weight, constraints);
+            currentRow++;
+        }
         return edName;
     }
 
@@ -96,7 +135,7 @@ public class EbGridBagUtil {
         container.add(component, gbc);
     }
 
-    public void setCurrentContainer(ContextEditorPanel contextEditorPanel) {
+    public void setCurrentContainer(ContextEditDetailsPanel contextEditorPanel) {
         currentContainer = contextEditorPanel;
     }
 
