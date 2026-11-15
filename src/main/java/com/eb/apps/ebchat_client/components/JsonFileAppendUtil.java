@@ -60,11 +60,17 @@ public class JsonFileAppendUtil {
         List<String> dateien = new ArrayList<>();
         StringBuilder strb = new StringBuilder();
 
-        if (!inputString.contains(FILE_MARKER))
-            return inputString;
+        //if (!inputString.contains(FILE_MARKER))
+        //    return inputString;
+
+
 
         String[] lines = inputString.split(LINE_SEPARATOR);
         for (String line : lines) {
+            if (FileExtensions.ebFileExists(line)) {
+                dateien.add(line.trim());
+                continue;
+            }
             if (line.startsWith(IMAGE_FILE_PREFIX)) {
                 String fileName = StringExtensions.ebTrimAll(line.substring(IMAGE_FILE_PREFIX.length()));
                 imageFileNames.add(fileName.trim());

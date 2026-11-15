@@ -12,7 +12,9 @@ import com.eb.apps.ebchat_client.components.JsonFileAppendUtil;
 import com.eb.apps.ebchat_client.domain.chat.AiContextProvider;
 import com.eb.apps.ebchat_client.domain.context.domain.ContextManager;
 import com.eb.apps.ebchat_client.domain.context.domain.ContextWithFiles;
+import com.eb.apps.ebchat_client.domain.context.gui.ContextEditDetailsPanel;
 import com.eb.apps.ebchat_client.domain.context.gui.ContextEditorPanel;
+import com.eb.apps.ebchat_client.domain.context.gui.ContextEditorPanelCtrl;
 import com.eb.apps.ebchat_client.domain.context.gui.ContextTreePanel;
 import com.eb.base.gui.decorator.GuiDecorator;
 import com.eb.base.gui.ICF;
@@ -35,22 +37,24 @@ public class ContextEditDlg extends JFrame {
 
     private IniFile myIniFile;
     private final GuiDecorator decorator;
-    private final ContextManager contextManager;
+
     private JSplitPane splitPane;
-    private ContextEditorPanel contextEditorPanel;
+    private ContextEditDetailsPanel contextEditDetailsPanel;
     private ContextTreePanel contextTreePanel;
 
-    private List<ContextWithFiles> contextList;
+
     private JToolBar toolBarMain;
     private JComboBox<String> comboBox;
-    private Predicate<String> filter;
+
+    private ContextEditorPanel contextEditorPanel;
+    private ContextEditorPanelCtrl contextEditorPanelCtrl;
 
 
     public static ContextEditDlg Show() {
 
         ContextEditDlg dlg = new ContextEditDlg();
         dlg.setVisible(true);
-        dlg.setContextList(AiContextProvider.getAvailableContexts());
+
         return dlg;
     }
 
@@ -58,19 +62,17 @@ public class ContextEditDlg extends JFrame {
 
         ContextEditDlg dlg = new ContextEditDlg();
         dlg.setNormalWindow();
-        dlg.setContextList(AiContextProvider.getAvailableContexts());
         return dlg;
     }
 
     public ContextEditDlg() {
         initializeView();
 
-        contextManager = AiContextProvider.getContextManager();
-
         myIniFile = IniFileProvider.createIniFile("ContextEditor.ini");
         decorator = new GuiDecorator(this, myIniFile, "Einstellungen");
         initMenuAndToolBar();
-        splitPane.setDividerLocation(300);
+        contextEditorPanel.setDividerLocation(300);
+
     }
 
     private void initMenuAndToolBar() {
@@ -86,54 +88,19 @@ public class ContextEditDlg extends JFrame {
 
         decorator.toolBars().addContainer("mainToolBar", toolBarMain);
 
-        decorator.toolBars().addToolbarButton("New Context", ICF.BlankDocument_Add, this::createNewContext);
-        decorator.toolBars().addToolbarButton("New Context", ICF.BlankDocument_Delete, this::deleteContext);
-        String[] Inhalte = new String[]{"Alle", "Prompts", "Snippets"};
-        comboBox = decorator.toolBars().addToolbarComboBox("Inhalt", Inhalte, x->setFilter());
-        comboBox.setMaximumSize(new Dimension(100,20));
-
-        decorator.toolBars().addContainer("editorToolBar", contextEditorPanel.getToolBar());
-        decorator.toolBars().addToolbarButton("Save Context", ICF.Save, this::saveContext);
-        decorator.toolBars().addToolbarButton("Undo", ICF.UndoBlue, this::undoEdit);
-        decorator.toolBars().addToolbarButton("Get Output", ICF.MediaButtonPlayGreen, this::setOutputContent);
     }
 
-    private void setOutputContent(ActionEvent actionEvent) {
-        String code = contextEditorPanel.getEdPrompt().getText();
-        String expanded = JsonFileAppendUtil.appendFiles(code, new ArrayList<>());
-        if (expanded != null) {
-
-            if (code.contains("\n<$D")) {
-                contextEditorPanel.getEdPrompt().setText(expanded);
-            }
-            else {
-                contextEditorPanel.getEdOutput().setText(expanded);
-            }
-        }
-
+    private void createNewContext(ActionEvent actionEvent) {
+        contextEditorPanelCtrl.createNewContext();
     }
 
-    private void setFilter() {
-        if (comboBox.getSelectedItem().equals("Prompts")) {
-            filter = x->x != null && x.startsWith("Prompts");
-        }
-        else if (comboBox.getSelectedItem().equals("Snippets")) {
-            filter = x->x != null && x.startsWith("Snippets");
-        }
-        else
-            filter = x->true;
 
-        filterContexts();
-
-    }
-
-    private void filterContexts() {
-        if (filter!=null)
-            contextTreePanel.setContextList(contextList.stream().filter(x->filter.test(x.getKnoten())).toList());
+    private void deleteContext(ActionEvent e) {
+        contextEditorPanelCtrl.deleteContext();
     }
 
     private void copyPrompt(ActionEvent e) {
-        StringSelection selection = new StringSelection(contextEditorPanel.getPromptText());
+        StringSelection selection = new StringSelection(contextEditDetailsPanel.getPromptText());
         Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
 
         clipboard.setContents(selection, null);
@@ -144,57 +111,7 @@ public class ContextEditDlg extends JFrame {
     }
 
     private void saveContext(ActionEvent actionEvent) {
-        saveContext();
-    }
-
-    private void saveContext() {
-        contextEditorPanel.transferViewToModel();
-        saveContextList();
-        contextTreePanel.rebuildTree();
-    }
-
-    private void deleteContext(ActionEvent actionEvent) {
-        ContextWithFiles selectedContext = contextTreePanel.getSelectedContext();
-        if (selectedContext == null)
-            return;
-        contextList.remove(selectedContext);
-        saveContextList();
-        contextTreePanel.rebuildTree();
-        contextEditorPanel.undo();
-    }
-
-    private void createNewContext(ActionEvent actionEvent) {
-        ContextWithFiles selectedContext = contextTreePanel.getSelectedContext();
-        if (selectedContext == null)
-            return;
-        ContextWithFiles newContext = new ContextWithFiles("Neuer Knoten", selectedContext.getKnoten(), "");
-        contextList.add(newContext);
-        contextTreePanel.rebuildTree();
-        contextTreePanel.setSelectedContext(newContext);
-        filterContexts();
-    }
-
-
-    public void setContextList(List<ContextWithFiles> contextList)
-    {
-        contextTreePanel.setContextList(contextList);
-        this.contextList = contextList;
-    }
-
-
-    private void saveContextList() {
-        try {
-            contextManager.writeKontexte();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    public JButton addToolBarButton(JToolBar bar, String text, Runnable action) {
-        JButton btn = new JButton(text);
-        btn.addActionListener(e->action.run());
-        bar.add(btn);
-        return btn;
+        contextEditorPanelCtrl.saveContext();
     }
 
     public void setNormalWindow()
@@ -210,38 +127,24 @@ public class ContextEditDlg extends JFrame {
 
 
         initializeComponents();
-
-        registerEvents();
-
-
     }
 
-    private void registerEvents() {
-        contextTreePanel.setTreeSelectionListener(x->transferSelectedContext());
-        contextEditorPanel.setSaveListener(()->contextTreePanel.rebuildTree());
-    }
 
-    private void transferSelectedContext() {
-        contextEditorPanel.transferModelToView(contextTreePanel.getSelectedContext());
-    }
+
 
 
     private void initializeComponents() {
         toolBarMain = new JToolBar();
         add(toolBarMain, BorderLayout.NORTH);
+        add(getContextEditorPanel());
+    }
 
-        contextTreePanel = new ContextTreePanel();
-        contextTreePanel.setSaveAction(this::saveContextList);
-
-        contextEditorPanel = new ContextEditorPanel();
-
-        splitPane = new JSplitPane(
-                JSplitPane.HORIZONTAL_SPLIT,
-                contextTreePanel,
-                contextEditorPanel
-        );
-        splitPane.setResizeWeight(0.0);
-        add(splitPane, BorderLayout.CENTER);
-        splitPane.setDividerLocation(430);
+    private Component getContextEditorPanel() {
+        if (contextEditorPanel==null)
+        {
+            contextEditorPanel = new ContextEditorPanel(false);
+            contextEditorPanelCtrl = new ContextEditorPanelCtrl(contextEditorPanel);
+        }
+        return contextEditorPanel;
     }
 }

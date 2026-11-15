@@ -1,6 +1,8 @@
 package com.eb.apps.ebchat_client.app;
 
 import com.eb.apps.ebchat_client.domain.chat.GlobaleEinstellungen;
+import com.eb.apps.ebchat_client.domain.context.gui.ContextEditorPanel;
+import com.eb.apps.ebchat_client.domain.context.gui.ContextEditorPanelCtrl;
 import com.eb.base.extensions.StringExtensions;
 import com.eb.base.gui.*;
 import com.eb.base.gui.adapter.JTextPaneAdapter;
@@ -48,6 +50,8 @@ public class AiPlaygroundWindow extends JFrame {
     private JPanel treePanel;
     @Getter
     private String toolbarTreePanelName;
+    private ContextEditorPanel contextEditorPanel;
+    private ContextEditorPanelCtrl contextEditorPanelCtrl;
 
 
     public AiPlaygroundWindow(IniFile iniFile)
@@ -248,7 +252,7 @@ public class AiPlaygroundWindow extends JFrame {
 
 
         // Create the SplitPanem vor Auswahl and Messages
-        splitPanelMain = new EbSplitPanel("MainSplitter", getTreePanel() , splitPanelMessages.getMainPanel(), JSplitPane.HORIZONTAL_SPLIT);
+        splitPanelMain = new EbSplitPanel("MainSplitter", getContextEditorPanel() , splitPanelMessages.getMainPanel(), JSplitPane.HORIZONTAL_SPLIT);
         toolbarTreePanelName = splitPanelMain.getToolBar1Name();
 
         add(splitPanelMain.getMainPanel(), BorderLayout.CENTER);
@@ -271,6 +275,16 @@ public class AiPlaygroundWindow extends JFrame {
             textFieldInputPraefix.setText("Übersetze ins Deutsche:");
         }
         return textFieldInputPraefix;
+    }
+
+    private JComponent getContextEditorPanel() {
+        if (contextEditorPanel==null)
+        {
+            contextEditorPanel = new ContextEditorPanel(true);
+            contextEditorPanel.getSplitPane().setOrientation(JSplitPane.VERTICAL_SPLIT);
+            contextEditorPanelCtrl = new ContextEditorPanelCtrl(contextEditorPanel);
+        }
+        return contextEditorPanel;
     }
 
     public JPanel getTreePanel()

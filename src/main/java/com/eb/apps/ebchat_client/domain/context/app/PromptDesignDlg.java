@@ -12,7 +12,7 @@ import com.eb.apps.ebchat_client.components.JsonFileAppendUtil;
 import com.eb.apps.ebchat_client.domain.chat.AiContextProvider;
 import com.eb.apps.ebchat_client.domain.context.domain.ContextManager;
 import com.eb.apps.ebchat_client.domain.context.domain.ContextWithFiles;
-import com.eb.apps.ebchat_client.domain.context.gui.ContextEditorPanel;
+import com.eb.apps.ebchat_client.domain.context.gui.ContextEditDetailsPanel;
 import com.eb.apps.ebchat_client.domain.context.gui.ContextTreePanel;
 import com.eb.base.gui.decorator.GuiDecorator;
 import com.eb.base.gui.ICF;
@@ -39,7 +39,7 @@ public class PromptDesignDlg extends JFrame {
     private final GuiDecorator decorator;
     private final ContextManager contextManager;
     private JSplitPane splitPane;
-    private ContextEditorPanel contextEditorPanel;
+    private ContextEditDetailsPanel contextEditorPanel;
     private ContextTreePanel contextTreePanel;
 
     private List<ContextWithFiles> contextList;
@@ -244,7 +244,7 @@ public class PromptDesignDlg extends JFrame {
         contextTreePanel = new ContextTreePanel();
         contextTreePanel.setSaveAction(this::saveContextList);
 
-        contextEditorPanel = new ContextEditorPanel();
+        contextEditorPanel = new ContextEditDetailsPanel(false, false);
 
         splitPane = new JSplitPane(
                 JSplitPane.HORIZONTAL_SPLIT,

@@ -1,115 +1,55 @@
-/*
- * Copyright parcIT GmbH
- *
- * Dieser Source-Code steht unter dem alleinigen Urheberschutz der parcIT GmbH.
- * Die Nutzung und Weitergabe ist nur mit ausdrücklicher Erlaubnis der parcIT GmbH gestattet.
- *
- */
-
 package com.eb.apps.ebchat_client.domain.context.gui;
 
-import com.eb.apps.ebchat_client.domain.context.domain.ContextWithFiles;
-import com.eb.base.gui.EbGridBagUtil;
+import com.eb.base.gui.EbSplitPanel;
 import lombok.Getter;
-import lombok.Setter;
 
 import javax.swing.*;
 import java.awt.*;
 
-public final class ContextEditorPanel extends JPanel {
+public class ContextEditorPanel extends JPanel {
 
-    private JTextField edName;
-    private JTextField edKnoten;
+    @Getter
+    private final ContextTreePanel contextTreePanel;
+    @Getter
+    private final ContextEditDetailsPanel contextEditDetailsPanel;
+    @Getter
+    private final EbSplitPanel splitPane;
 
-    private JTextArea edPrompt;
-    private JTextArea edOutput;
+    public ContextEditorPanel(boolean ignoreLabels) {
+        setLayout(new BorderLayout());
+        contextTreePanel = new ContextTreePanel();
+        contextTreePanel.setSaveAction(this::saveContextList);
 
-    @Getter     @Setter
-    private JToolBar toolBar;
-    private ContextWithFiles actContext;
-    private Runnable saveListener;
+        contextEditDetailsPanel = new ContextEditDetailsPanel(ignoreLabels, false);
 
-    public ContextEditorPanel() {
-        super(new GridBagLayout());
+        splitPane = new EbSplitPanel("mainPanel",
+                new JScrollPane(contextTreePanel),
+                contextEditDetailsPanel,
+                JSplitPane.HORIZONTAL_SPLIT
+        );
 
-        initializeComponents();
+        splitPane.setDividerLocation(430);
+        add(splitPane, BorderLayout.CENTER);
     }
 
-    private void initializeComponents() {
-        setBorder(BorderFactory.createEmptyBorder(2, 4, 4, 4));
-
-        EbGridBagUtil util = new EbGridBagUtil(this, 0);
-
-        toolBar = util.addToolBarRow(false);
-        edName = util.addLabeledFieldRow(new JTextField(), "Name", 0.0, GridBagConstraints.HORIZONTAL);
-        edKnoten = util.addLabeledFieldRow(new JTextField(), "Knoten", 0.0, GridBagConstraints.HORIZONTAL);
-        edPrompt = util.addLabeledScrollPaneWithFieldRow(new JTextArea(), "Prompt", 0.4, GridBagConstraints.BOTH);
-        edOutput = util.addLabeledScrollPaneWithFieldRow(new JTextArea(), "Output", 0.6, GridBagConstraints.BOTH);
+    public void undo() {
+        contextEditDetailsPanel.undo();
     }
 
-    public void undo()
-    {
-        transferModelToView(actContext);
+    private void saveContextList() {
     }
 
-    public void transferModelToView(ContextWithFiles contextWithFiles) {
-        this.actContext = contextWithFiles == null ? new ContextWithFiles() : contextWithFiles;
-        edName.setText(actContext.getName());
-        edKnoten.setText(actContext.getKnoten());
-        edPrompt.setText(actContext.getUserString());
-    }
-
-    public void transferViewToModel(ContextWithFiles contextWithFiles) {
-        contextWithFiles.setName(edName.getText());
-        contextWithFiles.setKnoten(edKnoten.getText());
-        contextWithFiles.setUserString(edPrompt.getText());
+    public void setDividerLocation(int i) {
+        splitPane.setDividerLocation(300);
     }
 
 
-    private JTextArea createTextArea() {
-        JTextArea textArea = new JTextArea();
-        textArea.setLineWrap(true);
-        textArea.setWrapStyleWord(true);
-        return textArea;
+    public void registerEvents() {
+        getContextTreePanel().setTreeSelectionListener(x->transferSelectedContext());
+        getContextEditDetailsPanel().setSaveListener(()->contextTreePanel.rebuildTree());
     }
 
-    public JTextField getEdName() {
-        return edName;
-    }
-
-    public JTextField getEdKnoten() {
-        return edKnoten;
-    }
-
-    public JTextArea getEdPrompt() {
-        return edPrompt;
-    }
-
-    public JTextArea getEdOutput() {
-        return edOutput;
-    }
-
-    public void setSaveListener(Runnable listener){
-        saveListener = listener;
-    }
-
-    public void transferViewToModel() {
-        if (actContext != null) {
-            transferViewToModel(actContext);
-        }
-    }
-
-    public String getPromptText() {
-        return edPrompt.getText();
-    }
-
-    public static void main(String[] argc)
-    {
-        JFrame frame = new JFrame();
-        frame.setLocationRelativeTo(null);
-        frame.setSize(800, 600);
-        frame.add(new ContextEditorPanel());
-        frame.setVisible(true);
-        frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+    private void transferSelectedContext() {
+        contextEditDetailsPanel.transferModelToView(contextTreePanel.getSelectedContext());
     }
 }
