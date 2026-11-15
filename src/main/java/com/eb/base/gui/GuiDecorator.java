@@ -18,19 +18,18 @@ import java.util.function.Consumer;
 import static java.lang.System.out;
 
 
-public class GuiDecorator implements GuiDecoratorToolBarMethods {
+public class GuiDecorator implements GuiDecoratorToolBarMethods, GuiDecoratorMenuBarMethods {
 	private final IniFile iniFile;
 	@Setter
     @Getter
     private JFrame frame;
-	@Setter
-    private JMenuBar menuBar;
+
+	@Getter
+	public GuiDecoratorMenuBars guiDecoratorMenuBars = new GuiDecoratorMenuBars(getFrame());
 
 	@Getter
 	public final GuiDecoratorToolBars toolBarDecorator;
 
-	private final Dictionary<String, JMenu> nameToMenuBarDictionary = new Hashtable<>();
-	private String currentMenuName;
 	private final List<Runnable> closeActions = new ArrayList<>();
 
 	public GuiDecorator() {
@@ -66,90 +65,6 @@ public class GuiDecorator implements GuiDecoratorToolBarMethods {
 		};
 
 		this.frame.addWindowListener(adapter);
-	}
-
-	public JMenu getMenu(String label)
-	{
-		JMenu jMenu = nameToMenuBarDictionary.get(label);
-		if (jMenu==null)
-		{
-			jMenu = new JMenu(label);
-			getMenuBar().add(jMenu);	
-			nameToMenuBarDictionary.put(label,  jMenu);
-		}
-		return jMenu;				
-	}
-	
-	public JMenuItem addMenuItem(String menuString, String label, Runnable object) {
-		JMenu menu = getMenu(menuString);
-		
-		JMenuItem item = new JMenuItem(label);
-
-		item.addActionListener(x->object.run());
-		menu.add(item);
-		return item;
-	}
-
-
-	public JCheckBoxMenuItem addJCheckBoxMenuItem(String menuString, String label, Runnable object) {
-		JMenu menu = getMenu(menuString);
-
-		JCheckBoxMenuItem item = new JCheckBoxMenuItem(label);
-
-		item.addActionListener(x->object.run());
-		menu.add(item);
-		return item;
-	}
-
-
-
-	public JMenuBar getMenuBar() {
-		if (menuBar!=null)
-			return menuBar;
-		if (getFrame()==null)
-			return null;
-		if (getFrame().getJMenuBar()==null)
-		{
-			menuBar = new JMenuBar();
-			getFrame().setJMenuBar(menuBar);
-		}
-		else
-			menuBar = getFrame().getJMenuBar();
-			
-		return menuBar;
-	}
-
-	public void addMenuSeparator(String string) {
-		JMenu menu = getMenu(string);
-		menu.add(new JSeparator());
-	}
-
-	public void setCurrentMenu(String string) {
-		currentMenuName = string;
-		// TODO Auto-generated method stub
-		
-	}
-
-	public void addMenuItem(String string, Runnable object) {
-		addMenuItem(currentMenuName, string, object);
-		
-	}
-
-	public JMenuItem addMenuItem(String string, Runnable object, int key, int mask) {
-		JMenuItem item = addMenuItem(currentMenuName, string, object);
-		item.setAccelerator( KeyStroke.getKeyStroke(key, mask) );
-		return item;
-	}
-
-	public JCheckBoxMenuItem addJCheckBoxMenuItem(String string, Runnable object, int key, int mask) {
-		JCheckBoxMenuItem item = addJCheckBoxMenuItem(currentMenuName, string, object);
-		item.setAccelerator( KeyStroke.getKeyStroke(key, mask) );
-		return item;
-	}
-
-	public void addMenuSeparator() {
-		addMenuSeparator(currentMenuName);
-		
 	}
 
 	/*
@@ -232,7 +147,6 @@ public class GuiDecorator implements GuiDecoratorToolBarMethods {
 			}
 		});
 	}
-
 
 	static class ReturnEnterKeyListener extends KeyAdapter {
 		@Override
