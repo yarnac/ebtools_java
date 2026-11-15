@@ -100,38 +100,38 @@ public class EBReaderViewController  {
 	private void decorateToolbar() {
 		GuiDecorator decorator = new GuiDecorator(getView().getFrame(), getIniFile(), "Einstellungen");
 		
-		decorator.addContainer("Upper", getView().getFrame().getTbUpper());
+		decorator.toolBars().addContainer("Upper", getView().getFrame().getTbUpper());
 		
-		decorator.addTopMostButton(getView().getFrame());
+		decorator.toolBars().addTopMostButton(getView().getFrame());
 		decorator.addEditIniFileButton(getIniFile().getFileName());
-		decorator.addToolbarButton("Edit Booksession", IC.TABLE, x->editSessionFile());
-		decorator.addToolbarButton("Test Zipper", IC.HELP_BLUE, x->ShowHelp());
+		decorator.toolBars().addToolbarButton("Edit Booksession", IC.TABLE, x->editSessionFile());
+		decorator.toolBars().addToolbarButton("Test Zipper", IC.HELP_BLUE, x->ShowHelp());
 		
 		
-		decorator.addToolbarButton("Reload", IC.REFRESHPAGE, x->getView() .resetText());
-		decorator.addToolbarButton("Speichern", IC.SAVE_ADD, x->saveChanges());
+		decorator.toolBars().addToolbarButton("Reload", IC.REFRESHPAGE, x->getView() .resetText());
+		decorator.toolBars().addToolbarButton("Speichern", IC.SAVE_ADD, x->saveChanges());
 		
-		decorator.addToolbarButton("Vorheriges Kapitel", IC.MB_REVERSE, x->nextChapter(-1));
+		decorator.toolBars().addToolbarButton("Vorheriges Kapitel", IC.MB_REVERSE, x->nextChapter(-1));
 		
-		decorator.addToolbarButton("Test Zipper", IC.Dictionary_HW, x->testZipper());
+		decorator.toolBars().addToolbarButton("Test Zipper", IC.Dictionary_HW, x->testZipper());
 		
-		decorator.addToolbarButton("Nächstes Kapitel", IC.MB_PLAY, x->nextChapter(1));
+		decorator.toolBars().addToolbarButton("Nächstes Kapitel", IC.MB_PLAY, x->nextChapter(1));
 		
-		decorator.addToolbarButton("Seite zurück", IC.MB_DOWN_BLUE, x->getView().nextPage(-1));
-		decorator.addToolbarButton("Seite vor", IC.MB_UP_BLUE, x->getView().nextPage(1));
+		decorator.toolBars().addToolbarButton("Seite zurück", IC.MB_DOWN_BLUE, x->getView().nextPage(-1));
+		decorator.toolBars().addToolbarButton("Seite vor", IC.MB_UP_BLUE, x->getView().nextPage(1));
 		
-		decorator.addToolbarSeparator();
+		decorator.toolBars().addToolbarSeparator();
 		
-		decorator.addToolbarButton("Analyzer starten", IC.TOOLS, x->startAnalyzer());
+		decorator.toolBars().addToolbarButton("Analyzer starten", IC.TOOLS, x->startAnalyzer());
 		
-		decorator.addToolbarSeparator();
+		decorator.toolBars().addToolbarSeparator();
 		
-		cbBuecher = decorator.addToolbarComboBox("Bücher", iniFile.getSectionValues("BOOKS"), x->bookChanged(x));
+		cbBuecher = decorator.toolBars().addToolbarComboBox("Bücher", iniFile.getSectionValues("BOOKS"), x->bookChanged(x));
 		
 		
 		
-		decorator.addToolbarButton("Start eclipse", IC.BOX_FLOW, x->startEclipse());
-		decorator.addToolbarButton("Test Zipper", IC.Calendar, x->testZipper());
+		decorator.toolBars().addToolbarButton("Start eclipse", IC.BOX_FLOW, x->startEclipse());
+		decorator.toolBars().addToolbarButton("Test Zipper", IC.Calendar, x->testZipper());
 
 		getView().getFrame().setIconImage(decorator.getImage(IC.BookOpen));
 	}

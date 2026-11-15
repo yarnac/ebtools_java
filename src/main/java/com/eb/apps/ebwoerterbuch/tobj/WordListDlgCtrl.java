@@ -29,10 +29,10 @@ public class WordListDlgCtrl {
 	}
 	private void decorate() {
 
-		decorator.setCurrentContainer("Main");
-		btnTopMost = decorator.addToggleButton("TopMost", IC.PIN_ORANGE, IC.PIN_RED, x->topMostChanged());
-		decorator.addToolbarButton("Delete", IC.DELETE_RED, x->deleteWord());
-		decorator.addToolbarButton("Save Add", IC.SAVE_ADD, x->save());
+		decorator.toolBars().setCurrentContainer("Main");
+		btnTopMost = decorator.toolBars().addToggleButton("TopMost", IC.PIN_ORANGE, IC.PIN_RED, x->topMostChanged());
+		decorator.toolBars().addToolbarButton("Delete", IC.DELETE_RED, x->deleteWord());
+		decorator.toolBars().addToolbarButton("Save Add", IC.SAVE_ADD, x->save());
 	}
 	private Object save() {
 		// TODO Auto-generated method stub

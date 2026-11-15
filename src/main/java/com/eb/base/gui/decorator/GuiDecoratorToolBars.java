@@ -8,17 +8,14 @@ import com.eb.base.gui.ICF;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionListener;
-import java.util.Dictionary;
-import java.util.Hashtable;
+import java.util.*;
 import java.util.List;
 import java.util.function.Consumer;
 
 import static java.lang.System.out;
 
 public class GuiDecoratorToolBars {
-    private final Dictionary<String, JMenu> nameToMenuBarDictionary = new Hashtable<>();
-    private final Dictionary<String, Container> nameToContainerDictionary = new Hashtable<>();
-    private String currentMenuName;
+    private final Map<String, Container> nameToContainerDictionary = new HashMap<>();
     private Container currentContainer;
     private Component frame;
 
@@ -66,13 +63,15 @@ public class GuiDecoratorToolBars {
         return getToolBarButton(tooltipText, listener, ic.getImageIcon(), "Image nicht gefunden: " + ic);
     }
 
-    JButton addToolbarButton(String tooltipText, ICF icf, ActionListener listener) {
+    public JButton addToolbarButton(String tooltipText, ICF icf, ActionListener listener) {
 
         return getToolBarButton(tooltipText, listener, icf.getImageIcon(), "Image nicht gefunden: " + icf);
     }
 
     private JButton getToolBarButton(String tooltipText, ActionListener listener, ImageIcon imageIcon, String s) {
-        Container toolbar = currentContainer;
+
+        checkCurrentContainer();
+
         JButton btn = new JButton();
         try {
             btn.setIcon(imageIcon);
@@ -80,18 +79,20 @@ public class GuiDecoratorToolBars {
             out.println(s);
         }
         btn.setToolTipText(tooltipText);
-        toolbar.add(btn);
+        currentContainer.add(btn);
         btn.addActionListener(listener);
 
-        if (!(toolbar instanceof JToolBar)) {
-            toolbar.revalidate();
-            toolbar.repaint();
-        }
+        checkAndInvalidateContainerIfNecessary();
         return btn;
     }
 
+    private void checkCurrentContainer() {
+        if (currentContainer == null) throw new IllegalStateException("Current container not set.");
+    }
+
     public JButton addOpenFileToolbarButton(String tooltipText, IC ic, String fileName) {
-        Container toolbar = currentContainer;
+
+        checkCurrentContainer();
         JButton btn = new JButton();
         try {
             btn.setIcon(ic.getImageIcon());
@@ -99,13 +100,10 @@ public class GuiDecoratorToolBars {
             out.println("Image nicht gefunden: " + ic);
         }
         btn.setToolTipText(tooltipText);
-        toolbar.add(btn);
+        currentContainer.add(btn);
         btn.addActionListener(x -> openFile(fileName));
 
-        if (!(toolbar instanceof JToolBar)) {
-            toolbar.revalidate();
-            toolbar.repaint();
-        }
+        checkAndInvalidateContainerIfNecessary();
         return btn;
     }
 
@@ -119,7 +117,9 @@ public class GuiDecoratorToolBars {
 
 
     public JButton addOpenFileToolbarButton(String toolbarName, String tooltipText, ICF ic, String fileName) {
-        Container toolbar = fetchContainer(toolbarName);
+
+        checkCurrentContainer();
+
         JButton btn = new JButton();
         try {
             btn.setIcon(ic.getImageIcon());
@@ -127,20 +127,24 @@ public class GuiDecoratorToolBars {
             out.println("Image nicht gefunden: " + ic);
         }
         btn.setToolTipText(tooltipText);
-        toolbar.add(btn);
+        currentContainer.add(btn);
         btn.addActionListener(x -> openFile(fileName));
 
-        if (!(toolbar instanceof JToolBar)) {
-            toolbar.revalidate();
-            toolbar.repaint();
-        }
+        checkAndInvalidateContainerIfNecessary();
+
         return btn;
     }
 
+    private void checkAndInvalidateContainerIfNecessary() {
+        if (!(currentContainer instanceof JToolBar)) {
+            currentContainer.revalidate();
+            currentContainer.repaint();
+        }
+    }
+
     public JToggleButton addToggleButton(String tooltipText, IC pinOrange, IC pinRed, Consumer<Boolean> listener) {
-        Container toolbar = currentContainer;
-        if (toolbar==null)
-            return null;
+
+        checkCurrentContainer();
 
         Image image = pinOrange.getCachedImage();
         Image selectedImage = pinRed.getCachedImage();
@@ -151,13 +155,17 @@ public class GuiDecoratorToolBars {
         btn.setSelectedIcon(new ImageIcon(selectedImage));
 
         btn.setToolTipText(tooltipText);
-        toolbar.add(btn);
+        currentContainer.add(btn);
         btn.addActionListener(x -> listener.accept(btn.isSelected()));
+
+        checkAndInvalidateContainerIfNecessary();
         return btn;
     }
 
     public JToggleButton addToggleButton(String tooltipText, ICF pinOrange, ICF pinRed, Consumer<Boolean> listener) {
-        Container toolbar = currentContainer;
+
+        checkCurrentContainer();
+
         Image image = pinOrange.getCachedImage();
         Image selectedImage = pinRed.getCachedImage();
 
@@ -167,24 +175,34 @@ public class GuiDecoratorToolBars {
         btn.setSelectedIcon(new ImageIcon(selectedImage));
 
         btn.setToolTipText(tooltipText);
-        toolbar.add(btn);
+        currentContainer.add(btn);
         btn.addActionListener(x -> listener.accept(btn.isSelected()));
+
+        checkAndInvalidateContainerIfNecessary();
+
         return btn;
     }
 
     public void addToolbarSeparator() {
-        Container container = currentContainer;
-        if (!(container instanceof JToolBar)) return;
+
+        checkCurrentContainer();
+
+        if (!(currentContainer instanceof JToolBar)) return;
 
         JSeparator seo = new JSeparator();
         seo.setMaximumSize(new Dimension(20,200));
         seo.setOpaque(true);
         seo.setSize(202,20);				
         seo.getInsets().left = 4;
-        container.add(seo);
+        currentContainer.add(seo);
+
+        checkAndInvalidateContainerIfNecessary();
     }
 
     public <T> JComboBox<T> addToolbarComboBox(String tooltipText, List<T> elements, Consumer<T> consumer) {
+
+        checkCurrentContainer();
+
         JComboBox<T> comboBox = new JComboBox<>();
         comboBox.setFont(new Font("Arial", Font.PLAIN, 14));
         comboBox.setToolTipText(tooltipText);
@@ -193,18 +211,26 @@ public class GuiDecoratorToolBars {
         comboBox.setModel(model);
         currentContainer.add(comboBox);
         comboBox.addActionListener(x -> consumer.accept((T)comboBox.getSelectedItem()));
+
+        checkAndInvalidateContainerIfNecessary();
         return comboBox;
     }
 
     public JProgressBar addToolbarProgressBar(String tooltipText) {
+
+        checkCurrentContainer();
+
         JProgressBar progressBar = new JProgressBar();
         currentContainer.add(progressBar);
+
+        checkAndInvalidateContainerIfNecessary();
+
         return progressBar;
     }
 
     public <T> JComboBox<T> addToolbarComboBox(String tooltipText, T[] elements, Consumer<T> consumer) {
-        if (currentContainer==null)
-            return null;
+
+        checkCurrentContainer();
 
         JComboBox<T> comboBox = new JComboBox<>();
         comboBox.setToolTipText(tooltipText);
@@ -214,6 +240,9 @@ public class GuiDecoratorToolBars {
         currentContainer.add(comboBox);
         comboBox.addActionListener(x -> consumer.accept((T)comboBox.getSelectedItem()));
         comboBox.setVisible(true);
+
+        checkAndInvalidateContainerIfNecessary();
+
         return comboBox;
     }
 

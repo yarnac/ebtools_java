@@ -5,6 +5,7 @@ import com.eb.apps.snippets.gui.SnippetTreeCtrl;
 import com.eb.apps.snippets.gui.SnippetWindowFrame;
 import com.eb.base.gui.decorator.GuiDecorator;
 import com.eb.base.gui.ICF;
+import com.eb.base.gui.decorator.GuiDecoratorToolBars;
 import com.eb.base.inifile.api.IniFile;
 import com.eb.base.inifile.api.IniFileProvider;
 
@@ -31,7 +32,7 @@ public class SnippetsCtrl {
         treeCtrl = new SnippetTreeCtrl(frame.getJTree(), frame.getSplitPanel().getToolBar1());
         editCtrl = new SnippetEditCtrl(frame.getEdSnippetText(), frame.getSplitPanel().getToolBar2());
 
-        decorator.setMenuBar(frame.getJMenuBar());
+        decorator.menuBars().setMenuBar(frame.getJMenuBar());
         //decorator.addMenuItem("Speichern",()->{});
 
 
@@ -44,16 +45,19 @@ public class SnippetsCtrl {
     }
 
     private GuiDecorator initializeView() {
-        GuiDecorator decorator = new GuiDecorator(frame, myIniFile, "Einstellungen");
+        GuiDecorator guiDecorator = new GuiDecorator(frame, myIniFile, "Einstellungen");
 
-        decorator.addContainer("mainToolBar", frame.getMainToolBar());
-        decorator.addToolbarButton("Speichern", ICF.SaveAll, (e)->{});
+        GuiDecoratorToolBars toolBarDecorator = guiDecorator.toolBars();
 
-        decorator.addContainer("treeToolBar", frame.getSplitPanel().getToolBar1());
-        decorator.addToolbarButton("Speichern", ICF.SaveAll, (e)->{});
+        toolBarDecorator.addContainer("mainToolBar", frame.getMainToolBar());
+        toolBarDecorator.addToolbarButton("Speichern", ICF.SaveAll, (e)->{});
 
-        decorator.addContainer("editToolBar", frame.getSplitPanel().getToolBar2());
-        decorator.addToolbarButton("Speichern", ICF.SaveAll, (e)->{});
-        return decorator;
+        toolBarDecorator.addContainer("treeToolBar", frame.getSplitPanel().getToolBar1());
+        toolBarDecorator.addToolbarButton("Speichern", ICF.SaveAll, (e)->{});
+
+        toolBarDecorator.addContainer("editToolBar", frame.getSplitPanel().getToolBar2());
+        toolBarDecorator.addToolbarButton("Speichern", ICF.SaveAll, (e)->{});
+
+        return guiDecorator;
     }
 }

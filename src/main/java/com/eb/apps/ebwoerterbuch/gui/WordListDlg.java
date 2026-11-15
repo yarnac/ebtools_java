@@ -57,9 +57,9 @@ public class WordListDlg extends JFrame {
 		
 		initForm();
 		setGuiDecorator(new GuiDecorator(this));
-		getGuiDecorator().setMenuBar(menuBar);
+		getGuiDecorator().menuBars().setMenuBar(menuBar);
 
-		getGuiDecorator().addContainer("Main", toolBar);
+		getGuiDecorator().toolBars().addContainer("Main", toolBar);
 		
 		clipboardAdapter = new ClipboardAdapter();
 		

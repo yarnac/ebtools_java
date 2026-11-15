@@ -32,11 +32,11 @@ public class EdRequestCtrl {
         GuiDecorator decorator = new GuiDecorator(window, myIniFile, "Einstellungen");
 
 
-        decorator.addContainer("tbRequests", window.getRequestsToolBar());
-        decorator.addToolbarButton("Delete Request", ICF.DeleteRed, this::deleteRequestClicked);
+        decorator.toolBars().addContainer("tbRequests", window.getRequestsToolBar());
+        decorator.toolBars().addToolbarButton("Delete Request", ICF.DeleteRed, this::deleteRequestClicked);
 
-        decorator.addContainer("tbMessages", window.getMessagesToolBar());
-        decorator.addToolbarButton("Delete Message", ICF.DeleteRed, this::deleteMessageClicked);
+        decorator.toolBars().addContainer("tbMessages", window.getMessagesToolBar());
+        decorator.toolBars().addToolbarButton("Delete Message", ICF.DeleteRed, this::deleteMessageClicked);
 
         IComponentPersister persister = ComponentPersisterFactory.createIniFilePersister(myIniFile);
         persister.addComponentItem(window.getSplitPane(),"SplitMain");

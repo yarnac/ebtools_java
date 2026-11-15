@@ -256,11 +256,11 @@ public class WbPanelView extends JPanel {
 
 	private void initializeDecorator() {
 		decorator = new GuiDecorator(this);
-		decorator.addContainer("Main", getToolbarMain());
-		decorator.addContainer("Vokabeln", getToolbarVokabeln());
-		decorator.addContainer("Word", getToolBarWord());
+		decorator.toolBars().addContainer("Main", getToolbarMain());
+		decorator.toolBars().addContainer("Vokabeln", getToolbarVokabeln());
+		decorator.toolBars().addContainer("Word", getToolBarWord());
 		
-		decorator.setMenuBar(getMenuBar());
+		decorator.menuBars().setMenuBar(getMenuBar());
 	}
 	
 	private void initializePanal() {

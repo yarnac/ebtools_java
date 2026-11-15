@@ -57,14 +57,14 @@ public class DoubleFinderPanelCtrl extends AbstrPanelCtrl {
 	}
 	
 	private void decorate() {
-		guiDecorator.addContainer("main", getPanel().getToolBar());
+		guiDecorator.toolBars().addContainer("main", getPanel().getToolBar());
 		
-		guiDecorator.addToolbarButton("Reload", IC.MB_PLAY, x->start(getPanel().getComboBox().getSelectedItem().toString()));
+		guiDecorator.toolBars().addToolbarButton("Reload", IC.MB_PLAY, x->start(getPanel().getComboBox().getSelectedItem().toString()));
 				
-		guiDecorator.addToolbarButton("Delete", IC.DELETE_RED, x->deleteDoubletten());
-		guiDecorator.addToolbarButton("Delete All", IC.SAVE_DEL, x->deleteDoublettenAll());
-		guiDecorator.addToolbarButton("Delete All", IC.MB_REVERSE, x->moveDuplicates());
-		guiDecorator.addToolbarButton("Delete All", IC.BOX_FLOW, x->removeDuplicates());
+		guiDecorator.toolBars().addToolbarButton("Delete", IC.DELETE_RED, x->deleteDoubletten());
+		guiDecorator.toolBars().addToolbarButton("Delete All", IC.SAVE_DEL, x->deleteDoublettenAll());
+		guiDecorator.toolBars().addToolbarButton("Delete All", IC.MB_REVERSE, x->moveDuplicates());
+		guiDecorator.toolBars().addToolbarButton("Delete All", IC.BOX_FLOW, x->removeDuplicates());
 	}	
 	
 	

@@ -5,7 +5,9 @@ import lombok.Setter;
 
 import javax.swing.*;
 import java.util.Dictionary;
+import java.util.HashMap;
 import java.util.Hashtable;
+import java.util.Map;
 
 public class GuiDecoratorMenuBars {
     @Setter
@@ -16,7 +18,7 @@ public class GuiDecoratorMenuBars {
     @Setter
     private String currentMenu;
 
-    private final Dictionary<String, JMenu> nameToMenuBarDictionary = new Hashtable<>();
+    private final Map<String, JMenu> nameToMenuBarDictionary = new HashMap<>();
 
     public GuiDecoratorMenuBars(JFrame frame) {
         this.frame = frame;

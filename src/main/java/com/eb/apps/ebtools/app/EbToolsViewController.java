@@ -91,47 +91,47 @@ public class EbToolsViewController {
 	}
 
 	private void addToolbarButtons() {
-		decorator.addContainer("main", view.getToolBar());
-		decorator.addTopMostButton(view);
+		decorator.toolBars().addContainer("main", view.getToolBar());
+		decorator.toolBars().addTopMostButton(view);
 
 		// Clean up downloads
-		decorator.addToolbarButton("Clean up downloads", IC.CONTRAST_ADJUST,
+		decorator.toolBars().addToolbarButton("Clean up downloads", IC.CONTRAST_ADJUST,
 				x -> new DownloadsManager(manager.getIniFile()).cleanUpDownloads());
 
 		// Open Ini File
-		decorator.addToolbarButton("OpenIniFile", IC.EDITDOC,
+		decorator.toolBars().addToolbarButton("OpenIniFile", IC.EDITDOC,
 				x -> manager.iniFileBearbeiten());
 
 		// Open Java
-		decorator.addToolbarButton("Open Java", IC.BOX_FLOW,
+		decorator.toolBars().addToolbarButton("Open Java", IC.BOX_FLOW,
 				x -> manager.openJava());
 
 		// Merge Santander CSVs
-		decorator.addToolbarButton("Kombiniere Santander Csvs", IC.COINS,
+		decorator.toolBars().addToolbarButton("Kombiniere Santander Csvs", IC.COINS,
 				x -> manager.mergeSantanderFiles());
 
 		// Awake Sound (Toggle)
-		decorator.addToggleButton("Awake Sound", IC.CLOCK_PLAY, IC.CLOCK_STOP,
+		decorator.toolBars().addToggleButton("Awake Sound", IC.CLOCK_PLAY, IC.CLOCK_STOP,
 				x -> manager.holdSoundAwake());
 
 		// Dictionary
-		decorator.addToolbarButton("Wörterbuch", IC.BOOKS_RED,
+		decorator.toolBars().addToolbarButton("Wörterbuch", IC.BOOKS_RED,
 				x -> openOsCmdFile("Woerterbuch"));
 
 		// eBook Reader
-		decorator.addToolbarButton("eBook Reader", IC.BookOpen,
+		decorator.toolBars().addToolbarButton("eBook Reader", IC.BookOpen,
 				x -> openOsCmdFile("EbReader"));
 
 		// Musicplayer (Single button)
-		decorator.addToggleButton("Musicplayer", IC.PLAY, IC.MusicLibraryPlay,
+		decorator.toolBars().addToggleButton("Musicplayer", IC.PLAY, IC.MusicLibraryPlay,
 				x -> manager.holdSoundAwake());
 
 		// Doubletten Finder
-		decorator.addToolbarButton("Doubletten", IC.ObjectMirrorHorizontal,
+		decorator.toolBars().addToolbarButton("Doubletten", IC.ObjectMirrorHorizontal,
 				x -> openOsCmdFile("EbDoubleFinder"));
 
 		// Crypt
-		decorator.addToolbarButton("Crypt", IC.HELP_BLUE,
+		decorator.toolBars().addToolbarButton("Crypt", IC.HELP_BLUE,
 				x -> openOsCmdFile("Crypt"));
 	}
 

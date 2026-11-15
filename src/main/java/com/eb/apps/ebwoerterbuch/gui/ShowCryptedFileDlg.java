@@ -88,8 +88,8 @@ public class ShowCryptedFileDlg extends JFrame {
 		programText = loadText(newFileName);
 		GuiDecorator decorator = new GuiDecorator();
 		decorator.setFrame(this);
-		decorator.setCurrentContainer("mainToolbar");
-		decorator.addToolbarButton("Speichern", IC.SAVE_DEL, e->save());
+		decorator.toolBars().setCurrentContainer("mainToolbar");
+		decorator.toolBars().addToolbarButton("Speichern", IC.SAVE_DEL, e->save());
 	}
 
 	private void initFrame() {

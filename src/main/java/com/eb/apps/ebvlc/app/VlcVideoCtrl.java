@@ -80,41 +80,41 @@ public class VlcVideoCtrl {
         frame.setIconImage(guiDecorator.getImage(IC.Triangle_Red));
 
 
-        guiDecorator.addContainer("MainToolbar", toolBar);
+        guiDecorator.toolBars().addContainer("MainToolbar", toolBar);
 
         guiDecorator.addEditIniFileButton("MainToolbar");
 
-        cbDirectories = guiDecorator.addToolbarComboBox("Verzeichnisse", verzeichnisse, x -> handleChangedVerzeichnis(x));
+        cbDirectories = guiDecorator.toolBars().addToolbarComboBox("Verzeichnisse", verzeichnisse, x -> handleChangedVerzeichnis(x));
 
-        guiDecorator.addToolbarButton("Refresh", IC.REFRESHPAGE, e -> DeleteShowedFiles());
-        guiDecorator.addToolbarButton("Refresh", IC.REFRESHPAGE, e -> ShowActVlcFile());
+        guiDecorator.toolBars().addToolbarButton("Refresh", IC.REFRESHPAGE, e -> DeleteShowedFiles());
+        guiDecorator.toolBars().addToolbarButton("Refresh", IC.REFRESHPAGE, e -> ShowActVlcFile());
 
         guiDecorator.addMouseDoubleClickAction(vlcVideoForm.getLstFiles(), this::playSelectedFiles);
         guiDecorator.addKeyPressAction(vlcVideoForm.getLstFiles(),"N",()->SelectAndPlayNextFiles(1));
         guiDecorator.addKeyPressAction(vlcVideoForm.getLstFiles(),"P",()->SelectAndPlayNextFiles(-1));
 
-        guiDecorator.addContainer("FilesToolBar", vlcVideoForm.getFilesToolBar());
-        guiDecorator.addToolbarButton("Play files", IC.MB_PLAY, e -> SelectAndPlayNextFiles(0));
-        guiDecorator.addToolbarButton("Select previous files", IC.PREV, e -> SelectAndPlayNextFiles(-1));
-        guiDecorator.addToolbarButton("Select next files", IC.NEXT, e -> SelectAndPlayNextFiles(1));
-        guiDecorator.addToolbarButton("Shuffle Files", IC.MALE_USER, e -> ShuffleFiles());
+        guiDecorator.toolBars().addContainer("FilesToolBar", vlcVideoForm.getFilesToolBar());
+        guiDecorator.toolBars().addToolbarButton("Play files", IC.MB_PLAY, e -> SelectAndPlayNextFiles(0));
+        guiDecorator.toolBars().addToolbarButton("Select previous files", IC.PREV, e -> SelectAndPlayNextFiles(-1));
+        guiDecorator.toolBars().addToolbarButton("Select next files", IC.NEXT, e -> SelectAndPlayNextFiles(1));
+        guiDecorator.toolBars().addToolbarButton("Shuffle Files", IC.MALE_USER, e -> ShuffleFiles());
 
-        guiDecorator.addToolbarButton("Delete selected files", ICF.DeleteRed, e -> markFileAsDeleted(true));
-        guiDecorator.addToolbarButton("Delete selected files", ICF.Database_Delete, e -> markFileAsDeleted(false));
+        guiDecorator.toolBars().addToolbarButton("Delete selected files", ICF.DeleteRed, e -> markFileAsDeleted(true));
+        guiDecorator.toolBars().addToolbarButton("Delete selected files", ICF.Database_Delete, e -> markFileAsDeleted(false));
 
-        guiDecorator.addToolbarButton("Select previous files", ICF.MediaButtonRewindBlue, e -> VLCStatus.sendCommand("pl_previous"));
-        guiDecorator.addToolbarButton("Select next files", ICF.MediaButtonFastForwardBlue, e ->VLCStatus.sendCommand("pl_next"));
-
-
-
-        guiDecorator.addContainer("DeletedFilesToolBar", vlcVideoForm.getDeletedFilesToolBar());
-        guiDecorator.addToolbarButton("Play files", IC.MB_PLAY, e -> playDeletedFiles());
-        guiDecorator.addToolbarButton("Undo delete", ICF.UndoBlue, e -> UndoDelete());
-        guiDecorator.addToolbarButton("Delete selected files", ICF.DeleteRed, e -> deleteSelectedDeletedFiles());
+        guiDecorator.toolBars().addToolbarButton("Select previous files", ICF.MediaButtonRewindBlue, e -> VLCStatus.sendCommand("pl_previous"));
+        guiDecorator.toolBars().addToolbarButton("Select next files", ICF.MediaButtonFastForwardBlue, e ->VLCStatus.sendCommand("pl_next"));
 
 
-        guiDecorator.addContainer("FavoritenToolBar", vlcVideoForm.getFavoritenToolBar());
-        guiDecorator.addToolbarButton("Play files", IC.MB_PLAY, e -> SelectAndPlayNextFiles(0));
+
+        guiDecorator.toolBars().addContainer("DeletedFilesToolBar", vlcVideoForm.getDeletedFilesToolBar());
+        guiDecorator.toolBars().addToolbarButton("Play files", IC.MB_PLAY, e -> playDeletedFiles());
+        guiDecorator.toolBars().addToolbarButton("Undo delete", ICF.UndoBlue, e -> UndoDelete());
+        guiDecorator.toolBars().addToolbarButton("Delete selected files", ICF.DeleteRed, e -> deleteSelectedDeletedFiles());
+
+
+        guiDecorator.toolBars().addContainer("FavoritenToolBar", vlcVideoForm.getFavoritenToolBar());
+        guiDecorator.toolBars().addToolbarButton("Play files", IC.MB_PLAY, e -> SelectAndPlayNextFiles(0));
 
 
 

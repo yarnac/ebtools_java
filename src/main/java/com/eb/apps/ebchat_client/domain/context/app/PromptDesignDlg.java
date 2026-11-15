@@ -16,6 +16,8 @@ import com.eb.apps.ebchat_client.domain.context.gui.ContextEditorPanel;
 import com.eb.apps.ebchat_client.domain.context.gui.ContextTreePanel;
 import com.eb.base.gui.decorator.GuiDecorator;
 import com.eb.base.gui.ICF;
+import com.eb.base.gui.decorator.GuiDecoratorMenuBars;
+import com.eb.base.gui.decorator.GuiDecoratorToolBars;
 import com.eb.base.inifile.api.IniFile;
 import com.eb.base.inifile.api.IniFileProvider;
 
@@ -75,26 +77,31 @@ public class PromptDesignDlg extends JFrame {
 
     private void initMenuAndToolBar() {
 
-        decorator.setCurrentMenu("Kontext");
-        ActionEvent e = new ActionEvent(this, ActionEvent.ACTION_PERFORMED, "");
-        decorator.addMenuItem("Neu", ()->createNewContext(e), KeyEvent.VK_N, InputEvent.CTRL_DOWN_MASK);
-        decorator.addMenuItem("Löschen", ()->deleteContext(e), KeyEvent.VK_D, InputEvent.CTRL_DOWN_MASK );
-        decorator.addMenuSeparator();
-        decorator.addMenuItem("Speichern", ()->saveContext(e), KeyEvent.VK_S, InputEvent.CTRL_DOWN_MASK);
-        decorator.addMenuItem("Undo", ()->undoEdit(e), KeyEvent.VK_Z, InputEvent.CTRL_DOWN_MASK);
-        decorator.addMenuItem("Copy Prompt", ()->copyPrompt(e), KeyEvent.VK_C, InputEvent.CTRL_DOWN_MASK | InputEvent.SHIFT_DOWN_MASK);
+        GuiDecorator decorator = new GuiDecorator();
 
-        decorator.addContainer("mainToolBar", toolBarMain);
-        decorator.addToolbarButton("New Context", ICF.BlankDocument_Add, this::createNewContext);
-        decorator.addToolbarButton("New Context", ICF.BlankDocument_Delete, this::deleteContext);
+        GuiDecoratorMenuBars menuBarDecorator = decorator.menuBars();
+
+        menuBarDecorator.setCurrentMenu("Kontext");
+        ActionEvent e = new ActionEvent(this, ActionEvent.ACTION_PERFORMED, "");
+        menuBarDecorator.addMenuItem("Neu", ()->createNewContext(e), KeyEvent.VK_N, InputEvent.CTRL_DOWN_MASK);
+        menuBarDecorator.addMenuItem("Löschen", ()->deleteContext(e), KeyEvent.VK_D, InputEvent.CTRL_DOWN_MASK );
+        menuBarDecorator.addMenuSeparator();
+        menuBarDecorator.addMenuItem("Speichern", ()->saveContext(e), KeyEvent.VK_S, InputEvent.CTRL_DOWN_MASK);
+        menuBarDecorator.addMenuItem("Undo", ()->undoEdit(e), KeyEvent.VK_Z, InputEvent.CTRL_DOWN_MASK);
+        menuBarDecorator.addMenuItem("Copy Prompt", ()->copyPrompt(e), KeyEvent.VK_C, InputEvent.CTRL_DOWN_MASK | InputEvent.SHIFT_DOWN_MASK);
+
+        GuiDecoratorToolBars tbDecorator = decorator.toolBars();
+        tbDecorator.addContainer("mainToolBar", toolBarMain);
+        tbDecorator.addToolbarButton("New Context", ICF.BlankDocument_Add, this::createNewContext);
+        tbDecorator.addToolbarButton("New Context", ICF.BlankDocument_Delete, this::deleteContext);
         String[] Inhalte = new String[]{"Alle", "Prompts", "Snippets"};
-        comboBox = decorator.addToolbarComboBox( "Inhalt",Inhalte, x->setFilter());
+        comboBox = tbDecorator.addToolbarComboBox( "Inhalt",Inhalte, x->setFilter());
         comboBox.setMaximumSize(new Dimension(100,20));
 
-        decorator.addContainer("editorToolBar", contextEditorPanel.getToolBar());
-        decorator.addToolbarButton("Save Context", ICF.Save, this::saveContext);
-        decorator.addToolbarButton("Undo", ICF.UndoBlue, this::undoEdit);
-        decorator.addToolbarButton("Get Output", ICF.MediaButtonPlayGreen, this::setOutputContent);
+        tbDecorator.addContainer("editorToolBar", contextEditorPanel.getToolBar());
+        tbDecorator.addToolbarButton("Save Context", ICF.Save, this::saveContext);
+        tbDecorator.addToolbarButton("Undo", ICF.UndoBlue, this::undoEdit);
+        tbDecorator.addToolbarButton("Get Output", ICF.MediaButtonPlayGreen, this::setOutputContent);
     }
 
     private void setOutputContent(ActionEvent actionEvent) {

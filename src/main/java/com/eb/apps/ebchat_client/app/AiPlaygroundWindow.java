@@ -82,18 +82,18 @@ public class AiPlaygroundWindow extends JFrame {
     }
 
     private void decorateMessagesInput() {
-        decorator.setCurrentContainer(splitPanelMessages.getToolBar1Name());
-        decorator.addToolbarButton("Speichern Input", IC.MB_PLAY, (x)->{});
+        decorator.toolBars().setCurrentContainer(splitPanelMessages.getToolBar1Name());
+        decorator.toolBars().addToolbarButton("Speichern Input", IC.MB_PLAY, (x)->{});
     }
 
     private void decorateMessagesOutput() {
-        decorator.setCurrentContainer(splitPanelMessages.getToolBar2Name());
-        decorator.addToolbarButton("Speichern Output", IC.MB_PLAY, (x)->{});
+        decorator.toolBars().setCurrentContainer(splitPanelMessages.getToolBar2Name());
+        decorator.toolBars().addToolbarButton("Speichern Output", IC.MB_PLAY, (x)->{});
     }
 
     private void decorateMessagesAuswahl() {
-        decorator.setCurrentContainer(splitPanelMain.getToolBar1Name());
-        decorator.addToolbarButton("Speichern Auswahl", IC.MB_PLAY, (x)->{});
+        decorator.toolBars().setCurrentContainer(splitPanelMain.getToolBar1Name());
+        decorator.toolBars().addToolbarButton("Speichern Auswahl", IC.MB_PLAY, (x)->{});
     }
 
     private void decorateMainToolbar() {

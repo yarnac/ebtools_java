@@ -20,13 +20,13 @@ public class VlcVidCtrl {
         myIniFile = IniFileProvider.createIniFile("VlcVidCtrl.ini");
         frame = new VlcVidFrame();
         GuiDecorator decorator = new GuiDecorator(frame, myIniFile, "Einstellungen");
-        decorator.addContainer("tbMain", frame.getToolBarMain());
+        decorator.toolBars().addContainer("tbMain", frame.getToolBarMain());
         decorator.addEditIniFileButton();
 
-        decorator.addContainer("tbLeft", frame.getSplitPanelMain().getToolBar1());
+        decorator.toolBars().addContainer("tbLeft", frame.getSplitPanelMain().getToolBar1());
         decorator.addEditIniFileButton();
 
-        decorator.addContainer("tbRight", frame.getSplitPanelMain().getToolBar2());
+        decorator.toolBars().addContainer("tbRight", frame.getSplitPanelMain().getToolBar2());
         decorator.addEditIniFileButton();
 
 

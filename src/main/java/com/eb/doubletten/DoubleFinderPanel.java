@@ -96,7 +96,7 @@ public class DoubleFinderPanel extends JPanel {
 		lstDoubletten.addListSelectionListener(x->doubletteChanged(lstDoubletten.getSelectedValue()));
 		
 		GuiDecorator decorator = new GuiDecorator();
-		decorator.addContainer("main", getToolBar());
+		decorator.toolBars().addContainer("main", getToolBar());
 		
 		this.addComponentListener(new ComponentListener() {
 			

@@ -75,27 +75,27 @@ public class ContextEditDlg extends JFrame {
 
     private void initMenuAndToolBar() {
 
-        decorator.setCurrentMenu("Kontext");
+        decorator.menuBars().setCurrentMenu("Kontext");
         ActionEvent e = new ActionEvent(this, ActionEvent.ACTION_PERFORMED, "");
-        decorator.addMenuItem("Neu", ()->createNewContext(e), KeyEvent.VK_N, InputEvent.CTRL_DOWN_MASK);
-        decorator.addMenuItem("Löschen", ()->deleteContext(e), KeyEvent.VK_D, InputEvent.CTRL_DOWN_MASK );
-        decorator.addMenuSeparator();
-        decorator.addMenuItem("Speichern", ()->saveContext(e), KeyEvent.VK_S, InputEvent.CTRL_DOWN_MASK);
-        decorator.addMenuItem("Undo", ()->undoEdit(e), KeyEvent.VK_Z, InputEvent.CTRL_DOWN_MASK);
-        decorator.addMenuItem("Copy Prompt", ()->copyPrompt(e), KeyEvent.VK_C, InputEvent.CTRL_DOWN_MASK | InputEvent.SHIFT_DOWN_MASK);
+        decorator.menuBars().addMenuItem("Neu", ()->createNewContext(e), KeyEvent.VK_N, InputEvent.CTRL_DOWN_MASK);
+        decorator.menuBars().addMenuItem("Löschen", ()->deleteContext(e), KeyEvent.VK_D, InputEvent.CTRL_DOWN_MASK );
+        decorator.menuBars().addMenuSeparator();
+        decorator.menuBars().addMenuItem("Speichern", ()->saveContext(e), KeyEvent.VK_S, InputEvent.CTRL_DOWN_MASK);
+        decorator.menuBars().addMenuItem("Undo", ()->undoEdit(e), KeyEvent.VK_Z, InputEvent.CTRL_DOWN_MASK);
+        decorator.menuBars().addMenuItem("Copy Prompt", ()->copyPrompt(e), KeyEvent.VK_C, InputEvent.CTRL_DOWN_MASK | InputEvent.SHIFT_DOWN_MASK);
 
-        decorator.addContainer("mainToolBar", toolBarMain);
+        decorator.toolBars().addContainer("mainToolBar", toolBarMain);
 
-        decorator.addToolbarButton("New Context", ICF.BlankDocument_Add, this::createNewContext);
-        decorator.addToolbarButton("New Context", ICF.BlankDocument_Delete, this::deleteContext);
+        decorator.toolBars().addToolbarButton("New Context", ICF.BlankDocument_Add, this::createNewContext);
+        decorator.toolBars().addToolbarButton("New Context", ICF.BlankDocument_Delete, this::deleteContext);
         String[] Inhalte = new String[]{"Alle", "Prompts", "Snippets"};
-        comboBox = decorator.addToolbarComboBox("Inhalt", Inhalte, x->setFilter());
+        comboBox = decorator.toolBars().addToolbarComboBox("Inhalt", Inhalte, x->setFilter());
         comboBox.setMaximumSize(new Dimension(100,20));
 
-        decorator.addContainer("editorToolBar", contextEditorPanel.getToolBar());
-        decorator.addToolbarButton("Save Context", ICF.Save, this::saveContext);
-        decorator.addToolbarButton("Undo", ICF.UndoBlue, this::undoEdit);
-        decorator.addToolbarButton("Get Output", ICF.MediaButtonPlayGreen, this::setOutputContent);
+        decorator.toolBars().addContainer("editorToolBar", contextEditorPanel.getToolBar());
+        decorator.toolBars().addToolbarButton("Save Context", ICF.Save, this::saveContext);
+        decorator.toolBars().addToolbarButton("Undo", ICF.UndoBlue, this::undoEdit);
+        decorator.toolBars().addToolbarButton("Get Output", ICF.MediaButtonPlayGreen, this::setOutputContent);
     }
 
     private void setOutputContent(ActionEvent actionEvent) {

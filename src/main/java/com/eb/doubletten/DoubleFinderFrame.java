@@ -60,8 +60,8 @@ public class DoubleFinderFrame extends JFrame {
 		ctrl.setDirectories(strings.toArray(new String[0]));
 				
 		GuiDecorator decorator = new GuiDecorator();
-		decorator.addContainer("main", getMainToolBar());
-		decorator.addTopMostButton( this);
+		decorator.toolBars().addContainer("main", getMainToolBar());
+		decorator.toolBars().addTopMostButton( this);
 	}
 	
 	

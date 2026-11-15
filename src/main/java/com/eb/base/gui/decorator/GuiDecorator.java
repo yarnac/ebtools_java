@@ -10,38 +10,39 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 
-public class GuiDecorator implements GuiDecoratorToolBarsMethods, GuiDecoratorMenuBarsMethods {
+public class GuiDecorator {
 	private final IniFile iniFile;
 	@Setter
     @Getter
     private JFrame frame;
+	private final GuiDecoratorMenuBars menuBars;
+	private final GuiDecoratorToolBars toolBars;
 
-	@Getter
-	public GuiDecoratorMenuBars guiDecoratorMenuBars;
+	public GuiDecoratorMenuBars menuBars() { return menuBars; }
+	public GuiDecoratorToolBars toolBars() { return toolBars; }
 
-	@Getter
-	public final GuiDecoratorToolBars toolBarDecorator;
 
 	private final List<Runnable> closeActions = new ArrayList<>();
 
 	public GuiDecorator() {
-		toolBarDecorator = new GuiDecoratorToolBars();
-		guiDecoratorMenuBars = new GuiDecoratorMenuBars(null);
+		toolBars = new GuiDecoratorToolBars();
+		menuBars = new GuiDecoratorMenuBars(null);
 		iniFile = null;
 	}
 
 	public GuiDecorator(JFrame frame) {
-		toolBarDecorator = new GuiDecoratorToolBars(frame);
-		guiDecoratorMenuBars = new GuiDecoratorMenuBars(frame);
+		toolBars = new GuiDecoratorToolBars(frame);
+		menuBars = new GuiDecoratorMenuBars(frame);
 		iniFile = null;
 	}
 
 	public GuiDecorator(JPanel panel) {
-		toolBarDecorator = new GuiDecoratorToolBars(panel);
-		guiDecoratorMenuBars = new GuiDecoratorMenuBars(null);
+		toolBars = new GuiDecoratorToolBars(panel);
+		menuBars = new GuiDecoratorMenuBars(null);
 		iniFile = null;
 	}
 
@@ -49,8 +50,8 @@ public class GuiDecorator implements GuiDecoratorToolBarsMethods, GuiDecoratorMe
 		this.frame = frame;
 		iniFile = newIniFile;
 
-		toolBarDecorator = new GuiDecoratorToolBars(frame);
-		guiDecoratorMenuBars = new GuiDecoratorMenuBars(frame);
+		toolBars = new GuiDecoratorToolBars(frame);
+		menuBars = new GuiDecoratorMenuBars(frame);
 
 		GuiPersister.registerAndLoadStatus(frame, newIniFile,einstellungen);
 		WindowAdapter adapter = new WindowAdapter() {
@@ -79,20 +80,22 @@ public class GuiDecorator implements GuiDecoratorToolBarsMethods, GuiDecoratorMe
 		if (iniFile==null)
 			throw (new RuntimeException("Ini File not set."));
 		if (fileNames==null || fileNames.length==0)
-			addToolbarButton("Edit Inifile", IC.EDITDOC, x->OpenFile(iniFile.getFileName()));
+			toolBars().addToolbarButton("Edit Inifile", IC.EDITDOC, x-> openFile(iniFile.getFileName()));
 		else
-			addToolbarButton("Edit Inifile", IC.EDITDOC, x->OpenFiles(fileNames));
+			toolBars().addToolbarButton("Edit Inifile", IC.EDITDOC, x-> openFiles(fileNames));
 
 	}
 
-	private void OpenFiles(String[] fileNames) {
+	private void openFiles(String[] fileNames) {
 		for (String fileName : fileNames) {
-			OpenFile(fileName);
+			openFile(fileName);
 		}
-		OpenFile(iniFile.getFileName());
+		if (Arrays.stream(fileNames).noneMatch(fileName -> fileName.equals(iniFile.getFileName()))) {
+			openFile(iniFile.getFileName());
+		}
 	}
 
-	private void OpenFile(String fileName) {
+	private void openFile(String fileName) {
 		FileUtil.open(fileName);
 	}
 

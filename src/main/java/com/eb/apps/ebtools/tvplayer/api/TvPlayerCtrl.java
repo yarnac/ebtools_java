@@ -47,20 +47,20 @@ public class TvPlayerCtrl {
 
     private void decorate(GuiDecorator decorator) {
 
-        decorator.addContainer("main", getView().getToolBarLeft());
+        decorator.toolBars().addContainer("main", getView().getToolBarLeft());
 
-        decorator.setCurrentContainer("main");
-        decorator.addToolbarButton("Hörzu", IC.VIDEO_LIBRARY_SEARCH, x->openHoerzu());
-        decorator.addToolbarButton("Open Tv File", IC.EDITDOC, x->tvFileBearbeiten());
-        decorator.addToolbarButton("Reload", IC.REFRESHPAGE, x->reload());
-        decorator.addToolbarButton("Export", IC.SAVE_ADD, x->copyScript());
-        decorator.addToolbarButton("Toggle Show All", IC.FILTER, x->toggleShowAll());
+        decorator.toolBars().setCurrentContainer("main");
+        decorator.toolBars().addToolbarButton("Hörzu", IC.VIDEO_LIBRARY_SEARCH, x->openHoerzu());
+        decorator.toolBars().addToolbarButton("Open Tv File", IC.EDITDOC, x->tvFileBearbeiten());
+        decorator.toolBars().addToolbarButton("Reload", IC.REFRESHPAGE, x->reload());
+        decorator.toolBars().addToolbarButton("Export", IC.SAVE_ADD, x->copyScript());
+        decorator.toolBars().addToolbarButton("Toggle Show All", IC.FILTER, x->toggleShowAll());
         decorator.addMouseDoubleClickAction(view.getLstTvItems(), this::showSelectedItem);
 
-        decorator.addContainer("SenderListe", getView().getToolBarRight());
-        decorator.setCurrentContainer("SenderListe");
+        decorator.toolBars().addContainer("SenderListe", getView().getToolBarRight());
+        decorator.toolBars().setCurrentContainer("SenderListe");
 
-        decorator.addToolbarButton("Play", IC.PLAY, x->showSelectedItem());
+        decorator.toolBars().addToolbarButton("Play", IC.PLAY, x->showSelectedItem());
     }
 
     private void showSelectedItem() {onShowFile(view.getSelectedTvItem()); }

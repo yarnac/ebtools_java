@@ -2,6 +2,7 @@ package com.eb.apps.ebchat_utils.codegen;
 
 import com.eb.base.gui.decorator.GuiDecorator;
 import com.eb.base.gui.ICF;
+import com.eb.base.gui.decorator.GuiDecoratorToolBars;
 import com.eb.base.gui.persist.ComponentPersisterFactory;
 import com.eb.base.gui.persist.IComponentPersister;
 import com.eb.base.inifile.api.IniFile;
@@ -20,12 +21,14 @@ public class AiCodeGeneratorCtrl {
         myIniFile = IniFileProvider.createIniFile("JavaAiPlaygroundCtrl.ini");
 
         GuiDecorator decorator = new GuiDecorator(frame, myIniFile, "Einstellungen");
-        decorator.setFrame(frame);
-        decorator.addContainer("tbGen", frame.getToolBar());
-        decorator.addToolbarButton( "Generiere Code", ICF.ArrowFlowVertical,this::handleGenerateCode);
 
-        decorator.addContainer("tbCode", frame.getToolBarCode());
-        decorator.addToolbarButton("Generiere Code", ICF.ArrowFlowVertical,this::handleSwitchLinespaces);
+        GuiDecoratorToolBars tbDecorator = decorator.toolBars();
+
+        tbDecorator.addContainer("tbGen", frame.getToolBar());
+        tbDecorator.addToolbarButton( "Generiere Code", ICF.ArrowFlowVertical,this::handleGenerateCode);
+
+        tbDecorator.addContainer("tbCode", frame.getToolBarCode());
+        tbDecorator.addToolbarButton("Generiere Code", ICF.ArrowFlowVertical,this::handleSwitchLinespaces);
 
         IComponentPersister persister = ComponentPersisterFactory.createIniFilePersister(myIniFile);
         persister.addComponentItem(frame.getEdNamespace(),"Namespace");
