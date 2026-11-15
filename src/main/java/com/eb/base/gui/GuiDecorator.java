@@ -1,6 +1,5 @@
 package com.eb.base.gui;
 
-import com.eb.base.ai_service.llm_client.api.LlmRequest;
 import com.eb.base.inifile.api.IniFile;
 import com.eb.base.io.FileUtil;
 import lombok.Getter;
@@ -10,22 +9,17 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.util.ArrayList;
-import java.util.Dictionary;
-import java.util.Hashtable;
 import java.util.List;
-import java.util.function.Consumer;
-
-import static java.lang.System.out;
 
 
-public class GuiDecorator implements GuiDecoratorToolBarMethods, GuiDecoratorMenuBarMethods {
+public class GuiDecorator implements GuiDecoratorToolBarsMethods, GuiDecoratorMenuBarsMethods {
 	private final IniFile iniFile;
 	@Setter
     @Getter
     private JFrame frame;
 
 	@Getter
-	public GuiDecoratorMenuBars guiDecoratorMenuBars = new GuiDecoratorMenuBars(getFrame());
+	public GuiDecoratorMenuBars guiDecoratorMenuBars;
 
 	@Getter
 	public final GuiDecoratorToolBars toolBarDecorator;
@@ -34,16 +28,19 @@ public class GuiDecorator implements GuiDecoratorToolBarMethods, GuiDecoratorMen
 
 	public GuiDecorator() {
 		toolBarDecorator = new GuiDecoratorToolBars();
+		guiDecoratorMenuBars = new GuiDecoratorMenuBars(null);
 		iniFile = null;
 	}
 
 	public GuiDecorator(JFrame frame) {
 		toolBarDecorator = new GuiDecoratorToolBars(frame);
+		guiDecoratorMenuBars = new GuiDecoratorMenuBars(frame);
 		iniFile = null;
 	}
 
 	public GuiDecorator(JPanel panel) {
 		toolBarDecorator = new GuiDecoratorToolBars(panel);
+		guiDecoratorMenuBars = new GuiDecoratorMenuBars(null);
 		iniFile = null;
 	}
 
@@ -51,9 +48,10 @@ public class GuiDecorator implements GuiDecoratorToolBarMethods, GuiDecoratorMen
 		this.frame = frame;
 		iniFile = newIniFile;
 
-		GuiPersister.registerAndLoadStatus(frame, newIniFile,einstellungen);
 		toolBarDecorator = new GuiDecoratorToolBars(frame);
+		guiDecoratorMenuBars = new GuiDecoratorMenuBars(frame);
 
+		GuiPersister.registerAndLoadStatus(frame, newIniFile,einstellungen);
 		WindowAdapter adapter = new WindowAdapter() {
 			@Override
 			public void windowClosing(WindowEvent e) {
