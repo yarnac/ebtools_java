@@ -17,7 +17,7 @@ import javax.swing.JList;
 import javax.swing.event.ListSelectionEvent;
 
 import com.eb.base.EbAppContext;
-import com.eb.base.gui.GuiDecorator;
+import com.eb.base.gui.decorator.GuiDecorator;
 import com.eb.base.gui.IC;
 import com.eb.base.inifile.api.IniFile;
 import com.eb.base.io.FileUtil;

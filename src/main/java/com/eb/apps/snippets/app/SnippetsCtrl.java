@@ -1,10 +1,9 @@
 package com.eb.apps.snippets.app;
 
-import com.eb.apps.snippets.domain.SnippetTree;
 import com.eb.apps.snippets.gui.SnippetEditCtrl;
 import com.eb.apps.snippets.gui.SnippetTreeCtrl;
 import com.eb.apps.snippets.gui.SnippetWindowFrame;
-import com.eb.base.gui.GuiDecorator;
+import com.eb.base.gui.decorator.GuiDecorator;
 import com.eb.base.gui.ICF;
 import com.eb.base.inifile.api.IniFile;
 import com.eb.base.inifile.api.IniFileProvider;

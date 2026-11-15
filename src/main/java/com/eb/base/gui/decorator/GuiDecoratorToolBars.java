@@ -1,4 +1,9 @@
-package com.eb.base.gui;
+package com.eb.base.gui.decorator;
+
+import com.eb.base.gui.BrowserLaunch;
+import com.eb.base.gui.GuiUtil;
+import com.eb.base.gui.IC;
+import com.eb.base.gui.ICF;
 
 import javax.swing.*;
 import java.awt.*;

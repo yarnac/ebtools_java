@@ -1,4 +1,4 @@
-package com.eb.base.gui;
+package com.eb.base.gui.decorator;
 
 import lombok.Getter;
 import lombok.Setter;

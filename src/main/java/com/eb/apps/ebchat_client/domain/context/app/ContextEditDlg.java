@@ -14,7 +14,7 @@ import com.eb.apps.ebchat_client.domain.context.domain.ContextManager;
 import com.eb.apps.ebchat_client.domain.context.domain.ContextWithFiles;
 import com.eb.apps.ebchat_client.domain.context.gui.ContextEditorPanel;
 import com.eb.apps.ebchat_client.domain.context.gui.ContextTreePanel;
-import com.eb.base.gui.GuiDecorator;
+import com.eb.base.gui.decorator.GuiDecorator;
 import com.eb.base.gui.ICF;
 import com.eb.base.inifile.api.IniFile;
 import com.eb.base.inifile.api.IniFileProvider;

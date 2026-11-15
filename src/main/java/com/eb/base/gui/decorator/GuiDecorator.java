@@ -1,5 +1,6 @@
-package com.eb.base.gui;
+package com.eb.base.gui.decorator;
 
+import com.eb.base.gui.IC;
 import com.eb.base.inifile.api.IniFile;
 import com.eb.base.io.FileUtil;
 import lombok.Getter;

@@ -4,12 +4,12 @@ import com.eb.apps.ebchat_client.domain.chat.GlobaleEinstellungen;
 import com.eb.base.extensions.StringExtensions;
 import com.eb.base.gui.*;
 import com.eb.base.gui.adapter.JTextPaneAdapter;
+import com.eb.base.gui.decorator.GuiDecorator;
 import com.eb.base.gui.persist.IComponentPersister;
 import com.eb.base.inifile.api.IniFile;
 import lombok.Getter;
 
 import javax.swing.*;
-import javax.swing.plaf.DimensionUIResource;
 import java.awt.*;
 
 public class AiPlaygroundWindow extends JFrame {

@@ -1,6 +1,7 @@
 package com.eb.apps.ebvlc.app;
 
 import com.eb.base.gui.*;
+import com.eb.base.gui.decorator.GuiDecorator;
 import com.eb.base.gui.persist.ComponentPersisterFactory;
 import com.eb.base.gui.persist.IComponentPersister;
 import com.eb.base.inifile.api.IniFile;

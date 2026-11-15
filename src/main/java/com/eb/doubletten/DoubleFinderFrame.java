@@ -8,7 +8,7 @@ import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 
 import com.eb.base.extensions.FileExtensions;
-import com.eb.base.gui.GuiDecorator;
+import com.eb.base.gui.decorator.GuiDecorator;
 import com.eb.base.io.FileUtil;
 
 public class DoubleFinderFrame extends JFrame {

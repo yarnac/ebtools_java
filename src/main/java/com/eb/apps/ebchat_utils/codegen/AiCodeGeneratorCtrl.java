@@ -1,6 +1,6 @@
 package com.eb.apps.ebchat_utils.codegen;
 
-import com.eb.base.gui.GuiDecorator;
+import com.eb.base.gui.decorator.GuiDecorator;
 import com.eb.base.gui.ICF;
 import com.eb.base.gui.persist.ComponentPersisterFactory;
 import com.eb.base.gui.persist.IComponentPersister;

@@ -5,7 +5,7 @@ import com.eb.apps.ebtools.tobj.DownloadsManager;
 import com.eb.apps.ebtools.tobj.EbToolsManager;
 import com.eb.apps.ebtools.tobj.Util;
 import com.eb.base.EbAppContext;
-import com.eb.base.gui.GuiDecorator;
+import com.eb.base.gui.decorator.GuiDecorator;
 import com.eb.base.gui.IC;
 import com.eb.base.io.FileUtil;
 import com.eb.apps.ebtools.gui.EbToolsView;

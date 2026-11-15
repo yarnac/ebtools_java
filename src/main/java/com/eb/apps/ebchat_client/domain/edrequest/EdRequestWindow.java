@@ -3,22 +3,14 @@ package com.eb.apps.ebchat_client.domain.edrequest;
 import com.eb.apps.ebchat_client.domain.edrequest.gui.RequestEditorPanel;
 import com.eb.base.ai_service.llm_client.api.LlmMessage;
 import com.eb.base.ai_service.llm_client.api.LlmRequest;
-import com.eb.base.ai_service.llmreqstore.LlmRequestManager;
 import com.eb.base.gui.EbSplitPanel;
 import com.eb.base.gui.FontUtil;
-import com.eb.base.gui.GuiDecorator;
-import com.eb.base.gui.ICF;
 import com.eb.base.gui.adapter.JTextPaneAdapter;
-import com.eb.base.inifile.api.IniFile;
-import com.eb.base.inifile.api.IniFileProvider;
 import lombok.Getter;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
 import java.util.List;
-
-import static java.awt.SystemColor.window;
 
 public class EdRequestWindow extends JFrame {
 

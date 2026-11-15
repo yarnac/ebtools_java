@@ -31,7 +31,7 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreeNode;
 
-import com.eb.base.gui.GuiDecorator;
+import com.eb.base.gui.decorator.GuiDecorator;
 import com.eb.base.system.TextChangedHandlerUtil;
 import com.eb.apps.ebwoerterbuch.gobj.Vokabel;
 import com.eb.apps.ebwoerterbuch.gobj.formatter.FlatListFormatter;

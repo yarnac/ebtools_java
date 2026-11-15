@@ -1,6 +1,8 @@
 package com.eb.base.gui;
 
 
+import com.eb.base.gui.decorator.GuiDecorator;
+
 import javax.swing.*;
 import java.awt.*;
 

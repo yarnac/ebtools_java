@@ -1,6 +1,6 @@
 package com.eb.apps.ebtools.tvplayer.api;
 
-import com.eb.base.gui.GuiDecorator;
+import com.eb.base.gui.decorator.GuiDecorator;
 import com.eb.base.gui.IC;
 import com.eb.base.inifile.api.IniFile;
 import com.eb.base.io.FileUtil;

@@ -10,7 +10,7 @@ import javax.swing.border.EmptyBorder;
 
 import com.eb.base.EbAppContext;
 import com.eb.base.crypt.Crypt;
-import com.eb.base.gui.GuiDecorator;
+import com.eb.base.gui.decorator.GuiDecorator;
 import com.eb.base.gui.IC;
 import com.eb.base.inifile.api.IniFile;
 import com.eb.base.inifile.api.IniFileProvider;
