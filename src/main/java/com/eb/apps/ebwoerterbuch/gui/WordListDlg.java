@@ -56,7 +56,7 @@ public class WordListDlg extends JFrame {
 	public WordListDlg() {
 		
 		initForm();
-		setGuiDecorator(new GuiDecorator());
+		setGuiDecorator(new GuiDecorator(this));
 		getGuiDecorator().setMenuBar(menuBar);
 
 		getGuiDecorator().addContainer("Main", toolBar);

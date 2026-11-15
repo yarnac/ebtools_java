@@ -89,7 +89,7 @@ public class ContextEditDlg extends JFrame {
         decorator.addToolbarButton("New Context", ICF.BlankDocument_Add, this::createNewContext);
         decorator.addToolbarButton("New Context", ICF.BlankDocument_Delete, this::deleteContext);
         String[] Inhalte = new String[]{"Alle", "Prompts", "Snippets"};
-        comboBox = decorator.addToolbarComboBox("Inhalt",Inhalte, x->setFilter());
+        comboBox = decorator.addToolbarComboBox("Inhalt", Inhalte, x->setFilter());
         comboBox.setMaximumSize(new Dimension(100,20));
 
         decorator.addContainer("editorToolBar", contextEditorPanel.getToolBar());

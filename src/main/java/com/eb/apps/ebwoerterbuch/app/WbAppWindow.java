@@ -57,7 +57,7 @@ public class WbAppWindow {
 		frmWrterbuch.setBounds(100, 100, 615, 372);
 		frmWrterbuch.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-		GuiDecorator decorator = new GuiDecorator();
+		GuiDecorator decorator = new GuiDecorator(frmWrterbuch);
 		frmWrterbuch.setIconImage(decorator.getImage(IC.BOOKS_RED));
 		
 

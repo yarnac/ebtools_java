@@ -37,7 +37,7 @@ public class TvPlayerCtrl {
         view = new TvPlayerView();
         view.initView(tvPanel);
 
-        GuiDecorator decorator = new GuiDecorator();
+        GuiDecorator decorator = new GuiDecorator(tvPanel);
         decorate(decorator);
 
         view.getCbKategorien().addListSelectionListener(e -> kategorieChanged());

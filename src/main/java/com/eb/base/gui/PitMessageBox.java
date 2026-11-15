@@ -32,7 +32,7 @@ public class PitMessageBox {
         frame.setBounds(100, 100, 615, 372);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-        GuiDecorator decorator = new GuiDecorator();
+        GuiDecorator decorator = new GuiDecorator(frame);
         frame.setIconImage(decorator.getImage(IC.BOOKS_RED));
 
         textArea = new JTextArea();
