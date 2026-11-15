@@ -24,7 +24,7 @@ public class GuiDecoratorToolBars {
     }
 
 
-    GuiDecoratorToolBars() {
+    public GuiDecoratorToolBars() {
     }
 
     private Container fetchContainer(String toolbarName) {
@@ -80,7 +80,10 @@ public class GuiDecoratorToolBars {
         }
         btn.setToolTipText(tooltipText);
         currentContainer.add(btn);
-        btn.addActionListener(listener);
+
+        btn.addActionListener(e -> {
+            SwingUtilities.invokeLater(()->listener.actionPerformed(e));
+        });
 
         checkAndInvalidateContainerIfNecessary();
         return btn;
@@ -101,7 +104,9 @@ public class GuiDecoratorToolBars {
         }
         btn.setToolTipText(tooltipText);
         currentContainer.add(btn);
-        btn.addActionListener(x -> openFile(fileName));
+        btn.addActionListener(x -> {
+            SwingUtilities.invokeLater(()->openFile(fileName));
+        });
 
         checkAndInvalidateContainerIfNecessary();
         return btn;
@@ -128,8 +133,9 @@ public class GuiDecoratorToolBars {
         }
         btn.setToolTipText(tooltipText);
         currentContainer.add(btn);
-        btn.addActionListener(x -> openFile(fileName));
-
+        btn.addActionListener(x -> {
+            SwingUtilities.invokeLater(()->openFile(fileName));
+        });
         checkAndInvalidateContainerIfNecessary();
 
         return btn;
@@ -156,7 +162,10 @@ public class GuiDecoratorToolBars {
 
         btn.setToolTipText(tooltipText);
         currentContainer.add(btn);
-        btn.addActionListener(x -> listener.accept(btn.isSelected()));
+
+        btn.addActionListener(x -> {
+            SwingUtilities.invokeLater(()->listener.accept(btn.isSelected()));
+        });
 
         checkAndInvalidateContainerIfNecessary();
         return btn;
@@ -176,7 +185,10 @@ public class GuiDecoratorToolBars {
 
         btn.setToolTipText(tooltipText);
         currentContainer.add(btn);
-        btn.addActionListener(x -> listener.accept(btn.isSelected()));
+
+        btn.addActionListener(x -> {
+            SwingUtilities.invokeLater(()->listener.accept(btn.isSelected()));
+        });
 
         checkAndInvalidateContainerIfNecessary();
 
@@ -210,7 +222,12 @@ public class GuiDecoratorToolBars {
         elements.forEach(model::addElement);
         comboBox.setModel(model);
         currentContainer.add(comboBox);
-        comboBox.addActionListener(x -> consumer.accept((T)comboBox.getSelectedItem()));
+
+        comboBox.addActionListener(x -> {
+            SwingUtilities.invokeLater(()->consumer.accept((T)comboBox.getSelectedItem()));
+        });
+
+
 
         checkAndInvalidateContainerIfNecessary();
         return comboBox;

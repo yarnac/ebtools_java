@@ -12,6 +12,7 @@ import java.awt.event.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.logging.Logger;
 
 
 public class GuiDecorator {
@@ -78,7 +79,7 @@ public class GuiDecorator {
 	public void addEditIniFileButton(String ... fileNames) {
 
 		if (iniFile==null)
-			throw (new RuntimeException("Ini File not set."));
+			throw new IllegalStateException("Ini file must be set before calling this method");
 		if (fileNames==null || fileNames.length==0)
 			toolBars().addToolbarButton("Edit Inifile", IC.EDITDOC, x-> openFile(iniFile.getFileName()));
 		else
