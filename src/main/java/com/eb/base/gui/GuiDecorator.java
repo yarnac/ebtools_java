@@ -58,7 +58,9 @@ public class GuiDecorator implements GuiDecoratorToolBarsMethods, GuiDecoratorMe
 				for(Runnable action : closeActions) {
 					action.run();
 				}
-				iniFile.Write();
+				if (iniFile != null) {
+					iniFile.Write();
+				}
 			}
 		};
 
