@@ -53,7 +53,7 @@ public class WbPanelView extends JPanel {
 	private JTextArea edText2;
 	
 	private JMenuBar menuBar;
-	private GuiDecorator decorator = new GuiDecorator();
+	private GuiDecorator decorator = new GuiDecorator(this);
 	
 	ItemWithListAdapter<Vokabel> adapter = new ItemWithListAdapter<Vokabel>(v->v.getWort(), v->v.getBedeutungen());
 	IVokabelListFormatter<Vokabel> formatter;
@@ -255,7 +255,7 @@ public class WbPanelView extends JPanel {
 
 
 	private void initializeDecorator() {
-		decorator = new GuiDecorator();
+		decorator = new GuiDecorator(this);
 		decorator.addContainer("Main", getToolbarMain());
 		decorator.addContainer("Vokabeln", getToolbarVokabeln());
 		decorator.addContainer("Word", getToolBarWord());

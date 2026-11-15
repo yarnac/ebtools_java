@@ -25,7 +25,7 @@ public class VokabelTrainerCtrl {
 	}
 
 	public void start() {				 		;
-		GuiDecorator decorator = new GuiDecorator();
+		GuiDecorator decorator = new GuiDecorator(trainer);
 		decorator.setFrame(trainer);
 		decorator.addMenuItem("Datei", "Huhu", ()->{});
 		decorator.setCurrentContainer("Main");

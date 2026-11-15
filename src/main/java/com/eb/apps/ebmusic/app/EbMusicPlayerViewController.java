@@ -101,7 +101,7 @@ public class EbMusicPlayerViewController {
 
 	
 	private void decorateToolStrip(JToolBar toolBar) {
-		GuiDecorator decorator = new GuiDecorator();
+		GuiDecorator decorator = new GuiDecorator(getView().getFrame());
 		decorator.addContainer("main", getView().getToolBar());
 		decorator.setCurrentContainer("main");
 		decorator.addTopMostButton(getView().getFrame());

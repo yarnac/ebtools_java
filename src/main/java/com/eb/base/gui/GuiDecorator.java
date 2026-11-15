@@ -1,5 +1,6 @@
 package com.eb.base.gui;
 
+import com.eb.base.ai_service.llm_client.api.LlmRequest;
 import com.eb.base.inifile.api.IniFile;
 import com.eb.base.io.FileUtil;
 import lombok.Getter;
@@ -17,7 +18,7 @@ import java.util.function.Consumer;
 import static java.lang.System.out;
 
 
-public class GuiDecorator {
+public class GuiDecorator implements GuiDecoratorToolBarMethods {
 	private final IniFile iniFile;
 	@Setter
     @Getter
@@ -25,18 +26,33 @@ public class GuiDecorator {
 	@Setter
     private JMenuBar menuBar;
 
-	GuiDecoratorToolBars toolBarDecorator;
+	@Getter
+	public final GuiDecoratorToolBars toolBarDecorator;
 
 	private final Dictionary<String, JMenu> nameToMenuBarDictionary = new Hashtable<>();
-	private final Dictionary<String, Container> nameToContainerDictionary = new Hashtable<>();
 	private String currentMenuName;
-	private Container currentContainer;
 	private final List<Runnable> closeActions = new ArrayList<>();
 
-
 	public GuiDecorator() {
+		toolBarDecorator = new GuiDecoratorToolBars();
 		iniFile = null;
 	}
+
+
+
+	public GuiDecorator(JFrame frame) {
+		toolBarDecorator = new GuiDecoratorToolBars(frame);
+		iniFile = null;
+	}
+
+	public GuiDecorator(JPanel panel) {
+		toolBarDecorator = new GuiDecoratorToolBars(panel);
+		iniFile = null;
+	}
+
+
+
+
 
 	public GuiDecorator(JFrame frame, IniFile newIniFile, String einstellungen) {
 		this.frame = frame;
@@ -92,103 +108,7 @@ public class GuiDecorator {
 	}
 
 
-	public JButton addToolbarButton(String tooltipText, ICF ic, ActionListener listener) {
 
-		return toolBarDecorator.addToolbarButton(tooltipText, ic, listener);
-	}
-
-	public JButton addOpenFileToolbarButton(String tooltipText, IC ic, String fileName) {
-		Container toolbar = currentContainer;
-
-		JButton btn = new JButton();
-
-		try {
-			btn.setIcon(ic.getImageIcon());
-		} catch (Exception e) {
-			out.println("Image nicht gefunden: " + ic);
-		}
-		btn.setToolTipText(tooltipText);
-		toolbar.add(btn);
-		btn.addActionListener(x->openFile(fileName));
-
-		if (!(toolbar instanceof JToolBar)) {
-			toolbar.revalidate();
-			toolbar.repaint();
-		}
-		return btn;
-	}
-
-	public JButton addOpenFileToolbarButton(String toolbarName, String tooltipText, ICF ic, String fileName) {
-		Container toolbar = fetchContainer(toolbarName);
-
-		JButton btn = new JButton();
-
-		try {
-			btn.setIcon(ic.getImageIcon());
-		} catch (Exception e) {
-			out.println("Image nicht gefunden: " + ic);
-		}
-		btn.setToolTipText(tooltipText);
-		toolbar.add(btn);
-		btn.addActionListener(x->openFile(fileName));
-
-		if (!(toolbar instanceof JToolBar)) {
-			toolbar.revalidate();
-			toolbar.repaint();
-		}
-		return btn;
-	}
-
-	private void openFile(String fileName) {
-		if (fileName==null || fileName.isEmpty())
-			return;
-		if (fileName.startsWith("http")) {
-			BrowserLaunch.openBrowser(fileName);
-		}
-	}
-
-	private void openFile(ActionEvent actionEvent) {
-		
-	}
-
-
-	public JButton addToolbarButton(String tooltipText, IC ic, ActionListener listener) {
-		
-		Container toolbar = currentContainer;
-		
-		JButton btn = new JButton();
-
-        try {
-			btn.setIcon(ic.getImageIcon());
-        } catch (Exception e) {
-			out.println("Image nicht gefunden: " + ic);
-        }
-        btn.setToolTipText(tooltipText);
-		toolbar.add(btn);
-		btn.addActionListener(listener);
-
-		if (!(toolbar instanceof JToolBar)) {
-			toolbar.revalidate();
-			toolbar.repaint();
-		}
-
-		return btn;		
-	}
-
-	private Container fetchContainer(String toolbarName) {
-		Container toolbar = nameToContainerDictionary.get(toolbarName);
-		if (toolbar!=null)
-			return toolbar;
-
-		List<Component> toolbars = GuiUtil.findComponents(getFrame(), x -> x instanceof JToolBar);
-		for(Component component : toolbars)
-			if (component.getName() != null) {
-				String name = component.getName();
-				nameToContainerDictionary.put(name, (Container) component);
-			}
-		return nameToContainerDictionary.get(toolbarName);
-	}
-	
 	public JMenuBar getMenuBar() {
 		if (menuBar!=null)
 			return menuBar;
@@ -203,12 +123,6 @@ public class GuiDecorator {
 			menuBar = getFrame().getJMenuBar();
 			
 		return menuBar;
-	}
-
-    public void addContainer(String string, Container toolbarVokabeln) {
-		nameToContainerDictionary.put(string, toolbarVokabeln);
-		toolBarDecorator.addContainer(string, toolbarVokabeln);
-		setCurrentContainer(string);
 	}
 
 	public void addMenuSeparator(String string) {
@@ -244,107 +158,11 @@ public class GuiDecorator {
 		
 	}
 
-    public JToggleButton addToggleButton(String tooltipText, IC pinOrange, IC pinRed,
-			Consumer<Boolean> listener) {
-
-		Container toolbar = currentContainer;
-		if (toolbar==null)
-			return null;
-
-		Image image = pinOrange.getCachedImage();
-		Image selectedImage = pinRed.getCachedImage();
-
-		JToggleButton btn = new JToggleButton("");
-
-		btn.setIcon(new ImageIcon(image));
-		btn.setSelectedIcon(new ImageIcon(selectedImage));
-
-		btn.setToolTipText(tooltipText);
-		toolbar.add(btn);
-		btn.addActionListener(x->listener.accept(btn.isSelected()));
-		return btn;
-	}
-
-	public JToggleButton addToggleButton(String tooltipText, ICF pinOrange, ICF pinRed,
-				Consumer<Boolean> listener) {
-
-		Container toolbar = currentContainer;
-
-		Image image = pinOrange.getCachedImage();
-		Image selectedImage = pinRed.getCachedImage();
-
-		JToggleButton btn = new JToggleButton("");
-
-		btn.setIcon(new ImageIcon(image));
-		btn.setSelectedIcon(new ImageIcon(selectedImage));
-
-		btn.setToolTipText(tooltipText);
-		toolbar.add(btn);
-		btn.addActionListener(x->listener.accept(btn.isSelected()));
-		return btn;
-	}
-
-	public void addToolbarSeparator() {
-		Container container = currentContainer;
-		if (!(container instanceof JToolBar)) return;
-
-		JSeparator seo = new JSeparator();
-		seo.setMaximumSize(new Dimension(20,200));
-		seo.setOpaque(true);
-		seo.setSize(202,20);				
-		seo.getInsets().left = 4;
-		container.add(seo);
-	}
-
-	public  <T> JComboBox<T> addToolbarComboBox(String tooltipText, List<T>elements, Consumer<T> consumer)
-	{
-		JComboBox<T> comboBox = new JComboBox<>();
-		comboBox.setFont(new Font("Arial", Font.PLAIN, 14));
-		comboBox.setToolTipText(tooltipText);
-		DefaultComboBoxModel<T> model = new DefaultComboBoxModel<>();
-		elements.forEach(model::addElement);
-		comboBox.setModel(model);
-		currentContainer.add(comboBox);
-		comboBox.addActionListener(x->consumer.accept((T)comboBox.getSelectedItem()));
-		return comboBox;
-	}
-
-	public  JProgressBar addToolbarProgressBar(String tooltipText)
-	{
-		JProgressBar progressBar = new JProgressBar();
-		currentContainer.add(progressBar);
-		return progressBar;
-	}
-
-	public  <T> JComboBox<T> addToolbarComboBox(String tooltipText, T[] elements, Consumer<T> consumer)
-	{
-		if (currentContainer==null)
-			return null;
-
-		JComboBox<T> comboBox = new JComboBox<>();
-		comboBox.setToolTipText(tooltipText);
-		comboBox.setFont(new Font("Arial", Font.PLAIN, 14));
-		DefaultComboBoxModel<T> model = new DefaultComboBoxModel<>(elements);
-		comboBox.setModel(model);
-		currentContainer.add(comboBox);
-		comboBox.addActionListener(x->consumer.accept((T)comboBox.getSelectedItem()));
-		comboBox.setVisible(true);
-		return comboBox;
-	}
-
-	public void addTopMostButton(JFrame jFrame) {
-		addToggleButton("Topmost", IC.PIN_ORANGE, IC.PIN_RED, x->switchTopMost(jFrame));
-	}
-
 	/*
 	public void addWatchClipboardButton(String toolBarName, JFrame jFrame, Consumer<Boolean> handleWatchClipboardChanged) {
 		addToggleButton(toolBarName,  "Watch Clipboard", IC.CLIPBOARD_DEL, IC.CLIPBOARD_UP, x->switchTopMost(jFrame));
 	}
 	*/
-
-	private void switchTopMost(JFrame jFrame) {
-		jFrame.setAlwaysOnTop(!jFrame.isAlwaysOnTop());
-	}
 
 	public void addEditIniFileButton(String ... fileNames) {
 
@@ -421,10 +239,6 @@ public class GuiDecorator {
 		});
 	}
 
-	public void setCurrentContainer(String main) {
-		currentContainer = fetchContainer(main);
-		toolBarDecorator.setCurrentContainer(currentContainer);
-	}
 
 	static class ReturnEnterKeyListener extends KeyAdapter {
 		@Override
