@@ -16,7 +16,7 @@ public class ContentPartMapperOpenAi
         return switch (part) {
             case ContentPartText text -> Map.of(
                     "type", textName,
-                    "text", text.text()
+                    "text", replaceFileNamesWithFileContents(text.text())
             );
 
             case ContentPartImage image -> Map.of(
