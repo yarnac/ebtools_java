@@ -6,10 +6,7 @@ import com.eb.apps.ebchat_utils.codegen.AiCodeGeneratorCtrl;
 import com.eb.apps.ebchat_client.domain.chat.GlobaleEinstellungen;
 import com.eb.apps.ebchat_client.domain.context.app.ContextEditDlg;
 import com.eb.apps.ebchat_client.domain.context.domain.ContextManager;
-import com.eb.base.ai_service.llm_client.api.LlmRequest;
-import com.eb.base.ai_service.llm_client.api.LlmRequestBuilder;
-import com.eb.base.ai_service.llm_client.api.LlmRequestService;
-import com.eb.base.ai_service.llm_client.api.LlmResponse;
+import com.eb.base.ai_service.llm_client.api.*;
 import com.eb.base.ai_service.llm_client.infrastructure.LlmModel;
 import com.eb.base.ai_service.llm_client.infrastructure.LlmModelProvider;
 import com.eb.base.ai_service.llm_client.infrastructure.contentmapping.JsonFileAppendUtil;
@@ -44,7 +41,6 @@ import java.util.concurrent.Executors;
 
 public class AiPlaygroundCtrl {
 
-    private JComboBox<ContextWithFiles> cbContexts;
     private JComboBox<LlmModel> cbModelle;
     private JComboBox<AiChat> cbChats;
     AiPlaygroundWindow window;
@@ -103,11 +99,15 @@ public class AiPlaygroundCtrl {
         
         IComponentPersister persister = ComponentPersisterFactory.createIniFilePersister(iniFile);
         persister.addComponentItem(cbChats,"CbChats");
-        persister.addComponentItem(cbContexts,"CbContexts");
         persister.addComponentItem(cbModelle,"CbModelle");
         window.registerPersister(persister);
         decorator.addCloseAction(persister::persistComponentItems);
         persister.loadAndSetComponentItems();
+
+        window.getContextEditorCtrl().setPromptConsumer((String s)-> window.setInput(s));
+        window.getContextEditorCtrl().setPromptOutputConsumer((String s)-> window.setInput(s));
+
+
 
 
         // ✅ Empfehlung der AI qwen3.5:9
@@ -134,7 +134,65 @@ public class AiPlaygroundCtrl {
     private void decorateToolbarTree() {
         String tbName = window.getToolbarTreePanelName();
         window.getDecorator().toolBars().setCurrentContainer(tbName);
+        window.getDecorator().toolBars().addToolbarButton("Set Request", ICF.TextDocument_Export, x->handleSetRequest((LlmRequest) cbRequests.getSelectedItem()));
         cbRequests = window.getDecorator().toolBars().addToolbarComboBox("Requests", llmRequestManager.getLlmRequests(), x->handleRequestChanged(x));
+
+    }
+
+    private void handleSetRequest(LlmRequest request) {
+        actLlmRequest = request;
+        LastLlmMessageInfo lastLlmMessageInfo = getLastLlmMessageInfo(request);
+        window.setInputPraefixText(lastLlmMessageInfo.system.replace("<system>",""));
+        window.setInputText(lastLlmMessageInfo.user.replace("<user>",""));
+        window.setOutputText(lastLlmMessageInfo.assistant.replace("<assistant>",""));
+
+    }
+
+    class LastLlmMessageInfo
+    {
+        String system;
+        String user;
+        String assistant;
+
+        public LastLlmMessageInfo() {
+            system = "";
+            user = "";
+            assistant = "";
+        }
+    }
+
+
+    private LastLlmMessageInfo getLastLlmMessageInfo(LlmRequest request) {
+        int n = request.getMessages().size();
+        LastLlmMessageInfo lastLlmMessageInfo = new LastLlmMessageInfo();
+        if (n>0)
+        {
+            LlmMessage llmMessage = request.getMessages().get(0);
+            if (llmMessage.isSystem())
+                lastLlmMessageInfo.system = llmMessage.getMessageString();
+
+            int i = n-1;
+            llmMessage = request.getMessages().get(i);
+            if (llmMessage.isAssistent()) {
+                lastLlmMessageInfo.assistant = llmMessage.getMessageString();
+                lastLlmMessageInfo.user = request.getMessages().get(i-1).getMessageString();
+            }
+            else if (llmMessage.isUser())
+                lastLlmMessageInfo.user = llmMessage.getMessageString();
+        }
+        return lastLlmMessageInfo;
+    }
+
+    private String getSystemString(LlmRequest request) {
+        if (request.getMessages().isEmpty()) {
+            return "";
+        }
+        LlmMessage llmMessage = request.getMessages().get(0);
+        if (llmMessage.getRole().equals("system")) {
+            return llmMessage.getMessage();
+        }
+        else
+            return "";
     }
 
     private void handleRequestChanged(LlmRequest request) {
@@ -154,6 +212,8 @@ public class AiPlaygroundCtrl {
         decorator.toolBars().addToolbarButton("Generate Content Description", ICF.Wizard, this::generateContentDescription);
         decorator.toolBars().addToolbarButton("Save Content Description", ICF.Wizard_Save, this::saveContentDescription);
         decorator.toolBars().addToolbarButton("Delete Request", ICF.DeleteRed, this::deleteRequest);
+
+
     }
 
     private void deleteRequest(ActionEvent actionEvent) {
@@ -224,12 +284,12 @@ public class AiPlaygroundCtrl {
         LlmModelProvider modelProvider = new LlmModelProvider();
         cbChats = decorator.toolBars().addToolbarComboBox("Chats", chatManager.getAvailableChats(), this::setChat);
         int height = cbChats.getHeight();
-        cbContexts = decorator.toolBars().addToolbarComboBox("Kontext", contextManager.getContextList(), this::setContext);
+
         cbModelle = decorator.toolBars().addToolbarComboBox("Modell", modelProvider.getModels(), this::setModel);
 
         cbChats.setPreferredSize(new Dimension(20, height));
         cbModelle.setPreferredSize(new Dimension(20, height));
-        cbContexts.setPreferredSize(new Dimension(20, height));
+
 
         progressBar = decorator.toolBars().addToolbarProgressBar("Huhu");
     }

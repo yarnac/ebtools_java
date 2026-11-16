@@ -11,6 +11,7 @@ import com.eb.base.gui.persist.IComponentPersister;
 import com.eb.base.inifile.api.IniFile;
 import lombok.Getter;
 
+import java.util.List;
 import javax.swing.*;
 import java.awt.*;
 
@@ -128,9 +129,12 @@ public class AiPlaygroundWindow extends JFrame {
         return textPaneInput.getText();
     }
 
+
+
     public void setInputText(String inputString2) {
         textPaneInput.setText(inputString2);
     }
+
 
     public void setInOutEnabled(boolean b) {
         textPaneInput.setEnabled(b);
@@ -153,6 +157,22 @@ public class AiPlaygroundWindow extends JFrame {
 
     public void setInputPraefixText(String userString) {
         textFieldInputPraefix.setText(userString);
+    }
+
+    public ContextEditorPanelCtrl getContextEditorCtrl() {
+        return contextEditorPanelCtrl;
+    }
+
+    public void setInput(String s) {
+        List<String> parts = StringExtensions.ebSplit(s, ">>");
+        if (parts.size() > 1) {
+            setInputPraefixText(parts.get(0) + ">>");
+            setInputText(parts.get(1));
+        }
+        else {
+            setInputPraefixText("");
+            setInputText(parts.get(0));
+        }
     }
 
 

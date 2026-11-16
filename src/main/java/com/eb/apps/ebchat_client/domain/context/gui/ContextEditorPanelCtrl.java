@@ -6,6 +6,7 @@ import com.eb.apps.ebchat_client.domain.context.domain.ContextManager;
 import com.eb.apps.ebchat_client.domain.context.domain.ContextWithFiles;
 import com.eb.base.gui.ICF;
 import com.eb.base.gui.decorator.GuiDecoratorToolBars;
+import lombok.Setter;
 
 import javax.swing.*;
 import java.awt.*;
@@ -13,6 +14,7 @@ import java.awt.event.ActionEvent;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 public class ContextEditorPanelCtrl {
@@ -27,6 +29,12 @@ public class ContextEditorPanelCtrl {
 
 
     private List<ContextWithFiles> contextList;
+    @Setter
+    private Consumer<String> promptConsumer;
+    @Setter
+    private Consumer<String> promptOutputConsumer;
+
+
 
     public ContextEditorPanelCtrl(ContextEditorPanel contextEditorPanel) {
         contextManager = AiContextProvider.getContextManager();
@@ -61,7 +69,23 @@ public class ContextEditorPanelCtrl {
         toolBars.addToolbarButton("Save Context", ICF.Save, e -> saveContext());
         toolBars.addToolbarButton("Undo", ICF.UndoBlue, (e) -> undoEdit());
         toolBars.addToolbarButton("Get Output", ICF.MediaButtonPlayGreen, this::setOutputContent);
+        toolBars.addToolbarButton("Export Prompt", ICF.BlankDocument_Export, this::exportPrompt);
+        toolBars.addToolbarButton("Export Output", ICF.TextDocument_Export, this::exportOutput);
     }
+
+    private void exportOutput(ActionEvent actionEvent) {
+        if (promptOutputConsumer != null) {
+            promptOutputConsumer.accept(contextEditDetailsPanel.getEdOutput().getText());
+        }
+    }
+
+    private void exportPrompt(ActionEvent actionEvent) {
+        if (promptConsumer != null) {
+            promptConsumer.accept(contextEditDetailsPanel.getPromptText());
+        }
+    }
+
+
 
     private void undoEdit() {
         contextEditorPanel.undo();

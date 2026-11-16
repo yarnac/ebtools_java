@@ -121,4 +121,15 @@ public class LlmMessage {
         }
         return stringBuilder.toString();
     }
+
+    public boolean isAssistent() {
+        return role != null && role.equals("assistant");
+    }
+
+    public boolean isUser() {
+        return role != null && role.equals("user");
+    }
+    public boolean isSystem() {
+        return role != null && role.equals("system");
+    }
 }
