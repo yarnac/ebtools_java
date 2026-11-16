@@ -7,5 +7,6 @@ public interface ContentPartToMapMapper {
     Map<String, Object> map(String role, ContentPart part);
     String getContentIdentifier();
     default boolean shouldSendSystemSeparately() {return false;}
+    default String replaceFileNamesWithFileContents(String content) {return JsonFileAppendUtil.appendAllFiles(content);}
 }
 

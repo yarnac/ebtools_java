@@ -17,7 +17,7 @@ public class ContentPartMapperAnthropic implements ContentPartToMapMapper {
         return switch (part) {
             case ContentPartText text -> Map.of(
                     "type", "text",
-                    "text", text.text()
+                    "text", replaceFileNamesWithFileContents(text.text())
             );
 
             case ContentPartImage image -> {

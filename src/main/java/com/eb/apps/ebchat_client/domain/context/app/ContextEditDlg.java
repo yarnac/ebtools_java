@@ -8,16 +8,11 @@
 
 package com.eb.apps.ebchat_client.domain.context.app;
 
-import com.eb.apps.ebchat_client.components.JsonFileAppendUtil;
-import com.eb.apps.ebchat_client.domain.chat.AiContextProvider;
-import com.eb.apps.ebchat_client.domain.context.domain.ContextManager;
-import com.eb.apps.ebchat_client.domain.context.domain.ContextWithFiles;
 import com.eb.apps.ebchat_client.domain.context.gui.ContextEditDetailsPanel;
 import com.eb.apps.ebchat_client.domain.context.gui.ContextEditorPanel;
 import com.eb.apps.ebchat_client.domain.context.gui.ContextEditorPanelCtrl;
 import com.eb.apps.ebchat_client.domain.context.gui.ContextTreePanel;
 import com.eb.base.gui.decorator.GuiDecorator;
-import com.eb.base.gui.ICF;
 import com.eb.base.inifile.api.IniFile;
 import com.eb.base.inifile.api.IniFileProvider;
 
@@ -28,10 +23,6 @@ import java.awt.datatransfer.StringSelection;
 import java.awt.event.ActionEvent;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.function.Predicate;
 
 public class ContextEditDlg extends JFrame {
 

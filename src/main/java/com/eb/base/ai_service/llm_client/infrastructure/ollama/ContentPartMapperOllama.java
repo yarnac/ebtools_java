@@ -15,7 +15,7 @@ public class ContentPartMapperOllama
         return switch (part) {
             case ContentPartText text -> Map.of(
                     "type", "text",
-                    "text", text.text()
+                    "text", replaceFileNamesWithFileContents(text.text())
             );
 
             case ContentPartImage image -> Map.of(

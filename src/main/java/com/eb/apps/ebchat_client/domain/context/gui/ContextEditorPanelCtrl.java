@@ -1,11 +1,10 @@
 package com.eb.apps.ebchat_client.domain.context.gui;
 
-import com.eb.apps.ebchat_client.components.JsonFileAppendUtil;
+import com.eb.base.ai_service.llm_client.infrastructure.contentmapping.JsonFileAppendUtil;
 import com.eb.apps.ebchat_client.domain.chat.AiContextProvider;
 import com.eb.apps.ebchat_client.domain.context.domain.ContextManager;
 import com.eb.apps.ebchat_client.domain.context.domain.ContextWithFiles;
 import com.eb.base.gui.ICF;
-import com.eb.base.gui.decorator.GuiDecoratorMenuBars;
 import com.eb.base.gui.decorator.GuiDecoratorToolBars;
 
 import javax.swing.*;

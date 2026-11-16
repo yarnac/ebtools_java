@@ -8,7 +8,7 @@
 
 package com.eb.apps.ebchat_client.domain.context.app;
 
-import com.eb.apps.ebchat_client.components.JsonFileAppendUtil;
+import com.eb.base.ai_service.llm_client.infrastructure.contentmapping.JsonFileAppendUtil;
 import com.eb.apps.ebchat_client.domain.chat.AiContextProvider;
 import com.eb.apps.ebchat_client.domain.context.domain.ContextManager;
 import com.eb.apps.ebchat_client.domain.context.domain.ContextWithFiles;

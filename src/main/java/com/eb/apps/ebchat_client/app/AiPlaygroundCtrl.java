@@ -12,6 +12,7 @@ import com.eb.base.ai_service.llm_client.api.LlmRequestService;
 import com.eb.base.ai_service.llm_client.api.LlmResponse;
 import com.eb.base.ai_service.llm_client.infrastructure.LlmModel;
 import com.eb.base.ai_service.llm_client.infrastructure.LlmModelProvider;
+import com.eb.base.ai_service.llm_client.infrastructure.contentmapping.JsonFileAppendUtil;
 import com.eb.base.ai_service.llm_client.infrastructure.ollama.OllamaClient;
 import com.eb.base.ai_service.llmreqstore.LlmRequestManager;
 import com.eb.base.gui.decorator.GuiDecorator;
@@ -22,7 +23,6 @@ import com.eb.base.gui.persist.ComponentPersisterFactory;
 import com.eb.base.gui.persist.IComponentPersister;
 import com.eb.base.inifile.api.IniFile;
 import com.eb.base.inifile.api.IniFileProvider;
-import com.eb.apps.ebchat_client.components.JsonFileAppendUtil;
 import com.eb.apps.ebchat_client.components.fileprovider.GuiFileNameProvider;
 import com.eb.apps.ebchat_client.domain.chat.AiChat;
 import com.eb.apps.ebchat_client.domain.context.domain.ContextWithFiles;
@@ -65,6 +65,7 @@ public class AiPlaygroundCtrl {
         chatManager = AiChatManager.getCurrent();
 
 
+
         try {
             if (!GlobaleEinstellungen.isWindows()) {
                 System.out.println(UIManager.getLookAndFeel());
@@ -79,6 +80,8 @@ public class AiPlaygroundCtrl {
 
 
         IniFile iniFile = IniFileProvider.createIniFile("JavaAiPlaygroundCtrl.ini");
+        JsonFileAppendUtil.addAllowedDirectories(iniFile.getSectionValues("AllowedPaths"));
+
         window = new AiPlaygroundWindow(iniFile);
         window.setVisible(true);
 
@@ -344,9 +347,9 @@ public class AiPlaygroundCtrl {
             return;
         }
 
-        String inputStringWithDirectoriesAndFiles = JsonFileAppendUtil.appendDirectoryFiles(inputString);
-        String inputStringWithFiles = JsonFileAppendUtil.appendFiles(inputStringWithDirectoriesAndFiles, imageFileNames);
-
+        //String inputStringWithDirectoriesAndFiles = JsonFileAppendUtil.appendDirectoryFiles(inputString);
+        //String inputStringWithFiles = JsonFileAppendUtil.appendFiles(inputStringWithDirectoriesAndFiles, imageFileNames);
+        String inputStringWithFiles = inputString;
         if (!append || actLlmRequest==null) {
             actLlmRequest = null;
 
