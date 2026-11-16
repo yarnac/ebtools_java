@@ -70,15 +70,10 @@ public class ContextEditorPanelCtrl {
 
     private void setOutputContent(ActionEvent actionEvent) {
         String code = contextEditDetailsPanel.getEdPrompt().getText();
-        String expanded = JsonFileAppendUtil.appendFiles(code, new ArrayList<>());
+        String expanded = JsonFileAppendUtil.appendDirectoryFiles(code);
+        expanded = JsonFileAppendUtil.appendFiles(expanded, new ArrayList<>());
         if (expanded != null) {
-
-            if (code.contains("\n<$D")) {
-                contextEditDetailsPanel.getEdPrompt().setText(expanded);
-            }
-            else {
-                contextEditDetailsPanel.getEdOutput().setText(expanded);
-            }
+            contextEditDetailsPanel.getEdOutput().setText(expanded);
         }
 
     }

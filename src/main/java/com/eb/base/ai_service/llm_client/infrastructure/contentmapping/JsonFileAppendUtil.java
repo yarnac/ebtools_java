@@ -6,6 +6,7 @@ import com.eb.base.extensions.StringExtensions;
 
 import java.io.IOException;
 import java.nio.file.FileSystems;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
@@ -20,50 +21,69 @@ public class JsonFileAppendUtil {
 
     // Line Separator Constants
     private static final String LINE_SEPARATOR = "\n";
-    private static final String DIRECTORY_MARKER = LINE_SEPARATOR + DIRECTORY_PREFIX;
     // File Filter Constants
     private static final String ALL_FILES_FILTER = "*";
 
-    private static final HashSet<Path> allowedPaths = new HashSet<>();
+    private static final List<Path> allowedPaths = new ArrayList<>();
 
 
     public static void addAllowedDirectories(Iterable<String> directories) {
+        if (directories == null) {
+            return;
+        }
         for (String dir : directories) {
-            Path dirPath = Paths.get(dir).toAbsolutePath().normalize();
-            allowedPaths.add(dirPath);
+            Path dirPath = null;
+            try {
+                dirPath = Paths.get(dir).toAbsolutePath().toRealPath().normalize();
+                if (Files.isDirectory(dirPath)) {
+                    allowedPaths.add(dirPath);
+                }
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+
         }
     }
 
 
     public static String appendDirectoryFiles(String inputString) {
-        if (StringExtensions.ebIsNilOrEmpty(inputString))
+
+        if (inputString==null)
             return "";
-        
-        if (!inputString.contains(DIRECTORY_MARKER))
+
+        if (allowedPaths.isEmpty())
             return inputString;
+
+        if (!inputString.contains(DIRECTORY_PREFIX) && !inputString.contains(ALL_FILES_PREFIX)) {
+            return inputString;
+        }
 
         StringBuilder strb = new StringBuilder();
         String[] lines = inputString.split(LINE_SEPARATOR);
 
-        for (String line : lines) {
-            String trimmedLine = line.trim();
+        for (String untrimmedLine : lines) {
+            String trimmedLine = untrimmedLine.trim();
 
             if (trimmedLine.startsWith(DIRECTORY_PREFIX)) {
-                String dirName = StringExtensions.ebTrimAll(line.substring(DIRECTORY_PREFIX.length()));
-                if (!isAllowedFileOrDirName(dirName))
+                String dirName = StringExtensions.ebTrimAll(trimmedLine.substring(DIRECTORY_PREFIX.length()));
+                if (!isAllowedFileOrDirName(dirName)||!Files.isDirectory(Paths.get(dirName))) {
                     continue;
+                }
                 List<String> fileNames = Arrays.stream(FileExtensions.ebGetFiles(dirName, ALL_FILES_FILTER)).toList();
                 fileNames.forEach(fileName -> {
                     strb.append(FILE_PREFIX).append(fileName).append(LINE_SEPARATOR);
                 });
             } else if (trimmedLine.startsWith(ALL_FILES_PREFIX)) {
-                String dirName = StringExtensions.ebTrimAll(line.substring(ALL_FILES_PREFIX.length()));
+                String dirName = StringExtensions.ebTrimAll(trimmedLine.substring(ALL_FILES_PREFIX.length()));
+                if (!isAllowedFileOrDirName(dirName)||!Files.isDirectory(Paths.get(dirName))) {
+                    continue;
+                }
                 List<String> fileNames = FileExtensions.ebGetAllFiles(dirName, ALL_FILES_FILTER);
                 fileNames.forEach(fileName -> {
                     strb.append(FILE_PREFIX).append(fileName).append(LINE_SEPARATOR);
                 });
             } else {
-                strb.append(line);
+                strb.append(untrimmedLine);
                 strb.append(LINE_SEPARATOR);
             }
         }
@@ -71,9 +91,14 @@ public class JsonFileAppendUtil {
     }
 
     private static boolean isAllowedFileOrDirName(String name) {
-        if (Paths.get(name).isAbsolute())
-            return isInAllowedDirectory(Paths.get(name));
-        return false;
+        try {
+            if (Paths.get(name).isAbsolute())
+                return isInAllowedDirectory(Paths.get(name).toRealPath());
+            return false;
+        }
+        catch(Exception e) {
+            return false;
+        }
     }
 
     private static boolean isInAllowedDirectory(Path inputPath) {
@@ -89,45 +114,78 @@ public class JsonFileAppendUtil {
 
     public static String appendFiles(String inputString, List<String> imageFileNamesFromUser) {
 
-        List<String> imageFileNames = imageFileNamesFromUser == null
-            ? new ArrayList<>()
-            : new ArrayList<>(imageFileNamesFromUser);
+        if (inputString==null)
+            return "";
 
-        Set<String> fileNames = new HashSet<>();
+        if (allowedPaths.isEmpty())
+            return inputString;
+
+        Set<String> imageFileNames = determineAllowedImageFileNames(imageFileNamesFromUser);
+
+
+
+
+        Set<String> fileNames = new LinkedHashSet<>();
         StringBuilder stringBuilder = new StringBuilder();
 
 
         String[] lines = inputString.split(LINE_SEPARATOR);
-        for (String line : lines) {
-            if (isAllowedFileOrDirName(line))
+        for (String untrimmedLine : lines) {
+            String trimmedLine = untrimmedLine.trim();
+
+
+            if (addAllowedRegularFile(fileNames, trimmedLine))
             {
-                fileNames.add(line.trim());
                 continue;
             }
-            if (line.startsWith(IMAGE_FILE_PREFIX)) {
-                String fileName = StringExtensions.ebTrimAll(line.substring(IMAGE_FILE_PREFIX.length()));
-                if (isAllowedFileOrDirName(fileName) && !imageFileNames.contains(fileName))
-                    imageFileNames.add(fileName.trim());
-                continue;
+            if (trimmedLine.startsWith(IMAGE_FILE_PREFIX)) {
+                String fileName = StringExtensions.ebTrimAll(trimmedLine.substring(IMAGE_FILE_PREFIX.length()));
+                if (addAllowedRegularFile(imageFileNames, fileName))
+                    continue;
             }
-            if (line.startsWith(FILE_PREFIX)) {
-                String fileName = StringExtensions.ebTrimAll(line.substring(FILE_PREFIX.length()));
-                if (isAllowedFileOrDirName(fileName))
-                    fileNames.add(fileName.trim());
-                continue;
+            if (trimmedLine.startsWith(FILE_PREFIX)) {
+                String fileName = StringExtensions.ebTrimAll(trimmedLine.substring(FILE_PREFIX.length()));
+                if (addAllowedRegularFile(fileNames, fileName))
+                    continue;
             }
 
-            stringBuilder.append(line);
-            stringBuilder.append(LINE_SEPARATOR);
+            stringBuilder.append(untrimmedLine).append(LINE_SEPARATOR);
         }
 
         try {
+            /* Mehrere JSON Dokumente werden akzeptiert */
             stringBuilder.append(new JasonFileContentProvider().getJsonFileString(fileNames.stream().toList()));
+            stringBuilder.append(new JasonFileContentProvider().getJsonFileString(imageFileNames.stream().toList()));
+
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
 
         return stringBuilder.toString();
+    }
+
+    private static boolean addAllowedRegularFile(Set<String> fileNames, String fileName) {
+        if (isAllowedFileOrDirName(fileName)
+                &&  Files.isRegularFile(Paths.get(fileName))) {
+            fileNames.add(fileName.trim());
+            return true;
+        }
+        return false;
+    }
+
+    private static Set<String> determineAllowedImageFileNames(List<String> imageFileNamesFromUser) {
+
+        Set<String> imageFileNames = new LinkedHashSet<>();
+        if (imageFileNamesFromUser == null || imageFileNamesFromUser.isEmpty())
+            return imageFileNames;
+
+        for(String imageFileName : imageFileNamesFromUser) {
+            if (isAllowedFileOrDirName(imageFileName) && Files.isRegularFile(Paths.get(imageFileName)))
+            {
+                imageFileNames.add(imageFileName);
+            }
+        }
+        return imageFileNames;
     }
 
     public static String appendAllFiles(String content) {
