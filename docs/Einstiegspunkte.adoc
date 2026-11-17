@@ -1,0 +1,20 @@
+= Einstiegspunkte
+
+== AiPlayground
+
+=== Context
+
+*TODO:* Input und Output durch einen eigenen Controller steuern?
+
+[cols="1,2"]
+|===
+| Toolbar | Location
+| Haupttoolbar | AiPlagroundCtrl.decorateToolbarMain
+|Toolbar mit Requests | AiPlaygroundCtrl.decorateToolbarTree
+| Tree und Editor | ContextEditorPanelCtrl.decorate
+| Input  | AiPlaygroundCtrl.decorateToolbarInput und decorateToolbarInputPart2
+| Output | AiPlaygroundCtrl.decorateToolbarOutput
+|===
+
+
+

@@ -405,7 +405,7 @@ Der Dialog verwendet `DISPOSE_ON_CLOSE`, hat eine Startgröße von `600 × 400` 
 
 === `JasonFileContentProvider`
 
-`JasonFileContentProvider` liest Dateien und serialisiert sie als JSON-Objekte des Typs `Codedatei`. Jedes Objekt enthält:
+`JsonFileContentProvider` liest Dateien und serialisiert sie als JSON-Objekte des Typs `Codedatei`. Jedes Objekt enthält:
 
 [cols="2,4"]
 |===
@@ -907,7 +907,7 @@ Der HTTP-Status und der Antworttext werden auf der Konsole ausgegeben. Der Input
 |`GuiFileNameProvider`
 |Stellt ein Fenster zum Sammeln lokaler Dateipfade bereit.
 
-|`JasonFileContentProvider`
+|`JsonFileContentProvider`
 |Liest Dateien und verpackt ihre Inhalte in JSON-Codeblöcke.
 
 |`CodeBlockReplacer`

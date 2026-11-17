@@ -489,7 +489,7 @@ Die Pfadprüfung akzeptiert nur absolute Pfade, deren aufgelöster Pfad innerhal
 |Ersetzt den Marker durch Dateimarker für alle Dateien, die über die verwendete Dateifunktion gefunden werden.
 |===
 
-Wenn ein Marker nicht auf einen erlaubten oder vorhandenen Pfad verweist, bleibt die betreffende Eingabezeile erhalten. Bei erfolgreichen Datei-Auflösungen wird der ursprüngliche Marker entfernt und der Inhalt über `JasonFileContentProvider` ergänzt. Ein Fehler beim Abrufen der Dateiinhalte wird protokolliert und als `RuntimeException` weitergegeben.
+Wenn ein Marker nicht auf einen erlaubten oder vorhandenen Pfad verweist, bleibt die betreffende Eingabezeile erhalten. Bei erfolgreichen Datei-Auflösungen wird der ursprüngliche Marker entfernt und der Inhalt über `JsonFileContentProvider` ergänzt. Ein Fehler beim Abrufen der Dateiinhalte wird protokolliert und als `RuntimeException` weitergegeben.
 
 Die Klasse hält erlaubte Pfade sowie Prüf-Caches in statischen, nebenläufigen Collections. In dem gezeigten Code werden die Maps `fileExistsCache` und `isDirectoryCache` zwar angelegt, aber nicht verwendet.
 

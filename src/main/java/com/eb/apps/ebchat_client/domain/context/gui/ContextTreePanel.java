@@ -10,6 +10,7 @@ package com.eb.apps.ebchat_client.domain.context.gui;
 
 import com.eb.apps.ebchat_client.domain.context.domain.ContextWithFiles;
 import com.eb.apps.ebchat_utils.edcontext.ContextTreeNode;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -171,5 +172,19 @@ public class ContextTreePanel extends JPanel {
         for (int row = 0; row < contextTree.getRowCount(); row++) {
             contextTree.expandRow(row);
         }
+    }
+
+    public List<ContextWithFiles> getContextList() {
+        return contextList;
+    }
+
+    public ContextWithFiles getLastSelectedNodeContext() {
+        if (getSelectedNode().getUserObject() instanceof ContextWithFiles) {
+            return (ContextWithFiles) getSelectedNode().getUserObject();
+        }
+        DefaultMutableTreeNode lastChild = (DefaultMutableTreeNode) getSelectedNode().getLastChild();
+        return lastChild == null
+                ? null
+                : (ContextWithFiles) lastChild.getUserObject();
     }
 }

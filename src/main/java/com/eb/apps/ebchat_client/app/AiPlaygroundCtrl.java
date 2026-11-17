@@ -99,16 +99,17 @@ public class AiPlaygroundCtrl {
         
         IComponentPersister persister = ComponentPersisterFactory.createIniFilePersister(iniFile);
         persister.addComponentItem(cbChats,"CbChats");
+
         persister.addComponentItem(cbModelle,"CbModelle");
+        persister.addComponentItem(window.getAiInputOutputPanel().getSplitPanelMessages().getSplitPane(),"SplitMessages");
+        persister.addComponentItem(window.getAiInputOutputPanel().getSplitPanelInput().getSplitPane(),"SplitInput");
+
         window.registerPersister(persister);
         decorator.addCloseAction(persister::persistComponentItems);
         persister.loadAndSetComponentItems();
 
         window.getContextEditorCtrl().setPromptConsumer((String s)-> window.setInput(s));
         window.getContextEditorCtrl().setPromptOutputConsumer((String s)-> window.setInput(s));
-
-
-
 
         // ✅ Empfehlung der AI qwen3.5:9
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
@@ -123,7 +124,7 @@ public class AiPlaygroundCtrl {
 
         decorator.addEditIniFileButton(chatManager.getLlmModelProvider().getModelFileName());
 
-        toolBarDecorator.addToolbarButton("Speichern Main", IC.MB_PLAY, (x)->{});
+        toolBarDecorator.addToolbarButton("Speichern Main", IC.SAVE_ADD, (x)->{});
         toolBarDecorator.addToolbarButton("Edit Requests", ICF.Flowchart, (x)->{new EdRequestCtrl();});
         toolBarDecorator.addToolbarButton("Edit Contexts", ICF.Code, (x)->{SwingUtilities.invokeLater(ContextEditDlg::Show);});
         toolBarDecorator.addToolbarButton("Open DataFiles", ICF.History_Edit, (x)-> {
@@ -137,6 +138,57 @@ public class AiPlaygroundCtrl {
         window.getDecorator().toolBars().addToolbarButton("Set Request", ICF.TextDocument_Export, x->handleSetRequest((LlmRequest) cbRequests.getSelectedItem()));
         cbRequests = window.getDecorator().toolBars().addToolbarComboBox("Requests", llmRequestManager.getLlmRequests(), x->handleRequestChanged(x));
 
+    }
+
+
+    private void decorateToolbarInput() {
+
+        String tbName = window.getPanelWithToolBarInput().getToolbar().getName();
+
+        decorator.menuBars().setCurrentMenu("Datei");
+        decorator.menuBars().addMenuItem("Abfrage neu starten",()->sendRequest(false), KeyEvent.VK_F5, 0);
+        decorator.menuBars().addMenuItem("Abfrage fortsetzen",()->sendRequest(true), KeyEvent.VK_F4,0);
+        chkBoxProtokoll = decorator.menuBars().addJCheckBoxMenuItem("Abfragen protokollieren", ()->{},0,0);
+        decorator.menuBars().addMenuItem("Speichern",()->speichereRequest(), KeyEvent.VK_S,InputEvent.CTRL_DOWN_MASK);
+        decorator.toolBars().addOpenFileToolbarButton(tbName, "OpenAI Kosten", ICF.Monitor_Info, "https://platform.openai.com/home");
+        decorator.toolBars().addOpenFileToolbarButton(tbName, "Anthropic Kosten", ICF.Monitor_Properties, "https://platform.claude.com/dashboard");
+
+        decorator.toolBars().setCurrentContainer(tbName);
+        decorator.toolBars().addToolbarButton("Run", IC.PLAY, (s) -> sendRequest(false));
+        decorator.toolBars().addToolbarButton("Run again", IC.MB_PLAY,  (s) -> sendRequest(true));
+        decorator.toolBars().addToolbarButton("Get Ollama Models", ICF.Help,  (s) -> showOllamaModelsFromClient());
+        decorator.toolBars().addToolbarButton("Open append file window", ICF.BulletList, this::actionPerformed);
+        decorator.toolBars().addToolbarButton( "Kontexte", ICF.LinePoints_Add, this::openContextEditor);
+        decorator.toolBars().addToolbarButton( "Dummy", ICF.MaleHardHat_Lock, (s)->{});
+    }
+
+    private void decorateToolbarInputPart2() {
+        String tbName = window.getPanelWithToolBarInput().getToolbar().getName();
+        decorator = window.getDecorator();
+        decorator.toolBars().setCurrentContainer(tbName);
+        contextManager = chatManager.getContextManager();
+
+        LlmModelProvider modelProvider = new LlmModelProvider();
+        cbChats = decorator.toolBars().addToolbarComboBox("Chats", chatManager.getAvailableChats(), this::setChat);
+        int height = cbChats.getHeight();
+
+        cbModelle = decorator.toolBars().addToolbarComboBox("Modell", modelProvider.getModels(), this::setModel);
+
+        cbChats.setPreferredSize(new Dimension(20, height));
+        cbModelle.setPreferredSize(new Dimension(20, height));
+
+
+        progressBar = decorator.toolBars().addToolbarProgressBar("Huhu");
+    }
+
+    private void decorateToolbarOutput() {
+        String tbOutputName = window.getPanelWithToolBarOutput().getToolbar().getName();
+        decorator.toolBars().setCurrentContainer(tbOutputName);
+        decorator.toolBars().addToolbarButton("Generate Code", ICF.ArrowFlowVertical_Add, this::handleGenerateCode);
+        decorator.toolBars().addToolbarButton("Toggle Full View", ICF.SelectMinus, this::switchFullView);
+        decorator.toolBars().addToolbarButton("Generate Content Description", ICF.Wizard, this::generateContentDescription);
+        decorator.toolBars().addToolbarButton("Save Content Description", ICF.Wizard_Save, this::saveContentDescription);
+        decorator.toolBars().addToolbarButton("Delete Request", ICF.DeleteRed, this::deleteRequest);
     }
 
     private void handleSetRequest(LlmRequest request) {
@@ -204,18 +256,6 @@ public class AiPlaygroundCtrl {
         transferRequestToView();
     }
 
-    private void decorateToolbarOutput() {
-        String tbOutputName = window.getPanelWithToolBarOutput().getToolbar().getName();
-        decorator.toolBars().setCurrentContainer(tbOutputName);
-        decorator.toolBars().addToolbarButton("Generate Code", ICF.ArrowFlowVertical_Add, this::handleGenerateCode);
-        decorator.toolBars().addToolbarButton("Toggle Full View", ICF.SelectMinus, this::switchFullView);
-        decorator.toolBars().addToolbarButton("Generate Content Description", ICF.Wizard, this::generateContentDescription);
-        decorator.toolBars().addToolbarButton("Save Content Description", ICF.Wizard_Save, this::saveContentDescription);
-        decorator.toolBars().addToolbarButton("Delete Request", ICF.DeleteRed, this::deleteRequest);
-
-
-    }
-
     private void deleteRequest(ActionEvent actionEvent) {
         if (actLlmRequest==null)
             return;
@@ -254,45 +294,7 @@ public class AiPlaygroundCtrl {
         llmRequestManager.store(actLlmRequest);
     }
 
-    private void decorateToolbarInput() {
 
-        String tbName = window.getPanelWithToolBarInput().getToolbar().getName();
-
-        decorator.menuBars().setCurrentMenu("Datei");
-        decorator.menuBars().addMenuItem("Abfrage neu starten",()->sendRequest(false), KeyEvent.VK_F5, 0);
-        decorator.menuBars().addMenuItem("Abfrage fortsetzen",()->sendRequest(true), KeyEvent.VK_F4,0);
-        chkBoxProtokoll = decorator.menuBars().addJCheckBoxMenuItem("Abfragen protokollieren", ()->{},0,0);
-        decorator.menuBars().addMenuItem("Speichern",()->speichereRequest(), KeyEvent.VK_S,InputEvent.CTRL_DOWN_MASK);
-        decorator.toolBars().addOpenFileToolbarButton(tbName, "OpenAI Kosten", ICF.Monitor_Info, "https://platform.openai.com/home");
-        decorator.toolBars().addOpenFileToolbarButton(tbName, "Anthropic Kosten", ICF.Monitor_Properties, "https://platform.claude.com/dashboard");
-
-        decorator.toolBars().setCurrentContainer(tbName);
-        decorator.toolBars().addToolbarButton("Run", IC.PLAY, (s) -> sendRequest(false));
-        decorator.toolBars().addToolbarButton("Run again", IC.MB_PLAY,  (s) -> sendRequest(true));
-        decorator.toolBars().addToolbarButton("Get Ollama Models", ICF.Help,  (s) -> showOllamaModelsFromClient());
-        decorator.toolBars().addToolbarButton("Open append file window", ICF.BulletList, this::actionPerformed);
-        decorator.toolBars().addToolbarButton( "Kontexte", ICF.LinePoints_Add, this::openContextEditor);
-        decorator.toolBars().addToolbarButton( "Dummy", ICF.MaleHardHat_Lock, (s)->{});
-    }
-
-    private void decorateToolbarInputPart2() {
-        String tbName = window.getPanelWithToolBarInput().getToolbar().getName();
-        decorator = window.getDecorator();
-        decorator.toolBars().setCurrentContainer(tbName);
-        contextManager = chatManager.getContextManager();
-
-        LlmModelProvider modelProvider = new LlmModelProvider();
-        cbChats = decorator.toolBars().addToolbarComboBox("Chats", chatManager.getAvailableChats(), this::setChat);
-        int height = cbChats.getHeight();
-
-        cbModelle = decorator.toolBars().addToolbarComboBox("Modell", modelProvider.getModels(), this::setModel);
-
-        cbChats.setPreferredSize(new Dimension(20, height));
-        cbModelle.setPreferredSize(new Dimension(20, height));
-
-
-        progressBar = decorator.toolBars().addToolbarProgressBar("Huhu");
-    }
 
     boolean showFullView;
     private void switchFullView(ActionEvent actionEvent) {

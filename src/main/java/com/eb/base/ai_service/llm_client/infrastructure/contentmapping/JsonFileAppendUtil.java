@@ -1,6 +1,6 @@
 package com.eb.base.ai_service.llm_client.infrastructure.contentmapping;
 
-import com.eb.apps.ebchat_client.components.JasonFileContentProvider;
+import com.eb.apps.ebchat_client.components.JsonFileContentProvider;
 import com.eb.base.extensions.FileExtensions;
 import com.eb.base.extensions.StringExtensions;
 
@@ -125,7 +125,9 @@ public class JsonFileAppendUtil {
 
                 if (!isAllowedFileOrDirName(dirName) || !Files.isDirectory(dirPath)) {
                     logger.fine("Verzeichnis nicht erlaubt oder nicht gefunden: " + dirName);
+                    strb.append("Datei nicht gefunden: ").append(LINE_SEPARATOR);
                     strb.append(untrimmedLine).append(LINE_SEPARATOR);
+
                     continue;
                 }
 
@@ -237,10 +239,10 @@ public class JsonFileAppendUtil {
         try {
             // Mehrere JSON Dokumente werden akzeptiert
             if (!fileNames.isEmpty()) {
-                stringBuilder.append(new JasonFileContentProvider().getJsonFileString(fileNames.stream().toList()));
+                stringBuilder.append(new JsonFileContentProvider().getJsonFileString(fileNames.stream().toList()));
             }
             if (!imageFileNames.isEmpty()) {
-                stringBuilder.append(new JasonFileContentProvider().getJsonFileString(imageFileNames.stream().toList()));
+                stringBuilder.append(new JsonFileContentProvider().getJsonFileString(imageFileNames.stream().toList()));
             }
         } catch (IOException e) {
             logger.log(Level.SEVERE, "Fehler beim Abrufen von Dateiinhalten", e);

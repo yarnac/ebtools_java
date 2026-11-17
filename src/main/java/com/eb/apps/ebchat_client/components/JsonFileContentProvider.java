@@ -8,7 +8,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
-public class JasonFileContentProvider {
+public class JsonFileContentProvider {
 
     private static final ObjectMapper mapper = new ObjectMapper();
 

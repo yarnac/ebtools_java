@@ -16,14 +16,15 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 
 
 public class OllamaClient implements ILlmClient {
 
     public static final String HOST_MACSTUDIO = "macstudio";
-    public static final String HOST_MACSTUDIO2 = "192.168.178.118";
+    public static final String HOST_MACSTUDIO2 = "192.168.178.119";
     public static final String HOST_MACBOOK = "macbookeb";
-    public static final String HOST_MAC = "mac";
+    public static final String HOST_MAC = "macs";
     public static final String HOST_MACBOOKAIR = "macbookair";
     public static final String HOST_XT13 = "xt13";
     public static final String[] HOSTS = new String[]{
@@ -84,6 +85,10 @@ public class OllamaClient implements ILlmClient {
         long endTime = System.nanoTime();
         double elapsedSeconds = (endTime - startTime) / 1000000000.0;
 
+        if (response.statusCode() != 200) {
+            throw new RuntimeException("Error response from Ollama: " + response.body());
+        }
+
         ObjectMapper jsonMapper = new ObjectMapper();
         String respondBody = response.body();
         OllamaResponse ollamaResponse =
@@ -122,7 +127,23 @@ public class OllamaClient implements ILlmClient {
                 }
                 System.out.println("%s isAvailable: ".formatted(host) + isAvailable3);
             });
+        }
 
+        for(int i=100; i<255;i++)
+        {
+            String host = "192.168.178." + i;
+            System.out.println("Checking %s: ".formatted(host));
+            CompletableFuture<Boolean> isAvailable =  CheckNetworkService.isOllamaAvailableAsync(host,11434);
+            try {
+                if (isAvailable.isDone() && isAvailable.get())
+                {
+                    HOST = host;
+                    System.out.println("%s isAvailable: ".formatted(host) + true);
+                    return host;
+                }
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
         }
         return HOST;
     }

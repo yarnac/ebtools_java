@@ -68,6 +68,11 @@ public class AnthropicClient implements ILlmClient {
 
         String respBody = response.body();
 
+
+        if (response.statusCode() != 200) {
+            throw new RuntimeException("Error response from Ollama: " + respBody);
+        }
+
         ObjectMapper mapper = new ObjectMapper()
                 .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
                 .configure(JsonParser.Feature.ALLOW_UNQUOTED_CONTROL_CHARS, true);

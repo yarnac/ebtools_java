@@ -5,6 +5,7 @@ import com.eb.apps.ebchat_client.domain.context.gui.ContextEditorPanel;
 import com.eb.apps.ebchat_client.domain.context.gui.ContextEditorPanelCtrl;
 import com.eb.base.extensions.StringExtensions;
 import com.eb.base.gui.*;
+import com.eb.base.gui.adapter.JTextAreaAdapter;
 import com.eb.base.gui.adapter.JTextPaneAdapter;
 import com.eb.base.gui.decorator.GuiDecorator;
 import com.eb.base.gui.persist.IComponentPersister;
@@ -25,34 +26,26 @@ public class AiPlaygroundWindow extends JFrame {
 
     @Getter
     private final GuiDecorator decorator;
-    @Getter
-    private JTextPaneAdapter textPaneAdapterOutput;
-    @Getter
-    private JTextPane textPaneInput;
-    @Getter
-    private JTextPane textPaneOutput;
     private JTree historyTree;
 
-    private EbSplitPanel splitPanelInput;
-    private EbSplitPanel splitPanelMessages;
     private EbSplitPanel splitPanelMain;
 
     private PanelWithToolBar panelWithToolBarAuswahl;
     private PanelWithToolBar panelWithToolBarInput;
     private PanelWithToolBar panelWithToolBarOutput;
-    private JTextPane textFieldInputPraefix;
-    private JScrollPane scrollPaneInputPraefix;
 
-    private JScrollPane scrollPaneInputText;
-    @Getter
-    private JLabel statusBarOutputLabel;
     @Getter
     private JToolBar toolBarHistoryTree;
     private JPanel treePanel;
     @Getter
     private String toolbarTreePanelName;
     private ContextEditorPanel contextEditorPanel;
+
+    @Getter
     private ContextEditorPanelCtrl contextEditorPanelCtrl;
+    private AiInputOutputPanel aiInputOutputPanel;
+    @Getter
+    private AiInputOutputPanelCtrl aiInputOutputPanelCtrl;
 
 
     public AiPlaygroundWindow(IniFile iniFile)
@@ -61,8 +54,6 @@ public class AiPlaygroundWindow extends JFrame {
         initializeView();
 
         setFontSizes(FONTSIZE);
-
-
 
         decorator = new GuiDecorator(this, myIniFile,"Einstellungen");
 
@@ -78,21 +69,21 @@ public class AiPlaygroundWindow extends JFrame {
 
     private void setFontSizes(int fontSize) {
         FontUtil.setMonospaceFont(fontSize,
-                getTextPaneInput(),
+                aiInputOutputPanel.getTextPaneInput(),
+                aiInputOutputPanel.getTextPaneOutput(),
+                aiInputOutputPanel.getTextFieldInputPraefix(),
                 getTreePanel(),
-                getTextFieldInputPraefix(),
-                getTextPaneOutput(),
-                statusBarOutputLabel
+                aiInputOutputPanel.getStatusBarOutputLabel()
         );
     }
 
     private void decorateMessagesInput() {
-        decorator.toolBars().setCurrentContainer(splitPanelMessages.getToolBar1Name());
+        decorator.toolBars().setCurrentContainer(aiInputOutputPanel.getSplitPanelMessages().getToolBar1Name());
         decorator.toolBars().addToolbarButton("Speichern Input", IC.MB_PLAY, (x)->{});
     }
 
     private void decorateMessagesOutput() {
-        decorator.toolBars().setCurrentContainer(splitPanelMessages.getToolBar2Name());
+        decorator.toolBars().setCurrentContainer(aiInputOutputPanel.getSplitPanelMessages().getToolBar2Name());
         decorator.toolBars().addToolbarButton("Speichern Output", IC.MB_PLAY, (x)->{});
     }
 
@@ -109,8 +100,8 @@ public class AiPlaygroundWindow extends JFrame {
         EventQueue.invokeLater(() -> {
             try {
                 // Dein existierender Code, vielleicht mit einem kleinen Delay, falls nötig
-                textPaneOutput.setText(answer);
-                textPaneOutput.setCaretPosition(0);
+                aiInputOutputPanel.getTextPaneOutput().setText(answer);
+                aiInputOutputPanel.getTextPaneOutput().setCaretPosition(0);
             } catch (Exception e) {
             }
         });
@@ -119,62 +110,84 @@ public class AiPlaygroundWindow extends JFrame {
 
     public String getNewInputString() {
         StringBuilder builder = new StringBuilder();
-        if (!StringExtensions.ebIsNilOrEmpty(textFieldInputPraefix.getText()))
-            builder.append(textFieldInputPraefix.getText()).append("\n");
-        builder.append(textPaneInput.getText());
+        if (!StringExtensions.ebIsNilOrEmpty(aiInputOutputPanel.getTextFieldInputPraefix().getText()))
+            builder.append(aiInputOutputPanel.getTextFieldInputPraefix().getText()).append("\n");
+        builder.append(aiInputOutputPanel.getTextPaneInput().getText());
         return builder.toString();
     }
 
     public String getInputString() {
-        return textPaneInput.getText();
+        return aiInputOutputPanel.getTextPaneInput().getText();
     }
 
-
-
     public void setInputText(String inputString2) {
-        textPaneInput.setText(inputString2);
+        aiInputOutputPanel.getTextPaneInput().setText(inputString2);
     }
 
 
     public void setInOutEnabled(boolean b) {
-        textPaneInput.setEnabled(b);
-        textPaneOutput.setEnabled(b);
-        splitPanelMessages.getToolBar1().setEnabled(b);
-        splitPanelMessages.getToolBar2().setEnabled(b);
+        aiInputOutputPanel.getTextPaneInput().setEnabled(b);
+        aiInputOutputPanel.getTextPaneOutput().setEnabled(b);
+        aiInputOutputPanel.getSplitPanelMessages().getToolBar1().setEnabled(b);
+        aiInputOutputPanel.getSplitPanelMessages().getToolBar2().setEnabled(b);
         splitPanelMain.getToolBar1().setEnabled(b);
         splitPanelMain.getToolBar2().setEnabled(b);
     }
 
     public void registerPersister(IComponentPersister persister) {
         persister.addComponentItem(getTextFieldInputPraefix(),"InputPraefix");
-        persister.addComponentItem(textPaneInput,"Input");
-        persister.addComponentItem(textPaneOutput,"Output");
+        persister.addComponentItem(aiInputOutputPanel.getTextPaneInput(),"Input");
+        persister.addComponentItem(aiInputOutputPanel.getTextPaneOutput(),"Output");
         persister.addComponentItem(splitPanelMain.getSplitPane(), "SplitPanelMain");
-        persister.addComponentItem(splitPanelMessages.getSplitPane(), "SplitPanelMessages");
-        persister.addComponentItem(splitPanelInput.getSplitPane(), "SplitPanelInput");
+        persister.addComponentItem(aiInputOutputPanel.getSplitPanelInput().getSplitPane(), "aiInputOutputPanel.getSplitPanelMessages()");
+        persister.addComponentItem(aiInputOutputPanel.getSplitPanelInput().getSplitPane(), "SplitPanelInput");
 
     }
 
     public void setInputPraefixText(String userString) {
-        textFieldInputPraefix.setText(userString);
+        aiInputOutputPanel.getTextFieldInputPraefix().setText(userString);
     }
 
     public ContextEditorPanelCtrl getContextEditorCtrl() {
         return contextEditorPanelCtrl;
     }
 
-    public void setInput(String s) {
-        List<String> parts = StringExtensions.ebSplit(s, ">>");
-        if (parts.size() > 1) {
-            setInputPraefixText(parts.get(0) + ">>");
-            setInputText(parts.get(1));
+    public void setInput(String sn) {
+
+        String s =
+                sn
+                        .replace("<user>\n","")
+                        .replace("<system>\n","")
+                        .replace("<assistant>\n","");
+
+
+        if (s.trim().startsWith("<<"))
+        {
+            setInputPraefixText(StringExtensions.ebSubstringBeforeFirst(s.trim(),">>") + ">>");
+            setInputText(StringExtensions.ebSubstringAfterFirst(s.trim(),">>"));
         }
-        else {
+        else
+        {
             setInputPraefixText("");
-            setInputText(parts.get(0));
+            setInputText(s);
         }
     }
 
+    public JTextPane getTextPaneInput() {
+        return aiInputOutputPanel.getTextPaneInput();
+    }
+
+    public JTextPane getTextPaneOutput() {
+        return aiInputOutputPanel.getTextPaneOutput();
+    }
+
+    public JTextPaneAdapter getTextPaneAdapterOutput() {
+        return aiInputOutputPanel.getTextPaneAdapterOutput();
+    }
+
+    public JLabel getStatusBarOutputLabel() {
+        return aiInputOutputPanel.getStatusBarOutputLabel();
+    }
 
     public class PanelWithToolBar {
         @Getter
@@ -198,14 +211,14 @@ public class AiPlaygroundWindow extends JFrame {
     public PanelWithToolBar getPanelWithToolBarInput()
     {
         if (panelWithToolBarInput == null)
-            panelWithToolBarInput = new PanelWithToolBar(splitPanelMessages.getPanel1(), splitPanelMessages.getToolBar1());
+            panelWithToolBarInput = new PanelWithToolBar(aiInputOutputPanel.getSplitPanelMessages().getPanel1(), aiInputOutputPanel.getSplitPanelMessages().getToolBar1());
         return panelWithToolBarInput;
     }
 
     public PanelWithToolBar getPanelWithToolBarOutput()
     {
         if (panelWithToolBarOutput == null)
-            panelWithToolBarOutput = new PanelWithToolBar(splitPanelMessages.getPanel2(), splitPanelMessages.getToolBar2());
+            panelWithToolBarOutput = new PanelWithToolBar(aiInputOutputPanel.getSplitPanelMessages().getPanel2(), aiInputOutputPanel.getSplitPanelMessages().getToolBar2());
         return panelWithToolBarOutput;
     }
 
@@ -244,57 +257,30 @@ public class AiPlaygroundWindow extends JFrame {
         setJMenuBar(menuBar);
     }
 
+    public AiInputOutputPanel getAiInputOutputPanel()
+    {
+        if (aiInputOutputPanel == null)
+        {
+            aiInputOutputPanel = new AiInputOutputPanel();
+            aiInputOutputPanelCtrl = new AiInputOutputPanelCtrl(aiInputOutputPanel);
+        }
+        return aiInputOutputPanel;
+    }
+
     private void createAndAddSplitPanelMain() {
 
-        textPaneInput = new JTextPane();
-        textPaneOutput = new JTextPane();
-
-        scrollPaneInputText = new JScrollPane(textPaneInput);
-        JScrollPane scrollPaneOutput = new JScrollPane(textPaneOutput);
-        textPaneAdapterOutput = new JTextPaneAdapter(scrollPaneOutput, textPaneOutput);
-
-        UndoDecorator.registerForTextArea(getTextPaneInput());
-        UndoDecorator.registerForTextArea(getTextPaneOutput());
 
 
-        splitPanelInput = new EbSplitPanel("splitPanelInput", getScrollPaneInputPraefix(), scrollPaneInputText, 0);
-
-        JPanel jPanelOutputAndStatus = new JPanel(new BorderLayout());
-        jPanelOutputAndStatus.add(scrollPaneOutput, BorderLayout.CENTER);
-        statusBarOutputLabel = new JLabel();
-        statusBarOutputLabel.setText("Status");
-        jPanelOutputAndStatus.add(statusBarOutputLabel, BorderLayout.SOUTH);
-
-        splitPanelMessages = new EbSplitPanel("MessageSplitter", splitPanelInput.getMainPanel(), jPanelOutputAndStatus, JSplitPane.VERTICAL_SPLIT);
-        splitPanelMessages.setDividerLocation(200);
-
-        //jPanelMessage.add(splitPanelMessages.getMainPanel(), BorderLayout.CENTER);
-
-
-        // Create the SplitPanem vor Auswahl and Messages
-        splitPanelMain = new EbSplitPanel("MainSplitter", getContextEditorPanel() , splitPanelMessages.getMainPanel(), JSplitPane.HORIZONTAL_SPLIT);
+        splitPanelMain = new EbSplitPanel("MainSplitter", getContextEditorPanel() , getAiInputOutputPanel(), JSplitPane.HORIZONTAL_SPLIT);
         toolbarTreePanelName = splitPanelMain.getToolBar1Name();
 
         add(splitPanelMain.getMainPanel(), BorderLayout.CENTER);
 
         splitPanelMain.getToolBar2().setVisible(false);
-
-    }
-
-    private JScrollPane getScrollPaneInputPraefix() {
-        if (scrollPaneInputPraefix==null) {
-            scrollPaneInputPraefix = new JScrollPane(getTextFieldInputPraefix());
-        }
-        return scrollPaneInputPraefix;
     }
 
     private JTextPane getTextFieldInputPraefix() {
-        if (textFieldInputPraefix == null) {
-            textFieldInputPraefix = new JTextPane();
-
-            textFieldInputPraefix.setText("Übersetze ins Deutsche:");
-        }
-        return textFieldInputPraefix;
+        return aiInputOutputPanel.getTextPaneInput();
     }
 
     private JComponent getContextEditorPanel() {

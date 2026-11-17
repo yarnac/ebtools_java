@@ -27,8 +27,6 @@ public class ContextEditorPanelCtrl {
     private Predicate<String> filter;
     private final ContextManager contextManager;
 
-
-    private List<ContextWithFiles> contextList;
     @Setter
     private Consumer<String> promptConsumer;
     @Setter
@@ -42,20 +40,11 @@ public class ContextEditorPanelCtrl {
         contextTreePanel = contextEditorPanel.getContextTreePanel();
         contextEditDetailsPanel = contextEditorPanel.getContextEditDetailsPanel();
         registerEvents();
+        decorate();
         setContextList(AiContextProvider.getAvailableContexts());
     }
 
-
-
-    public void setContextList(List<ContextWithFiles> contextList)
-    {
-        contextEditorPanel.getContextTreePanel().setContextList(contextList);
-    }
-
-
-    public void registerEvents() {
-        contextEditorPanel.registerEvents();
-
+    private void decorate() {
         toolBars = new GuiDecoratorToolBars();
         toolBars.addContainer("mainToolBar", contextEditorPanel.getSplitPane().getToolBar1());
 
@@ -71,6 +60,22 @@ public class ContextEditorPanelCtrl {
         toolBars.addToolbarButton("Get Output", ICF.MediaButtonPlayGreen, this::setOutputContent);
         toolBars.addToolbarButton("Export Prompt", ICF.BlankDocument_Export, this::exportPrompt);
         toolBars.addToolbarButton("Export Output", ICF.TextDocument_Export, this::exportOutput);
+    }
+
+
+    public void setContextList(List<ContextWithFiles> contextList)
+    {
+        contextEditorPanel.getContextTreePanel().setContextList(contextList);
+    }
+
+    public List<ContextWithFiles> getContextList()
+    {
+        return contextEditorPanel.getContextTreePanel().getContextList();
+    }
+
+
+    public void registerEvents() {
+        contextEditorPanel.registerEvents();
     }
 
     private void exportOutput(ActionEvent actionEvent) {
@@ -113,7 +118,7 @@ public class ContextEditorPanelCtrl {
         ContextWithFiles selectedContext = contextTreePanel.getSelectedContext();
         if (selectedContext == null)
             return;
-        contextList.remove(selectedContext);
+        getContextList().remove(selectedContext);
         saveContextList();
         contextTreePanel.rebuildTree();
         contextEditDetailsPanel.undo();
@@ -128,11 +133,16 @@ public class ContextEditorPanelCtrl {
     }
 
     public void createNewContext() {
+
         ContextWithFiles selectedContext = contextEditorPanel.getContextTreePanel().getSelectedContext();
-        if (selectedContext == null)
-            return;
+        if (selectedContext == null) {
+            selectedContext = contextTreePanel.getLastSelectedNodeContext();
+            if (selectedContext == null) {
+                return;
+            }
+        }
         ContextWithFiles newContext = new ContextWithFiles("Neuer Knoten", selectedContext.getKnoten(), "");
-        contextList.add(newContext);
+        getContextList().add(newContext);
         contextTreePanel.rebuildTree();
         contextTreePanel.setSelectedContext(newContext);
         filterContexts();
@@ -140,7 +150,7 @@ public class ContextEditorPanelCtrl {
 
     private void filterContexts() {
         if (filter!=null)
-            contextTreePanel.setContextList(contextList.stream().filter(x->filter.test(x.getKnoten())).toList());
+            contextTreePanel.setContextList(getContextList().stream().filter(x->filter.test(x.getKnoten())).toList());
     }
 
     private void setFilter() {
