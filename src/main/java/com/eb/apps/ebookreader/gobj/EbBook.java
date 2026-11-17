@@ -2,6 +2,7 @@ package com.eb.apps.ebookreader.gobj;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.logging.Logger;
 
 import com.eb.base.io.FileUtil;
 import com.eb.apps.ebwoerterbuch.gobj.WoerterbuchSession;
@@ -12,6 +13,7 @@ public class EbBook {
 	private ArrayList<Chapter> chapters;
 	private String fileName;
 	private WoerterbuchSession woerterbuchSession;
+	Logger logger = Logger.getLogger(EbBook.class.getName());
 	
 	public class Chapter
 	{
@@ -98,8 +100,7 @@ public class EbBook {
 			oldChapter.setEnde(text.length());
 			
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.info(e.getMessage());
 		}
 	}
 

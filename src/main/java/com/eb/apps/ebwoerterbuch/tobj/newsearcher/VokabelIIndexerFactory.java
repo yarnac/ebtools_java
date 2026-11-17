@@ -59,10 +59,11 @@ public class VokabelIIndexerFactory {
 	{
 		return str.length()< 3 ? str : str.substring(0, 3);
 	}
-	
+
+	/* Für einen Index für endsWith? */
 	private static String reverse(String getUnifiedWort) {
-		// TODO Auto-generated method stub
-		StringBuffer strb = new StringBuffer();
+
+		StringBuilder strb = new StringBuilder();
 		for (int i=getUnifiedWort.length()-1;i>=0;i--)
 			strb.append(getUnifiedWort.charAt(i));
 		return strb.toString();	

@@ -335,7 +335,7 @@ public class WbPanelCtrl {
 			
 			@Override
 			public void run() {
-				// TODO Auto-generated method stub
+
 				pushWort(w);
 				
 				if (getRequestFocusActionListener() != null)

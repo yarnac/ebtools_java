@@ -114,7 +114,7 @@ public class DoubleFinderPanelCtrl extends AbstrPanelCtrl {
 		try {
 			Thread.sleep(1000);
 		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
+
 			e.printStackTrace();
 		}
 		if (getOnActivate()!=null)
@@ -229,7 +229,7 @@ public class DoubleFinderPanelCtrl extends AbstrPanelCtrl {
 		try {
 			//Thread.currentThread().sleep(1000);
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
+
 			e.printStackTrace();
 		}
 	}

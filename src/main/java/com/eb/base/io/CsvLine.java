@@ -16,13 +16,13 @@ public class CsvLine {
 		file = line2.file;
 	}
 	public CsvLine() {
-		// TODO Auto-generated constructor stub
+
 	}
 	
 	 
 	@Override
 	public String toString() {
-		// TODO Auto-generated method stub
+
 		return getLine();
 	}
 	

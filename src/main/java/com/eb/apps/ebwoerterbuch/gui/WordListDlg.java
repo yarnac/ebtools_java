@@ -64,25 +64,12 @@ public class WordListDlg extends JFrame {
 		clipboardAdapter = new ClipboardAdapter();
 		
 		getLstWords().addListSelectionListener(x->wordSelected(x));
-		
-		decorate();
-	}
-	
-	public void doNothing() {
-		// TODO Auto-generated method stub		
 	}
 
 	private void wordSelected(ListSelectionEvent x) {
 		if (getLstWords().getSelectedValue()!=null)			
 			clipboardAdapter.setClipboardText(getLstWords().getSelectedValue());
 	}
-
-	private void decorate() {
-		// TODO Auto-generated method stub
-		
-	}
-
-
 
 	private void initForm() {
 		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);

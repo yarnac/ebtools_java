@@ -231,7 +231,6 @@ public class WbPanelView extends JPanel {
 
 			
 	public void setWort(String str) {
-		// TODO eb 5.5 2017 Auto-generated method stub
 		edWort.setText(str);
 	}
 	

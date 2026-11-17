@@ -60,7 +60,7 @@ public class WoerterbuchManager {
 	}
 	
 	private String getWoerterbuchFileName(String aktSprache) {
-		// TODO Auto-generated method stub
+
 		String fn = getFileName(aktSprache+"_Deutsch.txt");
 		if (new File(fn).exists())
 			return fn;

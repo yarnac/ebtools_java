@@ -80,7 +80,7 @@ public class DictionarySearchStrategyFactory
 	}
 	
 	private static String reverse(String getUnifiedWort) {
-		// TODO Auto-generated method stub
+
 		StringBuffer strb = new StringBuffer();
 		for (int i=getUnifiedWort.length()-1;i>=0;i--)
 			strb.append(getUnifiedWort.charAt(i));

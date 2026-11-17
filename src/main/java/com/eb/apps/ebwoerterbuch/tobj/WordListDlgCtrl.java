@@ -25,7 +25,6 @@ public class WordListDlgCtrl {
 		setDecorator(view.getGuiDecorator());
 		decorate();
 		setWoerter(list);
-		// TODO Auto-generated constructor stub
 	}
 	private void decorate() {
 
@@ -34,16 +33,15 @@ public class WordListDlgCtrl {
 		decorator.toolBars().addToolbarButton("Delete", IC.DELETE_RED, x->deleteWord());
 		decorator.toolBars().addToolbarButton("Save Add", IC.SAVE_ADD, x->save());
 	}
-	private Object save() {
-		// TODO Auto-generated method stub
-		return null;
+	private void save() {
+
 	}
+
 	private void deleteWord() {
 		String word = view.getLstWords().getSelectedValue();
 		DefaultListModel<String> model = (DefaultListModel<String>) view.getLstWords().getModel();
 		model.removeElement(word);
 		woerter.remove(word);
-		
 	}
 	private void topMostChanged() {
 		view.setAlwaysOnTop(btnTopMost.isSelected());
