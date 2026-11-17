@@ -79,12 +79,10 @@ public class WbAppWindow {
 	}
 
 	public JFrame getFrame() {
-		// TODO eb 5.5 2017 Auto-generated method stub
 		return frmWrterbuch;
 	}
 
 	public WbPanelView getWoerterbuchPanel() {
-		// TODO eb 5.5 2017 Auto-generated method stub
 		return woerterbuchPanel;
 	}
 

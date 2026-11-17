@@ -21,45 +21,28 @@ public class Woerterbuch {
 	private WbDirection wbDirection;
 	private static List<IDictionarySearchStrategy<Vokabel>> allSearcher;
 		
-	
-	
-	 public Woerterbuch(String string) {
-		// TODO Auto-generated constructor stub
-	}
-	 
+
 	 public Woerterbuch() {
-			// TODO Auto-generated constructor stub
-		}
+
+	 }
 	 
 	public void save() {
 		 save("[A->B]", getVokabelnAnachB());
 	 }
-	 
-	 private void save(String string, VokabelListe vokabeln) {
-		
-		 List<Vokabel> vList = vokabeln.getVokabeln();				 
-		 vList.sort((a,b)->a.getWort().compareTo(b.getWort()));		 
-		 List<String> list = vList.stream(). map( x->getLine(x) ) .collect(Collectors.toList());				 				 				 			
+
+	private void save(String string, VokabelListe vokabeln) {
+
+		 List<Vokabel> vList = vokabeln.getVokabeln();
+		 vList.sort((a, b) -> a.getWort().compareTo(b.getWort()));
+		 List<String> list = vList.stream().map(x -> getLine(x)).collect(Collectors.toList());
 		 iniFile.setSectionValues(string, list);
 		 iniFile.Write();
 	}
 
 	
 	private String getLine(Vokabel v)
-	 {
-		StringBuilder strb = new StringBuilder();
-		strb.append(v.getWort());
-		strb.append('\t');
-		strb.append(v.getUnifiedWort());
-		strb.append('\t');
-		for (String bed : v.getBedeutungen()) {
-			strb.append(bed);
-			strb.append('\t');
-			
-		}
-		String res = strb.toString().trim();
-		
-		return res;
+	{
+		return "%s\t%s\t%s".formatted(v.getWort(), v.getUnifiedWort(),String.join("\t", v.getBedeutungen())).trim();
 	 }
 	
 	public static Woerterbuch LoadStdWoerterbuch(String newfileName)

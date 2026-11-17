@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.logging.Logger;
 
 public class ConverterBook  {
 
@@ -37,8 +38,7 @@ public class ConverterBook  {
 			FileUtil.WriteLines("UTF8",LISBOA_OUT, readLines);
 			
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			Logger.getLogger(ConverterBook.class.getName()).warning(e.getMessage());
 		}
 		
 	

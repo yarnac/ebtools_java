@@ -31,13 +31,12 @@ public class ClipboardAdapter implements ClipboardOwner {
 	}
 		
 	public ClipboardAdapter() {
-		// TODO Auto-generated constructor stub
+
 	}
 
 	String oldtext;
 	private void Initialize() {
-		// TODO eb 5.5 2017 Auto-generated method stub
-			
+
 		while(true)
 		{
 			try {
@@ -80,13 +79,11 @@ public class ClipboardAdapter implements ClipboardOwner {
 			
 			@Override
 			public DataFlavor[] getTransferDataFlavors() {
-				// TODO Auto-generated method stub
 				return new DataFlavor[]{DataFlavor.stringFlavor};
 			}
 			
 			@Override
 			public Object getTransferData(DataFlavor flavor) throws UnsupportedFlavorException, IOException {
-				// TODO Auto-generated method stub
 				return text;
 			}
 		};
@@ -95,8 +92,7 @@ public class ClipboardAdapter implements ClipboardOwner {
 	}
 	
 	private String getTextFromClipboard() {
-		// TODO eb 5.5 2017 Auto-generated method stub
-		try {			
+		try {
 			String data = (String) Toolkit.getDefaultToolkit().getSystemClipboard().getData(DataFlavor.stringFlavor);
 			if (data==null)
 				return "";
@@ -104,8 +100,6 @@ public class ClipboardAdapter implements ClipboardOwner {
 			return data.trim();
 		}
 		catch (HeadlessException e) {
-			// TODO eb 5.5 2017 eventuell cleanup
-			
 		}
 		catch (UnsupportedFlavorException e) { 
 		}
@@ -128,8 +122,6 @@ public class ClipboardAdapter implements ClipboardOwner {
 
 	@Override
 	public void lostOwnership(Clipboard clipboard, Transferable contents) {
-		// TODO Auto-generated method stub
-		
 	}
 
 }

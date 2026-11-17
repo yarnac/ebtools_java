@@ -149,7 +149,7 @@ public class ShowCryptedFileDlg extends JFrame {
 	}
 
 	private void save() {
-		// TODO Auto-generated method stub
+
 		String fileName = EbAppContext.getJavaDataFilename(coreFileName);
 		Crypt.saveEncryptedFile(fileName, passwort, getTextArea().getText());
 		originalText = getTextArea().getText();
@@ -178,7 +178,6 @@ public class ShowCryptedFileDlg extends JFrame {
 			originalText = getTextArea().getText();
 			getTextArea().setCaretPosition(0);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			getTextArea().setText("nicht entschlüsselt");
 		}
 	}

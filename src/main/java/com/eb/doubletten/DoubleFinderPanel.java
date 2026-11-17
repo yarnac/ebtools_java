@@ -2,10 +2,7 @@ package com.eb.doubletten;
 
 import java.awt.Color;
 import java.awt.Dimension;
-import java.awt.event.ComponentEvent;
-import java.awt.event.ComponentListener;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
+import java.awt.event.*;
 import java.io.Serial;
 import java.util.function.Consumer;
 
@@ -41,13 +38,13 @@ public class DoubleFinderPanel extends JPanel {
 	
 	@Override
 	public Dimension getMinimumSize() {
-		// TODO Auto-generated method stub
+
 		return new Dimension(300, 20);
 	}
 	
 	@Override
 	public Dimension getPreferredSize() {
-		// TODO Auto-generated method stub
+
 		if (getParent()!=null)
 			return new Dimension(200, getParent().getHeight());
 		return new Dimension(300, 600);
@@ -55,7 +52,7 @@ public class DoubleFinderPanel extends JPanel {
 	
 	@Override
 	public Dimension getMaximumSize() {
-		// TODO Auto-generated method stub
+
 		return new Dimension(1000,  1000);
 	}
 
@@ -98,31 +95,16 @@ public class DoubleFinderPanel extends JPanel {
 		GuiDecorator decorator = new GuiDecorator();
 		decorator.toolBars().addContainer("main", getToolBar());
 		
-		this.addComponentListener(new ComponentListener() {
+		this.addComponentListener(new ComponentAdapter() {
 			
 			@Override
 			public void componentShown(ComponentEvent e) {
-				// TODO Auto-generated method stub
 				setSize(getSize());
 			}
 			
 			@Override
 			public void componentResized(ComponentEvent e) {
-				// TODO Auto-generated method stub
 				setSize(getSize());
-				
-			}
-			
-			@Override
-			public void componentMoved(ComponentEvent e) {
-				// TODO Auto-generated method stub
-				
-			}
-			
-			@Override
-			public void componentHidden(ComponentEvent e) {
-				// TODO Auto-generated method stub
-				
 			}
 		});
 	}
@@ -140,16 +122,14 @@ public class DoubleFinderPanel extends JPanel {
 
 	@Override
 	public void setSize(int width, int height) {
-		// TODO Auto-generated method stub
+
 		super.setSize(width, height);
 		comboBox.setSize(width-10, comboBox.getHeight());
 		scrollPane.setSize(width-10, height-40-30);
-		
 	}
 	
 	@Override
 	public void setSize(Dimension d) {
-		// TODO Auto-generated method stub
 		super.setSize(d);
 	}
 
@@ -214,46 +194,21 @@ public class DoubleFinderPanel extends JPanel {
 	}
 	
 	private KeyListener getDoublettenKeyActions(Consumer<KeyEvent> consumer) {
-		return new KeyListener() {
+		return new KeyAdapter() {
 			
 			@Override
 			public void keyTyped(KeyEvent e) {
 				consumer.accept(e);
 				
 			}
-			
-			@Override
-			public void keyReleased(KeyEvent e) {
-				// TODO Auto-generated method stub
-				
-			}
-			
-			@Override
-			public void keyPressed(KeyEvent e) {
-				// TODO Auto-generated method stub
-				
-			}
 		};
 	}
 
 	private KeyListener getTextFieldKeysAction(Consumer<KeyEvent> consumer) {
-		return new  KeyListener() {
-			
-			@Override
-			public void keyTyped(KeyEvent e) {
-				// TODO Auto-generated method stub
-				
-			}
-			
-			@Override
-			public void keyReleased(KeyEvent e) {
-				// TODO Auto-generated method stub
-				
-			}
-			
+		return new  KeyAdapter() {
 			@Override
 			public void keyPressed(KeyEvent e) {
-				// TODO Auto-generated method stub
+
 				if (e.getKeyCode()==10)
 					consumer.accept(e);
 				

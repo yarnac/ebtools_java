@@ -25,40 +25,20 @@ public class Vokabel {
 				
 	}
 
-	public Vokabel() {
-		// TODO Auto-generated constructor stub
-	}
-	
+	public Vokabel(){}
+
 	@Override
 	public String toString() {
 		return getWort();
 	}
 
-	
-	
-	public String toStringBU() {
-		StringBuffer strb = new StringBuffer();
-		strb.append(super.toString() +" " + wort + " ");
-		for (String string : bedeutungen) {
-			
-			strb.append(string + " ");
-		}
-		return strb.toString();
-	}
-	
 	public String toStringCrypt()
 	{
 		StringBuffer strb = new StringBuffer();
 		strb.append(wort);
 		strb.append(": ");
-		int i=0;
-		for (String s : bedeutungen) {
-			if (i++>0)
-				strb.append(", ");
-			strb.append(s);			
-		}
+		strb.append(String.join(", ", getBedeutungen()));
 		return strb.toString();
-		
 	}
 
 	public String getUnifiedWort() {
@@ -134,19 +114,11 @@ public class Vokabel {
 	
 	public List<Vokabel> getReverse()
 	{
-
-		List<Vokabel> res = new ArrayList<Vokabel>();
-		for (String string : bedeutungen) {
-			Vokabel n = new Vokabel();
-			n.setWort(string);
-			n.addBedeutung(getWort());
-			res.add(n);
-		};
-		return res ;
+		return bedeutungen.stream().map(bedeutung -> new Vokabel(bedeutung, List.of(wort))).toList();
 	}
 
 	public boolean isSameVokabel(Vokabel element2) {
-		// TODO Auto-generated method stub
+
 		return getWort().equals(element2.getWort());
 	}
 

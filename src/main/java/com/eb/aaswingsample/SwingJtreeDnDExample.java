@@ -14,7 +14,7 @@ public class SwingJtreeDnDExample {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		// TODO Auto-generated method stub
+
 		Runnable runnable = new Runnable(){
 			public void run(){
 				JFrame frame = new SwingDnDExampleFrame();

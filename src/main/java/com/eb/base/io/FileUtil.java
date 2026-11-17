@@ -139,7 +139,6 @@ public class FileUtil {
 			Desktop.getDesktop().open(new File(address)); 			
 		}
 		catch (IOException e) {
-			// TODO eb 5.5 2017 eventuell cleanup
 			out.println(e.getLocalizedMessage());
 		}		
 	}
@@ -150,7 +149,6 @@ public class FileUtil {
 			Runtime.getRuntime().exec(name); 			
 		}
 		catch (IOException e) {
-			// TODO eb 5.5 2017 eventuell cleanup
 			out.println(e.getLocalizedMessage());
 		}		
 	}
@@ -164,7 +162,6 @@ public class FileUtil {
 			Desktop.getDesktop().browse(new URI(address.replace(" ", "+"))); 			
 		}
 		catch (IOException e) {
-			// TODO eb 5.5 2017 eventuell cleanup
 			out.println(e.getLocalizedMessage());
 		} 
 		catch (URISyntaxException e) {

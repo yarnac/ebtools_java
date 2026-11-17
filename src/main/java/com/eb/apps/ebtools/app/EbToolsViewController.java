@@ -44,7 +44,6 @@ public class EbToolsViewController {
 
 		addToolbarButtons();
 		addMenus();
-		registerEvents();
 
 		tvPlayerCtrl = initTvPlayerCtrl();
 	}
@@ -55,11 +54,6 @@ public class EbToolsViewController {
 				view.getTvPanel());
 
 		return controller;
-	}
-
-	private void registerEvents() {
-		// TODO: Implement actual event handlers
-		// Example: view.addActionListener(e -> handleAction(e));
 	}
 
 	private void addMenus() {
