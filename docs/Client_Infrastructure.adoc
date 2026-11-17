@@ -1,0 +1,59 @@
+# LLM Client Infrastruktur Dokumentation
+
+== Übersicht
+Dieses Dokument beschreibt die Architektur, die Paketstruktur und die Kernfunktionen der `llm_client.infrastructure`-Paketgruppe im Java-Projekt `ebtools`. Der Fokus liegt auf der abstrakten Client-Schicht, dem dynamischen Laden von Modellen, dem provider-spezifischen JSON-Mapping sowie dem Token- und Zeit-Logging.
+
+== Paketstruktur & Komponenten
+|===
+| Paket / Klasse | Verantwortlichkeit
+| com.eb.base.ai_service.llm_client.infrastructure | Stammpaket für Client-Infrastruktur und Schnittstellen
+| com.eb.base.ai_service.llm_client.infrastructure.contentmapping | Serialisierung, Content-Parts und providerunabhängige JSON-Erstellung
+| com.eb.base.ai_service.llm_client.infrastructure.anthropic | Anthropic-spezifische Client-, Response- und Mapping-Klassen
+| com.eb.base.ai_service.llm_client.infrastructure.ollama | Ollama-spezifische Client-, Response- und Mapping-Klassen
+| com.eb.base.ai_service.llm_client.infrastructure.openai | OpenAI-spezifische Client-, Response- und Mapping-Klassen
+|===
+
+== Kernarchitektur & Klassenbeschreibungen
+
+=== ILlmClient (Schnittstelle)
+Die Schnittstelle `ILlmClient` definiert den zwingenden Vertrag für alle LLM-Provider-Clients. Sie erwartet eine `LlmRequest`, gibt ein `LlmResponse` zurück und warft `IOException` sowie `InterruptedException`. Alle konkreten Clients implementieren diesen Vertrag, um austauschbar innerhalb der Anwendung verwaltet werden zu können.
+
+=== LlmModelProvider (Modell-Verwaltung)
+Der `LlmModelProvider` fungiert als Singleton-Zugriffspunkt auf die konfigurierten LLM-Modelle. Im Konstruktor wird die Datei `AiServices/Modelle.txt` eingelesen und zeilenweise parst (Trennzeichen: Tabulator). Jeder gültige Eintrag wird in ein `LlmModel`-Objekt konvertiert. Zusätzlich bietet die Klasse Methoden zur Validierung von Parametern (`isAllowedParameter`) und zur dynamischen Modellabfrage (`getModel`, `findModel`).
+
+=== LlmClientFactory (Client-Fabrik)
+Die Fabrik `LlmClientFactory` entscheidet basierend auf dem Modellnamen (`model.isAnthropic()`, `.isOpenAi()`, `.isOllama()`) welches konkrete `ILlmClient`-Objekt instanziiert wird. API-Schlüssel für Anthropic und OpenAI werden lazy über `loadKeys()` geladen und mittels `Twofish_Crypter` entschlüsselt.
+
+=== TokenLogger (Protokollierung)
+`TokenLogger.log()` schreibt strukturierte Logzeilen in eine konfigurierte Datei. Pro Zeile werden Modellname, Input/Output/Total Tokens, Ausführungszeit in Sekunden und Tokens pro Sekunde protokolliert. Dateizugriffe erfolgen im Append-Modus mit UTF-8-Encoding und fehlende Pfade werden stillschweigend ignoriert (Exception wird nicht geworfen).
+
+=== ContentMapping-Paket (JSON-Serialisierung)
+Das Paket `contentmapping` kapselt die providerabhängige Transformation von `LlmMessage`-Strukturen in das jeweils erwartete JSON-Format:
+- `ContentPart`: Sealed Interface mit den Permits `ContentPartText` und `ContentPartImage`.
+- `ContentPartToMapMapper`: Schnittstelle, die von jedem Provider implementiert wird. Definiert `map()`, `getContentIdentifier()` und optionale Default-Methoden (`shouldSendSystemSeparately`, `replaceFileNamesWithFileContents`).
+- `LlmRequestJsonMapper`: Kombiniert die Messages, wendet den Mapper an, hängt Parameter an und serialisiert alles zu einem gültigen JSON-String.
+- `JsonFileAppendUtil`: Ersetzt spezielle Marker (`<$ `, `<$D `, `<$DA `, `<$P `) durch tatsächliche Dateiinhalte oder Verzeichnisauflistungen. Enthält Sicherheitschecks zur Pfadvalidierung und Caching für Performance.
+
+=== Provider-spezifische Clients
+- **AnthropicClient**: Sendet Requests an `api.anthropic.com/v1/messages`. Setzt standardmäßig `max_tokens` auf 20000. Nutzt `ContentPartMapperAnthropic`, der Bilder als nested `source`-Objekte formatiert. System-Nachrichten werden separat extrahiert.
+- **OpenAiClient**: Sendet Requests an `api.openai.com/v1/responses`. Parsen die Response nach `Output` vom Typ `message`. Extrahiert den Textinhalt und mappet ihn auf `LlmResponse`. Nutzt `ContentPartMapperOpenAi`, der Input/Output-Typen unterscheidet.
+- **OllamaClient**: Sendet Requests an `http://<HOST>:11434/v1/chat/completions`. Extrahiert die Antwort aus `choices[0].message.content`. Ignoriert Token-Counts für Input/Output, liest nur `total_tokens` und loggt Timing.
+
+== Wichtige Hinweise zur Host-Ermittlung (Ollama)
+Die Methode `OllamaClient.determineHost()` arbeitet gemäß aktueller Implementierung stabil und wie vorgesehen. Sie iteriert über die statische Liste `HOSTS`, führt asynchrone Verfügbarkeitsprüfungen via `CheckNetworkService.isOllamaAvailableAsync` durch und speichert den ersten erfolgreichen Host im statischen Feld `HOST`. Die aktuelle Logik (inklusive der asynchronen Natur und der Rückgabe von `HOST`) ist funktional und wurde nicht angepasst, wie explizit angefordert.
+
+== Methoden- & Parameter-Tabelle
+|===
+| Methode / Eigenschaft | Beschreibung
+| ILlmClient.sendRequest | Sendet eine LLM-Anfrage und gibt die Antwort mit Metadaten zurück
+| LlmModelProvider.readModels | Parst eine Konfigurationsdatei zeilenweise (Tabulator-getrennt)
+| LlmClientFactory.getLlmClient | Factory-Methode zur dynamischen Instanziierung des richtigen Providers
+| ContentPartToMapMapper.shouldSendSystemSeparately | Gibt an, ob Systemnachrichten im JSON separat übergeben werden müssen
+| JsonFileAppendUtil.appendDirectoryFiles | Ersetzt Verzeichnis-Marker durch Auflistung erlaubter Dateinamen
+| TokenLogger.appendLogMessage | Schreibt eine Logzeile anhängend in die Konfigurationsdatei
+|===
+
+== Zusammenfassung & Integrationshinweise
+Die Infrastruktur ist modular und providerneutral aufgebaut. Alle Clients folgen einem einheitlichen Muster: JSON-Konstruktion über Mapper, HTTP-Transfer, Response-Parsing via Jackson, Metadaten-Mapping auf `LlmResponse` und abschließendes Logging. Die Trennung der Mappings (`ContentPartMapper*`) ermöglicht eine saubere Erweiterung neuer Provider ohne Anpassung des Request-Pipes. Alle Dateioperationen sind abgesichert und nutzen Caching bzw. Validierung, um Security- und Performance-Anforderungen zu erfüllen.
+
+Das Dokument ist vollständig. Gib Bescheid, wenn du spezifische Abschnitte vertiefen, zusätzliche Tabellen generieren oder den Code in ein bestimmtes AsciiDoc-Template überführen möchtest.

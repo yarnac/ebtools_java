@@ -66,11 +66,10 @@ public class JasonFileContentProvider {
         }
 
         StringBuilder strb = new StringBuilder();
-        for(Codedatei codedateien1 : codedateien) {
-            strb.append("```json\n[");
-            strb.append(mapper.writeValueAsString(codedateien));
-            strb.append("]```\n");
-        }
+        strb.append("```json\n[");
+        strb.append(mapper.writeValueAsString(codedateien));
+        strb.append("]```\n");
+
         return strb.toString();
     }
 

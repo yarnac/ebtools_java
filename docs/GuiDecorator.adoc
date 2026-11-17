@@ -1,0 +1,115 @@
+
+= Gui-Dekorateure – Swing UI-Hilfsbibliothek
+
+== 1. Überblick & Architektur
+Dieses Dokument beschreibt die Klasse `com.eb.base.gui.decorator`, eine Sammlung von Hilfsklassen zur Abstraktion und Standardisierung typischer Swing-UI-Aufgaben. Die Komponenten verfolgen ein klares Dekoratoren- bzw. Utility-Muster, das wiederkehrende Boilerplate-Logik für Menüleisten, Symbolleisten (Toolbars), Fensterpersistenz und Event-Handling zentralisiert.
+
+**Kernziele:**
+
+* Vereinfachte, fließende Erstellung und Verwaltung von UI-Komponenten
+* Automatische Persistierung von Fensterstatus (Position & Größe) in INI-Dateien
+* Thread-sichere Integration von Event-Handlern in den AWT/Swing Dispatch Thread
+* Zentrale Caching-Strategien für Menüs und Toolbars
+
+== 2. Paketstruktur & Verantwortlichkeiten
+[cols="1,3"]
+|===
+|Klasse |Verantwortung
+|`GuiDecorator` |Orchestrierungsklasse: Initialisiert Menü-/Toolbar-Dekorateure, verwaltet UI-Events (Double-Click, KeyPress, Enter/Return), steuert den Lebenszyklus und die Persistenz.
+|`GuiPersister` |Zustandsspeicher: Lädt und speichert Fensterposition (`PosX`/`PosY`) und Größe (`SizeX`/`SizeY`) in einer INI-Konfigurationsdatei. Registert `WindowListener`.
+|`GuiDecoratorMenuBars` |Menüverwaltung: Erstellt, cacht und verwaltet `JMenuBar` und `JMenu`. Bietet Methoden zum Hinzufügen von Items, Checkboxen, Separatoren und Tastaturbeschleunigern (Accelerators).
+|`GuiDecoratorToolBars` |Toolbar-Management: Verwaltet `JToolBar`-Container dynamisch. Stellt Factory-Methoden für Buttons, Toggle-Buttons, Comboboxen, Progressbars und Separatoren bereit. Triggert automatisch Layout-Refreshes.
+|===
+
+== 3. Detaillierte Klassenbeschreibung
+
+=== GuiDecorator
+Zentrale Einstiegsklasse des Pakets. Dient als Facade für UI-Komponenten und Lebenszyklus-Events.
+
+* **Konstruktoren:**
+  * Leerer Konstruktor (ohne Frame/Panel)
+  * `GuiDecorator(JFrame)` / `GuiDecorator(JPanel)` initialisiert Tool-/MenuBars mit dem übergebenen Container
+  * `GuiDecorator(JFrame, IniFile, String)` integriert die INI-Persistenz und registriert einen `WindowAdapter`, der beim Schließen alle hinterlegten `closeActions` ausführt und das INI-File speichert.
+* **Event-Hook:**
+  + `addMouseDoubleClickAction(JComponent, Runnable)`: Registriert einen MouseListener für zwei Mausklicks.
+  + `addKeyPressAction(JComponent, String, Runnable)`: Nutzt `InputMap`/`ActionMap`, um beliebige Tastenkombinationen zu binden.
+  + `addOnEnterOrReturnPressed(JComponent, Runnable)`: Fängt `VK_ENTER` ab und triggert die Callback-Funktion.
+* **Helper:**
+  + `addCloseAction(Runnable)`: Speichert Aktionen für das Fenster-Schließen-Ereignis.
+  + `getImage(IC ic)` / `getImage(IC ic, int size)`: Lädt gecachte oder skalierter Grafiken aus dem `IC`-Interface.
+  + Methoden zum Öffnen von Dateien/INI-Konfigurationen über den Dateimanager des Systems.
+
+=== GuiPersister
+Statische Utility-Klasse zur Fensterstatus-Persistierung.
+
+* **`registerAndLoadStatus(JFrame, IniFile, String)`**: Startet den Persistenz-Zyklus für ein gegebenes Frame.
+* **`loadStatus(...)`**: Lädt `PosX`, `PosY`, `SizeX`, `SizeY` aus dem INI-Datei-Abschnitt und wendet sie auf das Frame an. Fällt auf übergebene Defaults zurück, wenn Werte fehlen.
+* **`saveStatus(...)`** & **`registerWindowEvents(...)`**: Registert einen `WindowListener`. Speichert den aktuellen Zustand bei `windowClosing` via `iniFile.Write()`.
+
+=== GuiDecoratorMenuBars
+Verwaltet strukturelle Menüelemente und deren Lifecycle.
+
+* **Caching:** Nutzt eine `Map<String, JMenu>` (`nameToMenuBarDictionary`), um doppelte Menu-Erstellungen zu vermeiden.
+* **Lazy Initialization:** `getMenuBar()` erstellt ein leeres `JMenuBar`, falls noch nicht vorhanden, und weist es dem Frame zu.
+* **Element-Verwaltung:**
+  + `addMenuItem(String menuString, String label, Runnable action)`: Fügt standard Items hinzu.
+  + `addJCheckBoxMenuItem(...)`: Analog für Checkboxen.
+  + `addMenuSeparator()`: Fügt visuelle Trennlinien hinzu.
+* **Accelerators:** Überladene Methoden akzeptieren `key` und `mask`, um Tastaturkürzel (`KeyStroke`) direkt an MenuItems zu binden. Nutzt `currentMenu` als kontextbezogenes Standard-Menü.
+
+=== GuiDecoratorToolBars
+Dynamisches Management von Symbolleisten-Containern.
+
+* **Container-Caching & -Auflösung:**
+  + `fetchContainer(String name)`: Prüft internes Mapping. Falls nicht vorhanden, durchsucht den Frame rekursiv nach existierenden `JToolBar`-Instanzen und registriert sie.
+  + `setCurrentContainer(String/Container)`: Legt das aktuelle Ziel für folgende Additionen fest.
+* **UI-Komponenten-Fabriken:**
+  + `addToolbarButton(...)`: Erzeugt Buttons mit Icons (`IC`/`ICF`), Tooltips und ActionListenern. Nutzt `SwingUtilities.invokeLater` für Thread-Sicherheit.
+  + `addToggleButton(...)`: Konfiguriert Buttons mit alternativem `SelectedIcon` und gibt den Selektionsstatus via `Consumer<Boolean>` zurück.
+  + `addToolbarComboBox(...)`: Erzeugt ComboBoxen aus `List<T>` oder `T[]`, setzt Standard-Fonts und leitet Selections weiter.
+  + `addToolbarProgressBar(String)` / `addToolbarSeparator()`: Stellt visuelle Progress-Bar und Separator dar.
+* **Auto-Layout:** `checkAndInvalidateContainerIfNecessary()` ruft nach jeder Komponentenerstellung automatisch `revalidate()` und `repaint()` auf, falls der Container keine native Toolbar ist.
+* **File/Browser Launch:** Spezielle Button-Methoden (`addOpenFileToolbarButton`) öffnen lokale Dateien oder URIs via `BrowserLaunch`.
+
+== 4. Wichtige Patterns & Best Practices
+* **Fluent/Builder-ähnliche API:** Alle Methoden sind void oder返回 referenzierte Objekte/Container, was kaskadierende Aufrufe und saubere Lesbarkeit ermöglicht.
+* **Event-Driven Architecture:** Event-Handler werden nicht inline im Event-Thread ausgeführt. Durchgängige Nutzung von `SwingUtilities.invokeLater()` gewährleistet thread-sichere UI-Aktionen auch bei asynchronen Calls.
+* **Lazy Caching & Idempotenz:** Menüs und Toolbars werden nur bei Bedarf instantiiert und in Maps gecacht. Mehrfaches Aufrufen führt nicht zu Duplikaten im Layout.
+* **Persistenz-Kopplung:** Die INI-Persistierung ist losgekoppelt, aber über `GuiPersister.registerAndLoadStatus()` einfach integrierbar. Status wird ausschließlich beim Schließen (`windowClosing`) gespeichert, um Write-Contention zu vermeiden.
+* **Typische Abhängigkeiten:** Verwendet externe Enums/Interfaces `IC` und `ICF` für Grafiken sowie `IniFile` für Konfigurationsmanagement.
+
+== 5. Typische Anwendung
+Der folgende Code-Ausschnitt demonstriert die typische Verknüpfung der Dekorateure:
+[source,java]
+----
+// 1. Frame erstellen & dekorieren
+JFrame frame = new JFrame("Meine App");
+GuiDecorator decorator = new GuiDecorator(frame, myIniFile, "AppSettings");
+
+// 2. Toolbars konfigurieren
+decorator.toolBars().setCurrentContainer("MainToolbar");
+decorator.toolBars()
+    .addToolbarButton("Speichern", IC.SAVE, e -> saveData())
+    .addOpenFileToolbarButton("Datei öffnen", IC.OPEN, "config.ini")
+    .addToolbarSeparator();
+
+// 3. Menüleiste aufbauen
+decorator.menuBars().setCurrentMenu("Hauptmenü");
+decorator.menuBars()
+    .addMenuItem("Aktion", () -> doSomething())
+    .addJCheckBoxMenuItem("Erweitert", e -> toggleAdvanced(), KeyEvent.VK_A, InputEvent.CTRL_MASK);
+
+// 4. Events & Lebenszyklus
+decorator.addMouseDoubleClickAction(myListPane, () -> openSelected());
+decorator.addCloseAction(() -> cleanupResources());
+frame.setVisible(true);
+----
+
+== 6. Hinweise & Limitationen
+* **Fehlende zentrale Konfiguration:** Die `IniFile` und die verwendeten Icon-Interfaces (`IC`, `ICF`) sind externe Abhängigkeiten und müssen im Projekt kontextualisiert sein.
+* **Methodenüberladung:** Ähnliche Signaturen (z.B. ComboBox für `List<T>` vs `T[]`) könnten zukünftig zur Reduktion von Code-Duplizierung konsolidiert werden.
+* **Layout-Refresh:** `checkAndInvalidateContainerIfNecessary()` verhindert unnötige Neuzeichnungen bei nativen `JToolBar`-Instanzen, erfordert aber korrekte Container-Typisierung seitens des Aufrufers.
+* **Thread-Sicherheit:** Alle UI-Manipulationen erfolgen innerhalb des AWT-Event-Threads via `invokeLater`. Asynchrone Datenaktualisierungen müssen daher über diesen Mechanismus gebunden werden.
+
+---
+*Dokument generiert auf Basis der Quelldateien aus `com.eb.base.gui.decorator`. Stand: Versionierung & API-Kontrakte entsprechen dem bereitgestellten Code.*

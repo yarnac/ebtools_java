@@ -1,0 +1,96 @@
+= LLM Client Service Dokumentation
+:doctype: book
+:toc: left
+
+== 1. Systemübersicht und Zweck
+
+Das vorliegende Modul implementiert eine modulare, provider-agnostische Schnittstelle für Large Language Models (LLMs). Es ermöglicht die Interaktion mit verschiedenen KI-Diensten (Ollama, OpenAI, Anthropic) über eine einheitliche Java-Schnittstelle. Der Code folgt einem klar strukturierten Architekturmuster, das Konfiguration, Builder-Pattern, Fabrikmuster, JSON-Mapping, Persistenz und Protokollierung trennt.
+
+Das System ist für folgende Anwendungsfälle ausgelegt:
+* Dynamisches Austauschen des Zielmodells zur Laufzeit
+* Unterstützung von Multi-Modal-Eingaben (Text und lokale Bilder im Base64-Format)
+* Sichere Speicherung von Anfragen und Token-Nutzungsstatistiken
+* Automatische Anpassung der JSON-Struktur an die spezifischen API-Anforderungen jedes Providers
+
+== 2. Architekturkomponenten
+
+[cols="1,3"]
+|===
+| Modul / Klasse | Funktionsbeschreibung
+| AiServiceConfig | Singleton zur Verwaltung von Konfigurationswerten aus einer INI-Datei (Modelle, Token-Pfade, Geheimnisse).
+| LlmRequestBuilder* | Fließender Builder zum schrittweisen Aufbau von LLMAntworten mit System-, User-Nachrichten und Parametern.
+| ILlmClient & Factory | Definiert die Vertrags-Schnittstelle zur API-Kommunikation. Die Factory wählt basierend auf dem Modellnamen den passenden Provider aus.
+| Ollama / Anthropic / OpenAi Client | Implementierungen der `ILlmClient`-Schnittstelle. Führen HTTP-Calls durch und parsen die jeweiligen JSON-Antworten.
+| Content Mapping | Konvertiert interne `ContentPart`-Objekte (Text/Bild) in das spezifische JSON-Format des Zielpartners.
+| LlmRequestManager | Verwaltet, speichert und lädt LLMAntworten verschlüsselt auf dem Dateisystem. Nutzt ein Singleton-Store-Pattern.
+| TokenLogger & CheckNetworkService | Protokolliert Token-Verbrauch und Antwortzeiten. Prüft die Erreichbarkeit von Ollama-Instanzen im lokalen Netzwerk.
+| Simple* Services | Beispielimplementierungen (Bildanalyse, Übersetzung, Wörterbuch) zur Demonstration der API-Nutzung.
+|===
+
+== 3. Detaillierte Klassenbeschreibung
+
+=== Konfiguration und Modellverwaltung
+`AiServiceConfig` liest eine INI-Datei (`AiServiceConfig.ini`) ein und stelltGetter bereit für Modelle, Token-Speicher und Geheimnis-Dateien. Die Struktur ist als Singleton ausgelegt und nutzt `IniFileProvider`.
+
+`LlmModelProvider` lädt eine tabellarische Modellliste aus einer Datei (`Modelle.txt`). Pro Zeile werden Company und ModelName getrennt. Der Provider bietet Methoden zur Validierung von Parametern (z.B. Temperatur nur bei nicht-OpenAI-Modellen) und zur schnellen Modellsuche.
+
+=== Fließender Baukasten (Builder Pattern)
+Der Aufbau einer Anfrage erfolgt über vier verknüpfte Interfaces, die eine typsichere, schrittweise Konfiguration erlauben:
+* `LlmRequestBuilderSystemOrUserMsg`: Definition von System-, User- oder Request-Nachrichten sowie Bildunterstützung.
+* `LlmRequestBuilderUserMsg`: Fortsetzung nach Nachrichtenfüllung, ermöglicht das Setzen des Modells.
+* `LlmRequestBuilderModel`: Definiert `setModel(String)`.
+* `LlmRequestBuilderFinish`: Schließt die Konstruktion ab (`build()`) und erlaubt das Hinzufügen von Parametern.
+
+Die konkrete Implementierung in `LlmRequestBuilder` sammelt alle Nachrichten in einer `List<LlmMessage>` und Parameter in einer `List<Parameter>`. Eine spezielle Feature `addRequestMsg` erkennt Marker `<< ... >>` und trennt automatisch eine Systemnachricht von der User-Nachricht.
+
+=== Client-Architektur und JSON-Mapping
+Das Herzstück bildet das Factory-Pattern. `LlmClientFactory.getLlmClient()` prüft die `company`-Eigenschaft des angefragten Modells und instanziiert entsprechend `AnthropicClient`, `OpenAiClient` oder `OllamaClient`.
+
+Jeder Client nutzt einen passgenauen Mapper (`ContentPartMapperX`), um den einheitlichen internen Zustand in das provider-spezifische JSON zu übersetzen:
+* **Anthropic**: Erwartet `messages` und eine separate `system`-Struktur. Bilder werden als Base64 im `source`-Objekt übergeben.
+* **OpenAI**: Nutzt das neue `v1/responses` Endpoint-Format mit `input` und `output_text`. Bilder folgen dem `image_url`-Schema.
+* **Ollama**: Kompatibel zum OpenAI-Compatible-Chat-Completions-Endpoint. Bilder werden als Data-URI embedded.
+
+Die tatsächliche HTTP-Anfrage wird über `java.net.http.HttpClient` durchgeführt. Die Antwort wird in ein einheitliches `LlmResponse`-Objekt gemappt, das Metadaten (Tokens, Dauer, Modell) sowie den reinen Antworttext enthält.
+
+=== Datenmodelle und Serialisierung
+`LlmRequest` speichert die Ziel-Konfiguration (`model`), eine Liste von Nachrichten und optionale Parameter. Es serialisiert via Jackson mit festgelegter Reihenfolge (`@JsonPropertyOrder`).
+
+`LlmMessage` unterstützt reine Textinhalte sowie Bilder aus lokalen Pfaden (automatische Base64-Kodierung). Das `contentParts`-Array enthält `ContentPartText` oder `ContentPartImage` Objekte, die durch Jackson-Stereotypen (`@JsonSubTypes`) sicher deserialisiert werden.
+
+=== Speicherung und Protokollführung
+`LlmRequestManager` verwaltet Anfragen in einer Liste und einem HashMap nach `requestId`. Neue Einträge werden verschlüsselt (Twofish/Custom Crypter) als `.dat`-Dateien im Request-Ordner gespeichert. Beim Start werden alle vorhandenen Dateien dekodiert und geladen.
+
+Der `TokenLogger` protokolliert nach jeder erfolgreichen Antwort Zeitstempel, Modellnamen, Input/Output/Total-Tokens sowie Durchlaufzeit in Tokens pro Sekunde. Die Ausgabe erfolgt als einfach formatierte Textzeile an eine Log-Datei.
+
+== 4. Wichtige Hinweise zur Implementierung
+
+=== OllamaClient.determineHost
+Die Methode `determineHost()` in `OllamaClient` durchsucht die Liste `HOSTS` asynchron auf Erreichbarkeit. Die aktuelle Implementierung funktioniert exakt wie vorgesehen und wird nicht modifiziert. Der asynchrone Check (`CheckNetworkService.isOllamaAvailableAsync`) ist bewusst so umgesetzt, um Blockaden während der Initialisierungsphase zu vermeiden.
+
+=== Netzwerkprüfung
+`CheckNetworkService` stellt `isOllamaAvailableAsync` bereit, das per HTTP-GET auf `/api/version` prüft. Zusätzlich gibt es `isExistingHost`, das die lokale Netzwerkschnittstellen-Konfiguration überprüft, um sicherzustellen, dass der Host wirklich an einem verfügbaren Adapter gebunden ist.
+
+=== Dateibehandlung in Prompts
+`JsonFileAppendUtil` erlaubt das Referenzieren lokaler Dateien im Prompt-Text über definierte Präfixe (`<$ `, `<$D `, `<$DA `, `<$P `). Nur Pfade, die explizit freigegeben wurden (`addAllowedDirectories`), werden geladen. Die Klasse nutzt Thread-Safe Collections und Caching für Dateioperationen, um Performance und Sicherheit zu gewährleisten.
+
+== 5. Typische Anwendungsabfolge
+
+1. Konfiguration laden: `AiServiceConfig.current()` stellt INI-Werte bereit.
+2. Anfrage aufbauen: `LlmRequest.builder().addSystemMsg(...).addUserMsg(...).setModel("qwen3.5:4b").build()`
+3. Client wählen: `LlmClientFactory.getLlmClient()` gibt je nach Modellnamen den passenden HTTP-Client zurück.
+4. Ausführen und Loggen: Der Client sendet die Anfrage, parsen die Antwort in `LlmResponse` und triggeren automatisch den `TokenLogger`.
+5. Persistenz (optional): `LlmRequestManager.store()` sichert die Anfrage verschlüsselt ab.
+
+== 6. Fazit
+
+Das Modul bietet eine robuste, erweiterbare Basis für den Betrieb mehrerer LLM-Provider innerhalb einer Java-Anwendung. Durch strikte Trennung von Builder, Factory, Mapping und Persistenz bleibt der Code wartbar und leicht an neue API-Endpunkte (z.B. zukünftige OpenAI-Varianten oder weitere Anbieter) erweiterbar. Die Nutzung von Jackson für JSON-Mapping sowie die integrierte Token-Protokollierung sichern eine professionelle Produktionsreife.
+
+[cols="2,5"]
+|===
+| Bereich | Empfohlene Praxis
+| Builder Pattern | Immer über `.builder()` starten, um Typsicherheit bei Nachrichten und Parametern zu gewährleisten.
+| Client-Auswahl | Modellnamen strikt nach `Company/ModelName`-Schema vergeben, um die Factory-Logik stabil zu halten.
+| Mapping | Neue Provider benötigen nur einen neuen `ContentPartMapperX` und eine Klasse, die `ILlmClient` implementiert.
+| Sicherheit | Datei-Pfade für Bildreferenzen immer über `addAllowedDirectories` freischalten, um Pfadeinschränkungen zu gewährleisten.
+|===

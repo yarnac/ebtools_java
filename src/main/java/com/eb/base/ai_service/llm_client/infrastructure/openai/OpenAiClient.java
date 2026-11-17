@@ -42,7 +42,6 @@ public class OpenAiClient implements ILlmClient {
                 .POST(HttpRequest.BodyPublishers.ofString(json))
                 .header("Content-Type", "application/json")
                 .header("Authorization", "Bearer " +  apiKey )
-                .POST(HttpRequest.BodyPublishers.ofString(json))
                 .build();
 
         long startTime = System.nanoTime();

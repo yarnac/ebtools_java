@@ -1,0 +1,74 @@
+[[functions-of-the-code]]
+== Funktionen des Codes
+
+Der bereitgestellte Java-Code implementiert ein Framework zur Interaktion mit Language Learning Models (LLMs), insbesondere für die Verarbeitung von Anfragen und Antworten, sowie zur Handhabung von Nachrichten, Parametern und Modellen.
+
+=== Hauptkomponenten
+
+==== 1. `LlmRequestBuilder` - Builder-Muster für LLM-Anfragen
+- Erstellt `LlmRequest`-Objekte durch eine fluent API
+- Unterstützt Hinzufügen von System-, Benutzer- und Bildnachrichten
+- Ermöglicht das Setzen von Modellen und Parametern
+- Verwendet das Builder-Muster zur flexiblen Erstellung komplexer Anfragen
+
+==== 2. `LlmRequest` - Datenstruktur für LLM-Anfragen
+- Enthält Modellname, Nachrichtenliste, Parameter und zusätzliche Metadaten
+- Stellt Methoden zum Hinzufügen von Parametern und Nachrichten bereit
+- Speichert die letzte Antwort (`lastResponse`) zur Verfolgung der Gesprächsgeschichte
+- Implementiert `toString()` für eine einfache Darstellung
+
+==== 3. `LlmMessage` - Einzelne Nachrichten im Dialog
+- Repräsentiert eine einzelne Nachricht mit Rolle (user, system, assistant)
+- Unterstützt Text- und Bildinhalte (Base64-kodierte Bilder)
+- Verwendet `ContentPart` für unterschiedliche Inhaltstypen
+- Speichert Metadaten wie Token-Zahl und Laufzeit
+
+==== 4. `LlmResponse` - Antwort von LLMs
+- Enthält Antworttext, Modellinformationen, Token-Zahlen und Laufzeiten
+- Berechnet Tokens pro Sekunde
+- Stellt Methoden zur Darstellung der Antwort mit Details bereit
+
+==== 5. `LlmRequestService` - Hauptanwendungsschicht
+- Sendet LLM-Anfragen an den Client (`ILlmClient`)
+- Verwaltet die Antwortverarbeitung und Speicherung
+- Bietet eine vereinfachte Methode `sendSimpleRequest()` für schnelle Anfragen
+
+==== 6. `LlmClient` - Interface zur Kommunikation mit LLMs
+- Implementiert das `ILlmClient`-Interface
+- Verwendet `LlmClientFactory` zur Auswahl des passenden Clients
+- Stellt die `sendRequest()`-Methode bereit
+
+==== 7. `Parameter` - Konfigurationsparameter für Anfragen
+- Enthält Name und Wert eines Parameters
+- Wird zur Übertragung von Einstellungen wie max_tokens verwendet
+
+==== 8. `LlmMessageInfo` - Metadaten zu Nachrichten
+- Speichert Token-Zahlen (Input, Output, Gesamt)
+- Speichert Modellname und Laufzeiten
+- Wird zur Statistik und Analyse verwendet
+
+==== 9. `CheckNetworkService` - Netzwerküberprüfung
+- Prüft die Erreichbarkeit von Ollama-Servern
+- Verwendet HTTP-Requests zur Überprüfung des API-Zugangs
+- Unterstützt asynchrone Prüfungen
+
+=== Funktionsweise
+
+. Ein `LlmRequest` wird über den `LlmRequestBuilder` erstellt
+. Der Builder ermöglicht das Hinzufügen von Nachrichten (Text oder Bilder) und Parametern
+. Die Anfrage wird an einen `LlmClient` gesendet
+. Der Client sendet die Anfrage an das LLM und erhält eine Antwort
+. Die Antwort wird in ein `LlmResponse`-Objekt umgewandelt
+. Das Framework verarbeitet Token-Zählung und Laufzeiten
+. Die Ergebnisse können über Methoden wie `getAnswerWithDetails()` oder `getShortDetails()` dargestellt werden
+
+=== Verwendung
+
+Die Hauptanwendung erfolgt durch:
+1. Erstellung einer Anfrage mit `LlmRequest.builder()`
+2. Hinzufügen von Nachrichten (Text, Bilder)
+3. Festlegen des Modells und Parameter
+4. Senden der Anfrage über `LlmRequestService.sendRequest()` oder `sendSimpleRequest()`
+5. Verarbeitung der Antwort
+
+Die Architektur unterstützt sowohl textbasierte als auch multimodale Anfragen mit Bildern, wobei Bilder automatisch in Base64 kodiert werden.

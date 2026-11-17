@@ -1,0 +1,157 @@
+# API-Dokumentation: `ebtools` Extension-Klassen
+
+**Paket:** `com.eb.base.extensions`
+**Beschreibung:** Utility-Kollektionen für häufig wiederkehrende Aufgaben in den Bereichen Datums-/Zeitmanipulation, JSON-Serialisierung, String-Verarbeitung, Dateisystemoperationen, Prozesssteuerung, numerische Berechnungen und Collections.
+
+---
+
+## == Klasse `DateExtensions`
+Ermöglicht vereinfachte Handhabung von `LocalDateTime`-Objekten, einschließlich Datumsausschnitt-Erkennung, Jahr-/Monatsberechnungen und Formatierung.
+
+### === Methodenreferenz
+|===
+| Methode | Signatur | Beschreibung
+| ebPureDatetime | `ebPureDatetime(LocalDateTime self)` | Gibt den reinen Datumsteil als `LocalDateTime` zurück (Uhrzeit wird auf 00:00 gesetzt).
+| ebPureDate | `ebPureDate(LocalDateTime self)` | Gibt das reine Datum als `LocalDate` zurück.
+| ebJahresultimo | `ebJahresultimo(LocalDateTime self)` | Liefert das Jahresenddatum (31.12. des angegebenen Jahres).
+| ebIsJahresultimo | `ebIsJahresultimo(LocalDateTime self)` | Prüft, ob das übergebene Datum dem 31.12. entspricht.
+| ebVorjahresultimo | `ebVorjahresultimo(LocalDateTime self)` | Liefert das Enddatum des Vorjahres (31.12.).
+| ebJahresanfang | `ebJahresanfang(LocalDateTime self)` | Liefert den Jahresanfang (01.01. des angegebenen Jahres).
+| ebDateTimeStringRev | `ebDateTimeStringRev(LocalDateTime self)` | Formatiert das Datum als umgekehrten String (`yyyyMMddHHmmss`).
+| ebDateStringRev | `ebDateStringRev(LocalDateTime self)` | Formatiert das Datum als umgekehrten String (`yyyy_MM_dd`).
+| ebDiffInTagen / ebDiffInTagenAbs | `ebDiffInTagen(...)`, `ebDiffInTagenAbs(...)` | Berechnet die absolute Differenz in Tagen zwischen zwei Zeitpunkten.
+| ebDiffInSekunden | `ebDiffInSekunden(LocalDateTime start, LocalDateTime stop)` | Liefert die Sekunden-Differenz zwischen Start und Stopp.
+| ebDiffInMonaten | `ebDiffInMonaten(LocalDateTime self, LocalDateTime other)` | Berechnet die Differenz in Kalendermonaten.
+| ebDiffInJahren | `ebDiffInJahren(LocalDateTime self, LocalDateTime other)` | Berechnet die ungefähre Jahresdifferenz (Double, basiert auf 365,25 Tagen).
+| ebIsSameYear | `ebIsSameYear(LocalDateTime self, LocalDateTime other)` | Prüft, ob beide Zeitpunkte im selben Kalenderjahr liegen.
+| ebWochentag | `ebWochentag(LocalDateTime self)` | Liefert das deutsche Wochentagskürzel (Mo, Di, Mi, Do, Fr, Sa, So).
+|===
+
+---
+
+## == Klasse `JsonExtensions`
+Wrapper-Klasse für JSON-Serialisierung und -Deserialisierung mittels Jackson `ObjectMapper`. Stellt typsichere Umwandlungen zwischen Strings, Listen und JSON-Payloads bereit.
+
+### === Methodenreferenz
+|===
+| Methode | Signatur | Beschreibung
+| ebJsonFromString | `ebJsonFromString(String str)` | Serialisiert einen plain String in ein valides JSON-String-Literal (`"..."`).
+| ebJsonToString | `ebJsonToString(String str)` | Deserialisiert ein JSON-String-Literal zurück in einen Java-String.
+| ebJsonFromStringList | `ebJsonFromStringList(List<String> str)` | Serialisiert eine `List<String>` in ein JSON-Array.
+| ebJsonToStringList | `ebJsonToStringList(String str)` | Deserialisiert ein JSON-Array in eine `List<String>`.
+|===
+
+---
+
+## == Klasse `StringExtensions`
+Umfangreiche Sammlung an String-Manipulationsroutinen. Umfasst Parsing, Splitting, Replace-Operationen, Formatierung, Unicode-Behandlung, CSV/JSON-Kodierung sowie Extraktion von ID-Patterns (OKU, JIRA) und CommandLine-Argumente.
+
+### === Methodenreferenz
+|===
+| Methode | Signatur | Beschreibung
+| ebOpenFile | `ebOpenFile(String fileName)` | Öffnet eine Datei über den Systemstandardprozessor.
+| ebRemoveLineEndDoubles | `ebRemoveLineEndDoubles(String str)` | Entfernt mehrfach hintereinander folgende Zeilenumbrüche.
+| ebRemoveXmlTags | `ebRemoveXmlTags(String text)` | Strippt XML-Tags (`<...>`) aus einem Text.
+| ebRemoveSatztrennzeichen | `ebRemoveSatztrennzeichen(String text)` | Schneidet alles ab dem ersten Satztrennzeichen (`.`).
+| ebSplitTextBySentences | `ebSplitTextBySentences(...)` | Teilt einen Text zeilenweise in `sentenceCount` Sätze auf.
+| ebIsSatztrennzeichen / ebIsAnfuehrungszeichen | `ebIsSatztrennzeichen(char)`, `ebIsAnfuehrungszeichen(char)` | Prüft, ob ein Zeichen ein Satzende oder Anführungszeichen ist.
+| ebSubstringAfterLast/First | `ebSubstringAfterLast(...)`, `ebSubstringAfterFirst(...)` | Liefert den Substring nach dem letzten/ersten Vorkommen eines Musters.
+| ebSubstringBeforeLast/First | `ebSubstringBeforeLast(...)`, `ebSubstringBeforeFirst(...)` | Liefert den Substring vor dem letzten/ersten Vorkommen eines Musters.
+| ebReplaceLast / ebReplaceFirst | `ebReplaceLast(...)`, `ebReplaceFirst(...)` | Ersetzt das letzte/erste Vorkommen eines Musters.
+| ebSplit | `ebSplit(String str, String pattern)` | Teilt einen String an einem Trennmuster (optional ohne leere Zeilen).
+| ebNewSplit | `ebNewSplit(String s, char ch)` | Split-Logik mit spezieller Handling-Logik für Anführungszeichen.
+| ebCountLines | `ebCountLines(String str)` | Zählt die Anzahl der Zeilen in einem String.
+| ebReplaceUnicodeSpaces | `ebReplaceUnicodeSpaces(...)` | Ersetzt alle Unicode-Space-Zeichen durch normale Spaces oder Tabs.
+| ebReplaceIgnoreCase | `ebReplaceIgnoreCase(self, pattern, other)` | Case-insensitive Textersetzung.
+| ebFormat | `ebFormat(String str, Object... args)` | Wrapper für `String.format()`.
+| ebStartsWithAny / ebEndsWithAny | `ebStartsWithAny(...)`, `ebEndsWithAny(...)` | Prüft, ob ein String mit/min einem der übergebenen Präfixe/Suffixe beginnt/endet.
+| ebIsOneOfStrings | `ebIsOneOfStrings(pattern, String... strings)` | Case-insensitive Gleichheitsprüfung gegen eine Liste.
+| ebReplaceUmlaute | `ebReplaceUmlaute(String self)` | Ersetzt Umlaute durch ASCII-Escape (`ä`→`ae`, `ß`→`ss` usw.).
+| ebRemove | `ebRemove(String pattern, String... args)` | Entfernt mehrere Substrings sequenziell.
+| ebDateRev | `ebDateRev(String pattern)` | Konvertiert ein deutsches Datumsformat in ein reversiertes (`yyyyMMdd`).
+| ebWrapText | `ebWrapText(String input, int len)` | Zeilenumbruch-Logik für fixe Zeichenlänge (Word-Wrap).
+| ebToString / ebToDouble/ToInt/ToLong | `ebToString(double)`, `ebToDouble(...)`, ... | Typkonvertierung mit Fehlerbehandlung.
+| ebIsFastNull/Gleich / ebIsNullbetrag | `ebIsFastNull(...)`, `ebIsFastGleich(...)`, `ebIsNullbetrag(...)` | Floating-Point-Näherungsprüfungen.
+| ebWoerter / ebWoerterString | `ebWoerter(String)`, `ebWoerterString(String)` | Extrahiert Wörter oder konvertiert Liste zurück zu String.
+| ebFilled | `ebFilled(String str, int n)` | Füllt String mit Leerzeichen bis zur Ziellänge auf.
+| ebCodeString | `ebCodeString(...)`, `ebCodeString(boolean)` | Kodiert Strings/Booleans als Code-Literal.
+| ebCsvSplit | `ebCsvSplit(String str, char separator)` | Parse-Logik für CSV mit Anführungszeichen-Support.
+| ebOkuNr / ebGetFirstJiraNr / ebGetAllJiraNrs | `ebOkuNr(...)`, `ebGetFirstJiraNr(...)`, ... | Extrahiert IDs nach spezifischen Präfixen (`oku-`, `supp-`, `inf-`, `OKU-`, `INF-`).
+| ebFirstIndexOf | `ebFirstIndexOf(String self, String... praefixes)` | Liefert den kleinsten Index mehrerer Patterns.
+| ebTrim / ebIsNilOrEmpty / ebEqualsIgnoreCase | `ebTrim(...)`, `ebIsNilOrEmpty(...)`, `ebEqualsIgnoreCase(...)` | Grundlegende Validierungs- und Trim-Funktionen.
+| ebGetShorterString | `ebGetShorterString(self, int n)` | Liefert den String minus letzter `n` Zeichen.
+| ebDateString / ebTimeStringInverse | `ebDateString(...)`, `ebTimeStringInverse(...)` | Konvertiert Date/Time-Strings zwischen Filename- und LesefORMAT.
+| ebTrimAll | `ebTrimAll(String str)` | Trimmt Whitespaces ausschließlich vom Anfang.
+| ebCommandLineArguments | `ebCommandLineArguments(String argString)` | Parst Command-Line-Argumente unter Berücksichtigung von Quotes.
+| ebContainsOneOf / ebEndsWithOneOf / ebStartsWithOneOf | `ebContainsOneOf(...)`, `ebEndsWithOneOf(...)`, ... | Prüft Match against Space-Separated Patterns.
+|===
+
+---
+
+## == Klasse `FileExtensions`
+Erweitert die Dateisystem-Interaktion um Pfadmanipulation, Existenzprüfung, Lese-/Schreiboperationen (UTF-8, Windows/macOS Encoding), rekursive Suche, Maintenance und Prozessausführung.
+
+### === Methodenreferenz (Auszug nach Kategorien)
+|===
+| Kategorie | Methoden | Beschreibung
+| **Pfad-Manipulation** | `ebDirectoryName`, `ebLocalFileName`, `ebFileExtension`, `ebFileRoot`, `ebLocalFileRoot`, `ebFileDirectory`, `ebFileParentDirectory` | Extrahieren von Verzeichnisnamen, lokalen Dateinamen, Erweiterungen, Root-Namen und Parent-Verzeichnissen.
+| **Existenz & Creation** | `ebFileExists`, `ebDirectoryExists`, `ebCreateDirectory`, `ebFileNameInDirectory`, `ebFullFileNameInDirectory`, `ebUniqueFileNameInDirectory` | Prüfen/Erstellen von Verzeichnissen und Pfaden, inklusive sicherer Unique-Namensgenerierung.
+| **Dateinamen-Transformation** | `ebFilenameWithDateTime`, `ebFilenameWithExtension`, `ebFileNameWithSuffix`, `ebFileNameWithPraefix`, `ebReplaceFileNameWith` | Anhängen/Ersetzen von Zeitstempeln, Extensions, Suffixes und Präfixes.
+| **Lesen (Text/Zeilen)** | `ebGetFileTextUtf8`, `ebFileContentsWindows/Mac`, `ebGetFileTextLines` | Einlesen von Dateiinhalt als String oder String-Array (UTF-8, CP1252, MacRoman). Leere Zeilen optional entfernen.
+| **Schreiben & Kopieren** | `ebWriteTextToFileUtf8/Windows`, `ebWriteFileLinesUTF8/Windows`, `ebCopy`, `ebMove` | Schreiben von Strings/Zeilen in Dateien (Encoding-gesteuert), Kopieren und Verschieben.
+| **Suche & Navigation** | `ebGetFiles`, `ebGetDirectories`, `ebGetAllFiles`, `ebGetAllDirectories`, `ebGetLatestFile`, `ebDeleteEmptyDirs` | Auflisten von Files/Directories (mit Pattern, rekursiv), find latest modified, löschen leerer Dirs.
+| **Prozess & System** | `ebOpenAsProcess`, `ebOpenAsProcessWaitForExit`, `ebIsValidAbsoluteOsFileName` | Starten von Executables mit/ohne Argumenten und Warten auf Beendigung. Validierung absoluter OS-Pfade.
+|===
+
+---
+
+## == Klasse `ProcessExtensions`
+Leichte Wrapper für die Ausführung externer Prozesse via `ProcessBuilder`.
+
+### === Methodenreferenz
+|===
+| Methode | Signatur | Beschreibung
+| ebStartProcess | `ebStartProcess(String self)` | Startet einen Process ohne Argumente. Ignoriert leere/Null-Input.
+| ebStartProcess (mit Args) | `ebStartProcess(String self, String arguments)` | Startet einen Process mit zusätzlichen CLI-Argumenten und vererbt die IO-Kanäle (`inheritIO`).
+|===
+
+---
+
+## == Klasse `NumericExtensions`
+Numerische Hilfsroutinen für Rundung, Formatierung, mathematische Grundoperationen und statistische Normalverteilungs-Inverse.
+
+### === Methodenreferenz
+|===
+| Methode | Signatur | Beschreibung
+| ebRound | `ebRound(double self, int nr)` | Rundet ein Double auf `nr` Dezimalstellen (banker's rounding variant).
+| ebToRoundedString | `ebToRoundedString(double zahl, int n)` | Formatiert Double als String mit fester Anzahl an Nachkommastellen.
+| ebFilledString | `ebFilledString(int n, int m, String str)` | Füllt eine Integer-Darstellung links mit einem Zeichen bis zur Länge `m` auf.
+| ebIntValue | `ebIntValue(String self)` | Parst String zu Integer, liefert bei Fehler `-1`.
+| sqrt | `sqrt(double p)` | Wrapper für `Math.sqrt()`.
+| normInv / realNormInv | `normInv(double p)`, `realNormInv(double p)` | Inverse Normalverteilung (statistisch). `normInv` wandelt Prozent in [0,1] um. Implementiert polynomial approximation (Peizer & Pratt / Beasley-Springer-Moro variant).
+|===
+
+---
+
+## == Klasse `CollectionExtensions`
+Erweiterungen für Java Collections (`List`, `Iterable`) und Arrays. Bietet Typkonvertierung, Splitting, Filterung und In-Place-Operationen.
+
+### === Methodenreferenz
+[cols="2,3,5"]
+|===
+| Methode | Signatur | Beschreibung
+| ebIsNilOrEmpty | `ebIsNilOrEmpty(List<T> werte)` | Prüft, ob eine Liste null oder leer ist.
+| ebToList / ebToArray | `ebToList(String[])`, `ebToArray(List<String>)` | Konvertierung zwischen String-Array und List.
+| ebToObjArr | `ebToObjArr(T[])`, `ebToObjArr(Iterable<T>)` | Umwandlung von generischen Arrays/Iterables in `Object[]`.
+| ebIndexOf | `ebIndexOf(String[] strs, String pattern)` | Sucht nach einem Pattern in einem String-Array (liefert Index oder `-1`).
+| ebGet | `ebGet(String[] str, int)`, `ebGet(List<String> str, int)` | Sicheres Auslesen von Elementen an gegebenem Index (`null` bei OOB).
+| ebSeparatedString / textFromLines | `ebSeparatedString(...)`, `textFromLines(...)` | Konvertiert Iterable/Strings zu einem getrennten String oder mehrzeiligem Text.
+| trimmedWerte | `trimmedWerte(Object[] werte)` | Trimmt alle Objekte, überspringt Nulls und leere Strings.
+| ebSplit (List) | `ebSplit(List<String> lines, int size)` | Teilt eine Liste in Chunks der Größe `size`.
+| ebRemoveEmptyStrings | `ebRemoveEmptyStrings(List<String> orig)` | Entfernt leere/Null-Strings direkt im Original (`in-place`).
+| ebFilterWhere | `ebFilterWhere(List<String> self, Predicate)` | Filtert Elemente heraus und gibt sie als neue Liste zurück (entfernt Original).
+| ebFindOrCreate | `ebFindOrCreate(List<T>, Predicate, Supplier)` | Sucht nach match oder erstellt/fügt ein neues Element via Factory.
+|===
+
+---
+*Hinweis: Diese Dokumentation wurde automatisch aus den bereitgestellten Java-Quelldateien extrahiert und in professionelles Deutsch übersetzt. Methodensignaturen bleiben unverändert, um Kompatibilität mit der bestehenden Codebasis zu gewährleisten.*

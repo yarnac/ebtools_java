@@ -1,0 +1,212 @@
+= LLM Client API Dokumentation
+
+== Paket: com.eb.base.ai_service.llm_client.api
+
+Dieses Paket enthält die grundlegenden Klassen zur Interaktion mit Language Model (LLM) Diensten.
+
+=== Klassen
+
+==== LlmRequestBuilderModel
+Interface zur Definition des Modell-Sets in der Anfrageerstellung.
+[source,java]
+----
+public interface LlmRequestBuilderModel {
+    LlmRequestBuilderFinish setModel(String newModel);
+}
+----
+
+==== LlmRequestService
+Stellt Methoden zum Senden von LLM-Anfragen zur Verfügung.
+[source,java]
+----
+public class LlmRequestService {
+    public static LlmResponse sendRequest(LlmRequest llmRequest);
+    public static LlmResponse sendSimpleRequest(String message, String modelName, String host);
+}
+----
+
+==== LlmMessageInfo
+Klasse zur Speicherung von Metadaten zu Nachrichten.
+[source,java]
+----
+public class LlmMessageInfo {
+    private int InputTokens;
+    private int OutputTokens;
+    private int TotalTokens;
+    private String model;
+    private double secondsToRun;
+    private double tokensPerSecond;
+}
+----
+
+==== Parameter
+Repräsentiert einen Parameter für eine LLM-Anfrage.
+[source,java]
+----
+public class Parameter {
+    private final String name;
+    private final Object value;
+}
+----
+
+==== LlmRequest
+Klasse zur Repräsentation einer Anfrage an ein LLM.
+[source,java]
+----
+public class LlmRequest {
+    @JsonProperty("model")
+    private String model;
+    List<LlmMessage> messages;
+    List<Parameter> parameters;
+    String contentMemo;
+
+    public static LlmRequestBuilderSystemOrUserMsg builder();
+    public void addParameter(Parameter parameter);
+    public Parameter getParameter(String name);
+    public boolean hasParameter(String maxTokens);
+    public void addUserMsg(String inputStringWithFiles);
+    public void addResponse(LlmResponse response);
+    public String getAllMessageString();
+}
+----
+
+==== LlmRequestBuilderUserMsg
+Interface zur Definition von Benutzeranfragen.
+[source,java]
+----
+public interface LlmRequestBuilderUserMsg {
+    LlmRequestBuilderUserMsg addUserMsg(String msgContent);
+    LlmRequestBuilderFinish setModel(String newModel);
+}
+----
+
+==== LlmRequestBuilderSystemOrUserMsg
+Interface zur Definition von System- und Benutzeranfragen.
+[source,java]
+----
+public interface LlmRequestBuilderSystemOrUserMsg {
+    LlmRequestBuilderUserMsg addSystemMsg(String msgContent);
+    LlmRequestBuilderUserMsg addUserMsg(String msgContent);
+    LlmRequestBuilderUserMsg addRequestMsg(String msgContent);
+    LlmRequestBuilderUserMsg addRequestMsg(String msgContent, List<String> imageFileNames);
+    LlmRequestBuilderUserMsg addUserMsgWithImage(String userMessage, String imagePath);
+}
+----
+
+==== ImageUrl
+Klasse zur Repräsentation von Bild-URLs.
+[source,java]
+----
+public class ImageUrl {
+    @JsonProperty("url")
+    private String url;
+    @JsonProperty("detail")
+    private String detail;
+}
+----
+
+==== LlmRequestBuilderFinish
+Interface zur Beendigung der Anfrageerstellung.
+[source,java]
+----
+public interface LlmRequestBuilderFinish {
+    LlmRequestBuilderFinish addParameter(String parameterName, Object value);
+    LlmRequest build();
+}
+----
+
+==== LlmClient
+Klasse zur Implementierung des LLM-Clients.
+[source,java]
+----
+public class LlmClient implements ILlmClient {
+    public LlmClient();
+    @Override
+    public LlmResponse sendRequest(LlmRequest llmRequest);
+}
+----
+
+==== CheckNetworkService
+Dienst zur Überprüfung der Netzwerkverbindung zu Ollama.
+[source,java]
+----
+public class CheckNetworkService {
+    public static void main(String[] args);
+    public static CompletableFuture<Boolean> isOllamaAvailableAsync(String host, int port);
+    public boolean isExistingHost(String url);
+}
+----
+
+==== LlmResponse
+Repräsentiert die Antwort eines LLMs.
+[source,java]
+----
+public class LlmResponse {
+    private int status;
+    private String answer;
+    private String model;
+    private String reasoning;
+    private String error;
+    private int inputTokens;
+    private int outputTokens;
+    private int totalTokens;
+    private double secondsToRun;
+    private double tokensPerSecond;
+
+    public LlmMessageInfo getMessageInfo();
+    public void calcTokens();
+    public String getAnswerWithDetails();
+    public String getShortDetails();
+    public String getDetails();
+}
+----
+
+==== LlmRequestBuilder
+Klasse zur Erstellung von LLM-Anfragen.
+[source,java]
+----
+public class LlmRequestBuilder implements LlmRequestBuilderSystemOrUserMsg,
+        LlmRequestBuilderUserMsg, LlmRequestBuilderModel, LlmRequestBuilderFinish {
+    static LlmRequestBuilderSystemOrUserMsg create();
+    public void addMsg(String role, String msgContent);
+    public LlmRequest build();
+    public LlmRequestBuilderFinish setModel(String newModel);
+}
+----
+
+==== LlmMessage
+Repräsentiert eine Nachricht innerhalb einer LLM-Anfrage.
+[source,java]
+----
+public class LlmMessage {
+    public LlmMessage();
+    @JsonProperty("role")
+    private String role;
+    @JsonProperty("content")
+    private List<ContentPart> contentParts = new ArrayList<>();
+    @JsonProperty("info")
+    private LlmMessageInfo messageInfo;
+    private List<String> imageFileNames = new ArrayList<>();
+    private List<String> textFileNames = new ArrayList<>();
+
+    public void addText(String text);
+    public void addImageFromPath(String filePath) throws IOException;
+    public void addImage(String mimeType, String imageData);
+    public String getMessage();
+    public String getMessageString();
+    public boolean isAssistent();
+    public boolean isUser();
+    public boolean isSystem();
+}
+----
+
+=== Abhängigkeiten
+
+* com.eb.base.ai_service.llm_client.infrastructure.ILlmClient
+* com.eb.base.ai_service.llm_client.infrastructure.LlmClientFactory
+* com.eb.base.ai_service.llm_client.infrastructure.ollama.OllamaClient
+* com.eb.base.extensions.StringExtensions
+* com.fasterxml.jackson.annotation.JsonProperty
+* com.fasterxml.jackson.annotation.JsonPropertyOrder
+* lombok.Getter
+* lombok.Setter

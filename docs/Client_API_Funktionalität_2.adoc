@@ -1,0 +1,61 @@
+# LLM Client API Dokumentation
+
+== 1. Übersicht & Architektur
+Das Paket `com.eb.base.ai_service.llm_client.api` bildet die Anwendungslogik-Schicht für die Kommunikation mit Large Language Models (LLMs). Es kapselt den Aufbau von Chat-Anfragen, die Serialisierung von Nachrichten, die Verwaltung von Metadaten sowie die statische Dienstbereitstellung. Die Architektur folgt dem Fluent-Building-Pattern, um eine typsichere und lesbare Request-Erstellung zu gewährleisten.
+
+== 2. Paketstruktur & Kernkomponenten
+|===
+| Komponente | Verantwortung
+| LlmRequest
+| Hauptdatenstruktur für API-Anfragen (Modelle, Nachrichtenverlauf, Parameter)
+| LlmMessage
+| Einzelne Chat-Nachricht mit Rollenverwaltung und Unterstützung für Text/Bilder
+| LlmResponse
+| Antwort-DTO inkl. Token-Statistiken, Timing und detailierter Ausgabeformatierung
+| LlmMessageInfo
+| Leichte Datenklasse zur Repräsentation von Metriken (Tokens, Zeit)
+| LlmRequestBuilder
+| Fluent-Builder-Implementierung zum schrittweisen Aufbau von Anfragen
+| LlmRequestService
+| Statische Service-Schicht für direkten Dispatching und Request-Vereinfachung
+| CheckNetworkService
+| Prüft asynchron die Erreichbarkeit lokaler Ollama-Instanzen über Netzwerk-Requests
+|===
+
+== 3. Detailbeschreibung der Klassen
+
+=== LlmRequest & LlmMessage
+Die Klasse `LlmRequest` dient als zentrale Container-Klasse für alle an einen LLM gesendeten Daten. Sie verwaltet das Zielformat (`model`), eine Liste von `LlmMessage`-Objekten sowie optionale `Parameter`. Die Serialisierung wird durch Jackson-Annotationen (`@JsonPropertyOrder`, `@JsonIgnore`) präzise gesteuert. Zusätzlich hält die Klasse Metadaten wie `lastResponse` und `requestId` (beide ignoriert) sowie eine optional beschreibbare `contentMemo` zur alternativen String-Darstellung.
+`LlmMessage` repräsentiert eine einzelne Interaktion im Chat-Kontext. Neben der Rolle (`system`, `user`, `assistant`) hält es eine Liste von `ContentPart`-Objekten, was die Erweiterung auf multimodale Inhalte (z.B. Bilder als Base64) ermöglicht. Die Klasse bietet Helfer zur Typisierung (`isUser()`, `isSystem()`, `isAssistent()`) sowie Methoden zur sauberen String-Repräsentation (`getMessageString()`).
+
+=== LlmResponse & LlmMessageInfo
+`LlmResponse` kapselt die Rückgabe des jeweiligen Providers. Es speichert die eigentliche Antwort (`answer`), das verwendete Modell, Token-Verbräuche sowie Timing-Daten. Die Methode `calcTokens()` berechnet bei Bedarf automatisch `totalTokens` und `tokensPerSecond`.
+Zusätzlich bietet die Klasse vorbereitete Ausgabeformate:
+- `getShortDetails()`: Kompakte Metriken auf einer Zeile mit automatischer Host-Erkennung (Startet Modellname mit `q`).
+- `getDetails()`: Ausgegliederte, mehrzeilige Formatierung mit spezifischen Host-Alias-Ersetzungen (MacBook Air/Pro).
+- `getMessageInfo()`: Liefert eine isolierte Kopie der Token-/Timing-Daten als `LlmMessageInfo`-Objekt.
+
+=== Fluent Builder Pattern (LlmRequestBuilder)
+Der `LlmRequestBuilder` implementiert vier Schnittstellen (`SystemOrUserMsg`, `UserMsg`, `Model`, `Finish`), die eine schrittweise DSL ermöglichen:
+1. Start über `builder()` liefert ein `SystemOrUserMsg`-Interface.
+2. Hinzufügen von System- oder User-Nachrichten, optional mit Bildpfaden.
+3. Die Methode `addRequestMsg(String)` unterstützt einen speziellen Syntax `<<SYSTEM>>USER`, um beide Rollen automatisch zu splitten und korrekt zuzuordnen.
+4. Modellzuweisung über `setModel()` und optionale Parameter via `addParameter()`.
+5. Abschluss durch `build()`, welches das finalisierte `LlmRequest`-Objekt instanziiert.
+Alle Schritte sind typsicher verkettenbar und werfen bei ungültigen Eingaben oder IO-Fehlern (z.B. beim Laden von Bildpfaden) sofort RuntimeExceptions.
+
+=== Service-Schicht & Netzwerk-Checks
+`LlmRequestService` stellt zwei statische Methoden bereit:
+- `sendRequest()`: Instanziiert einen `LlmClientFactory`, ermittelt den passenden Client und leitet die Anfrage weiter. Fängt IO-/InterruptExceptions um und speichert die Antwort im Request (`llmRequest.addResponse()`).
+- `sendSimpleRequest()`: Convenience-Methode zur schnellen Sendeoperation, bei der der Ollama-Host explizit vorgegeben wird (`OllamaClient.HOST = host`).
+
+`CheckNetworkService` enthält eine asynchrone Methode `isOllamaAvailableAsync()`, die über HTTP_1.1 einen GET-Request auf `/api/version` des angegebenen Hosts ausführt. Bei Status < 300 gilt der Host als verfügbar. Zusätzlich existiert eine synchrone Prüfroutine `isExistingHost()` zur lokalen Netzwerkinterface-Validierung über `InetAddress`.
+
+== 4. Wichtige Hinweise & Konventionen
+- Die Serialisierung von `LlmRequest` und `LlmMessage` ist explizit auf JSON-fähige Ausgabe optimiert, wobei interne Tracking-Felder (`@JsonIgnore`) die Payload bereinigen.
+- Bildunterstützung erfolgt ausschließlich über lokale Pfade, die in Base64 konvertiert werden (`addImageFromPath`). Die MIME-Typ-Erkennung basiert auf Dateiendungen.
+- Die `LlmRequestBuilder`-Kette ist unveränderlich im Finalzustand und gibt pro Schritt ein typisiertes Interface zurück, um Compile-Time-Fehler bei falscher Reihenfolge zu vermeiden.
+- Netzwerkchecks nutzen kurze Timeouts (3 Sekunden) und sind asynchron designed, um Blockierungen in Hauptthreads vorzubeugen.
+- Token-Metriken werden automatisch berechnet (`calcTokens()`), sofern `totalTokens` initial 0 ist. Dies stellt Konsistenz zwischen verschiedenen Providern sicher.
+
+Das Dokument ist abgeschlossen. Gib bekannt, wenn du spezifische Abschnitte erweitern, UML-Diagramme anfordern oder den Code in ein anderes Format überführen möchtest.
