@@ -1,0 +1,1331 @@
+= AiService – Technische Dokumentation
+:author: EKK
+:revdate: 2025
+:toc: left
+:toclevels: 3
+
+== 1. Übersicht
+
+Die `com.eb.base.ai_service`-Komponente stellt eine abstrakte, provider-unabhängige Schnittstelle für die Kommunikation mit Large Language Models (LLMs) bereit. Sie unterstützt drei Anbieter:
+
+* Ollama (lokale Modelle, z. B. Qwen)
+
+* OpenAI (z. B. GPT-Serie)
+
+* Anthropic (z. B. Claude)
+
+Zusätzlich umfasst der Code:
+
+* eine Singleton-basierte Konfiguration (`AiServiceConfig`)
+
+* ein verschlüsseltes Anfrage-Archiv (`LlmRequestManager`)
+
+* drei einfache Demo-/Testdienste (`SimpleImageService`, `SimpleUebersetzungService`, `SimpleWoerterbuchService`)
+
+* ein Token-Logging-Subsystem (`TokenLogger`)
+
+== 2. Architektur
+
+=== 2.1 Schichtenmodell
+
+Das System folgt einem klassischen Schichten- und Factory-Muster:
+
+* **API-Schicht** (`llm_client.api`): Definiert die abstrakten Typen `LlmRequest`, `LlmResponse`, `LlmMessage`, `ILlmClient` sowie den öffentlichen Einstiegspunkt `LlmClient`.
+
+* **Infrastructure-Schicht** (`llm_client.infrastructure`): Enthält die `LlmClientFactory`, die `LlmModelProvider` und die konkreten Provider-Implementierungen (`OllamaClient`, `OpenAiClient`, `AnthropicClient`).
+
+* **ContentMapping** (`llm_client.infrastructure.contentmapping`): Transforms `ContentPart`-Objekte (Text, Bild) in das jeweilige JSON-Format des Zielsystems.
+
+* **Konfiguration** (`ai_service`): `AiServiceConfig` liest Einstellungen aus einer INI-Datei.
+
+* **Speicher** (`llmreqstore`): `LlmRequestManager` persistiert Anfragen und Antworten verschlüsselt als `.dat`-Dateien.
+
+=== 2.2 Klassendiagramm (vereinfacht)
+
+----
+LlmClient (Entry Point)
+  └── LlmClientFactory
+        ├── OllamaClient        ← ContentPartMapperOllama
+        ├── OpenAiClient        ← ContentPartMapperOpenAi
+        └── AnthropicClient     ← ContentPartMapperAnthropic
+
+LlmRequest
+  ├── List<LlmMessage>
+  │     └── List<ContentPart>  (sealed: ContentPartText | ContentPartImage)
+  └── List<Parameter>
+
+LlmRequestJsonMapper
+  └── LlmMessageMapper
+        └── ContentPartToMapMapper (Strategy)
+----
+
+== 3. Package `com.eb.base.ai_service`
+
+=== 3.1 AiServiceConfig
+
+`AiServiceConfig` ist ein Singleton, der alle Konfigurationswerte aus einer INI-Datei (`AiServiceConfig.ini`) liest.
+
+[source,java]
+----
+public static AiServiceConfig current()
+----
+
+Ruft die einzige Instanz ab. Wird beim ersten Zugriff initialisiert.
+
+==== Konfigurationswerte
+
+[cols="2,3,5"]
+|===
+| Methode
+| INI-Abschnitt / Key
+| Beschreibung
+
+| `getModelFileName()`
+| `[Einstellungen]` / `AiModelFileName`
+| Pfad zur Datei, in der die verfügbaren LLM-Modelle aufgelistet sind (Tab-getrennt). Standard: `AiServicesConfig.ini`.
+
+| `getGeheimnisFileName()`
+| `[Einstellungen]` / `AiGeheimnisFileName`
+| Pfad zur verschlüsselten Datei, in der API-Keys (OpenAI, Anthropic) gespeichert sind.
+
+| `getTokenFileName()`
+| `[Einstellungen]` / `AiTokenFileName`
+| Pfad zur Log-Datei, in der Token-Verbrauch und Laufzeiten protokolliert werden.
+
+| `getData1()`
+| `[Data]` / `Data1`
+| Frei definierbarer Datenplatzhalter.
+
+| `getData2()`
+| `[Data]` / `Data2`
+| Frei definierbarer Datenplatzhalter.
+|===
+
+== 4. Package `com.eb.base.ai_service.ai_chat`
+
+Diese Klassen sind einfache Demo- bzw. Testdienste, die einen `main`-Methode enthalten.
+
+=== 4.1 SimpleImageService
+
+Analysiert ein Bild mit einem LLM und erzeugt ein strukturiertes JSON-Tagging.
+
+==== Prompt (Verschlagwortung)
+
+Der Prompt instruiert das Modell, ein Bild in vier Kategorien zu taggen:
+
+* `architecture` – Gebäude / Infrastruktur
+
+* `landscape` – Natur / Umgebung
+
+* `people` – Menschen / Personen
+
+* `motiv` – Hauptmotiv des Bildes
+
+Es werden pro Kategorie jeweils 5 deutsche Schlagwörter erwartet. Die Ausgabe muss reiner JSON-Text sein (kein Markdown).
+
+==== Methode `getImageDescription`
+
+[source,java]
+----
+public String getImageDescription(String userMessage, String image, String model)
+----
+
+* Erzeugt einen `LlmRequest` über den Builder mit `addUserMsgWithImage`.
+
+* Setzt `temperature = 0.0` (deterministische Ausgabe).
+
+* Ruft `LlmClient.sendRequest` auf.
+
+* Anhang an das Ergebnis: Modellname, Tokenzahl, Laufzeit, Tokens/Sekunde.
+
+==== Test-Modelle (main)
+
+[cols="3,7"]
+|===
+| Modell-Bezeichnung
+| Anmerkung
+
+| `qwen3.5:4b`, `qwen3.5:9b`, `qwen3.5:35b`
+| Lokale Qwen-Modelle via Ollama
+
+| `qwen3-vl:30b`
+| Vision-Language-Modell
+
+| `gpt-5.6-luna`
+| OpenAI-Modell
+
+| `claude-haiku-4-5`
+| Anthropic-Modell
+|===
+
+=== 4.2 SimpleUebersetzungService
+
+Übersetzt einen vollständigen Textabschnitt von einer fremden Sprache nach Deutsch.
+
+==== Methode `getUebersetzungen`
+
+[source,java]
+----
+public String getUebersetzungen(String word, String sprache, String model)
+----
+
+* Systemnachricht: `"Du bist {sprache} Deutsch Übersetzer"`
+
+* User-Nachricht: Bittet um eine rein deutsche Übersetzung des übergebenen Textes.
+
+* `temperature = 0.0`
+
+* Das Ergebnis wird mit Metadaten (Modell, Tokens, Zeit, T/s) angereichert.
+
+=== 4.3 SimpleWoerterbuchService
+
+Liefert Übersetzungen für ein einzelnes Wort im Pipelined-Format.
+
+==== Methode `getUebersetzungen`
+
+[source,java]
+----
+public String getUebersetzungen(String word, String sprache, String model)
+----
+
+* Systemnachricht: `"Du bist {sprache} Deutsch Übersetzer"`
+
+* User-Nachricht: Fordert Übersetzungen im Format `Übersetzung1|Übersetzung2|...`
+
+* Kein `temperature`-Parameter gesetzt (Default des Modells).
+
+* Testaufrufe: `cikarmak` (Türkisch), `volar` (Portugiesisch) mit `gpt-5.4-nano`.
+
+== 5. Package `com.eb.base.ai_service.llm_client.api`
+
+=== 5.1 ILlmClient
+
+Die zentrale Schnittstelle für alle LLM-Provider.
+
+[source,java]
+----
+public interface ILlmClient {
+    LlmResponse sendRequest(LlmRequest request) throws IOException, InterruptedException;
+}
+----
+
+=== 5.2 LlmClient
+
+Öffentlicher Einstiegspunkt. Delegiert an die `LlmClientFactory`.
+
+[source,java]
+----
+LlmClient client = new LlmClient();
+LlmResponse response = client.sendRequest(request);
+----
+
+Der Konstruktor erzeugt eine `LlmClientFactory`. `sendRequest` fragt die Factory nach dem passenden `ILlmClient` (Ollama, OpenAI, Anthropic) und leitet den Aufruf weiter.
+
+=== 5.3 LlmRequest
+
+Repräsentiert eine vollständige Anfrage an ein LLM.
+
+[cols="2,3,5"]
+|===
+| Feld / Methode
+| Typ
+| Beschreibung
+
+| `model`
+| `String`
+| Bezeichnung des zu verwendenden Modells (z. B. `qwen3.5:9b`).
+
+| `messages`
+| `List<LlmMessage>`
+| Die Dialog-Nachrichten (System, User, Assistant).
+
+| `parameters`
+| `List<Parameter>`
+| Zusätzliche Parameter wie `temperature`, `max_tokens`.
+
+| `contentMemo`
+| `String`
+| Optionaler human-readable Text für `toString()`.
+
+| `lastResponse`
+| `LlmResponse` *(JsonIgnore)*
+| Die zuletzt erhaltene Antwort; nicht serialisiert.
+
+| `requestId`
+| `Long` *(JsonIgnore)*
+| Zeitstempel-basierte ID für die Persistenz.
+
+| `builder()`
+| –
+| Statische Methode, die den `LlmRequestBuilder` startet.
+
+| `addParameter(Parameter)`
+| –
+| Hängt einen Parameter an die Liste an.
+
+| `getParameter(String name)`
+| `Parameter`
+| Sucht nach einem Parameter anhand des Namens.
+
+| `hasParameter(String name)`
+| `boolean`
+| Prüft, ob ein Parameter vorhanden ist.
+
+| `addUserMsg(String)`
+| –
+| Hängt eine User-Nachricht an.
+
+| `addResponse(LlmResponse)`
+| –
+| Hängt die Antwort als `assistant`-Nachricht an und speichert sie in `lastResponse`.
+
+| `getLastLlmMessageInfo()`
+| `LastLlmMessageInfo`
+| Gibt die letzten System-, User- und Assistant-Nachrichten zurück.
+|===
+
+==== Builder-Muster
+
+Der Builder ist in vier Schnittstellen aufgeteilt, um die Aufrufreihenfolge zu erzwingen:
+
+[cols="3,7"]
+|===
+| Schnittstelle
+| Methoden
+
+| `LlmRequestBuilderSystemOrUserMsg`
+| `addSystemMsg`, `addUserMsg`, `addRequestMsg`, `addUserMsgWithImage`
+
+| `LlmRequestBuilderUserMsg`
+| `addUserMsg`, `setModel`
+
+| `LlmRequestBuilderModel`
+| `setModel`
+
+| `LlmRequestBuilderFinish`
+| `addParameter`, `build`
+|===
+
+Beispiel:
+
+[source,java]
+----
+LlmRequest request = LlmRequest.builder()
+        .addSystemMsg("Du bist ein Übersetzer.")
+        .addUserMsg("Übersetze: Hello")
+        .setModel("qwen3.5:9b")
+        .addParameter("temperature", 0.0)
+        .build();
+----
+
+==== `addRequestMsg` – Inline-Systemnachricht
+
+Die Methode `addRequestMsg(String msg, List<String> imageFileNames)` erkennt das Muster `<<Systemtext>>Usertext` und trennt daraus eine System- und eine User-Nachricht.
+
+=== 5.4 LlmResponse
+
+Enthält die Antwort eines LLM-Aufrufs.
+
+[cols="2,2,6"]
+|===
+| Feld
+| Typ
+| Beschreibung
+
+| `status`
+| `int`
+| HTTP-Statuscode der Antwort.
+
+| `answer`
+| `String`
+| Der Text der Antwort.
+
+| `model`
+| `String`
+| Tatsächlich verwendetes Modell.
+
+| `reasoning`
+| `String`
+| Optionale Reasoning-Ausgabe (z. B. bei o1-Modellen).
+
+| `error`
+| `String`
+| Fehlermeldung bei Fehlern.
+
+| `inputTokens`
+| `int`
+| Anzahl der Input-Tokens.
+
+| `outputTokens`
+| `int`
+| Anzahl der Output-Tokens.
+
+| `totalTokens`
+| `int`
+| Gesamt-Token-Anzahl (berechnet via `calcTokens()`).
+
+| `request`
+| `LlmRequest` *(JsonIgnore)*
+| Verweis auf die ursprüngliche Anfrage.
+
+| `secondsToRun`
+| `double`
+| Laufzeit in Sekunden.
+
+| `tokensPerSecond`
+| `double`
+| Berechnete Token-Rate.
+|===
+
+==== Hilfsmethoden
+
+* `calcTokens()` – Berechnet `totalTokens = inputTokens + outputTokens` und `tokensPerSecond = totalTokens / secondsToRun`, falls noch nicht gesetzt.
+
+* `getMessageInfo()` – Erzeugt ein `LlmMessageInfo`-Objekt aus den Response-Feldern.
+
+* `getShortDetails()` – Kompakte Text-Zusammenfassung (Modell, Tokens, Zeit, T/s). Bei Qwen-Modellen wird zusätzlich der Ollama-Host ausgegeben.
+
+* `getDetails()` – Detaillierte, formatierte Ausgabe. Ersetzt interne Hostnamen (`macbook-air-von-ekkart` → `Mac Book Air M4 16GB`, `macbookeb` → `Mac Book Pro M1 Pro 16GB`).
+
+* `getAnswerWithDetails()` – Kombiniert `getShortDetails()` und `getAnswer()`.
+
+=== 5.5 LlmMessage
+
+Repräsentiert eine einzelne Nachricht im Dialog.
+
+[cols="2,2,6"]
+|===
+| Feld / Methode
+| Typ
+| Beschreibung
+
+| `role`
+| `String`
+| Eine von `system`, `user`, `assistant`.
+
+| `contentParts`
+| `List<ContentPart>`
+| Liste von Text- und/oder Bild-Teilen.
+
+| `messageInfo`
+| `LlmMessageInfo`
+| Token-Metadaten (nur bei Assistant-Nachrichten).
+
+| `imageFileNames`
+| `List<String>` *(JsonIgnore)*
+| Liste der zugehörigen Bildpfade.
+
+| `textFileNames`
+| `List<String>` *(JsonIgnore)*
+| Liste der zugehörigen Textdateipfade.
+
+| `addText(String)`
+| –
+| Hängt einen `ContentPartText` an.
+
+| `addImageFromPath(String)`
+| –
+| Liest eine Datei, codiert sie Base64 und hängt ein `ContentPartImage` an. Erkennt `.png` und `.jpg`/`.jpeg`.
+
+| `addImage(String mimeType, String data)`
+| –
+| Hängt ein `ContentPartImage` mit vorgegebenem Base64-Datenstring an.
+
+| `getMessage()`
+| `String`
+| Voller Text inkl. `<role>`-Header und allen ContentParts.
+
+| `getMessageString()`
+| `String`
+| Kompakt-Version; Bilder werden als `"Image ..."` dargestellt.
+
+| `isSystem()` / `isUser()` / `isAssistent()`
+| `boolean`
+| Rollenprüfung.
+|===
+
+=== 5.6 LlmMessageInfo
+
+Einfaches DTO mit Token-Metadaten:
+
+[cols="2,2,6"]
+|===
+| Feld
+| Typ
+| Beschreibung
+
+| `InputTokens`
+| `int`
+| Eingabe-Tokens
+
+| `OutputTokens`
+| `int`
+| Ausgabe-Tokens
+
+| `TotalTokens`
+| `int`
+| Gesamt-Tokens
+
+| `model`
+| `String`
+| Modellname
+
+| `secondsToRun`
+| `double`
+| Laufzeit in Sekunden
+
+| `tokensPerSecond`
+| `double`
+| Token-Rate
+|===
+
+=== 5.7 Parameter
+
+Immutable Record mit `name` (String) und `value` (Object). Wird z. B. für `temperature` und `max_tokens` verwendet.
+
+=== 5.8 ImageUrl
+
+DTO für eine Bild-URL mit optionalem Detail-Level (`auto`, `low`, `high`).
+
+=== 5.9 LlmRequestService
+
+Statische Hilfsklasse für schnelle Aufrufe:
+
+* `sendRequest(LlmRequest)` – Erzeugt eine Factory, sendet die Anfrage, hängt die Antwort an den Request an.
+
+* `sendSimpleRequest(String message, String modelName, String host)` – Kurzfassung: erstellt einen Request, setzt den Ollama-Host und sendet.
+
+== 6. Package `com.eb.base.ai_service.llm_client.infrastructure`
+
+=== 6.1 LlmClientFactory
+
+Zentrale Factory, die anhand des Modellnamens den passenden `ILlmClient` zurückliefert.
+
+==== Modellauflösung
+
+1. `LlmModelProvider.getModel(modelName)` wird aufgerufen.
+
+2. Je nach `company`-Feld des `LlmModel` wird der passende Client instanziiert:
+
+[cols="3,4,3"]
+|===
+| Provider
+| Bedingung
+| Erzeugter Client
+
+| Anthropic
+| `model.isAnthropic()`
+| `AnthropicClient(httpClient, anthropicKey)`
+
+| OpenAI
+| `model.isOpenAi()`
+| `OpenAiClient(httpClient, openAiKey)`
+
+| Ollama
+| `model.isOllama()`
+| `OllamaClient(httpClient)`
+|===
+
+==== API-Keys
+
+Die Keys werden verschlüsselt (Twofish) aus der Datei, deren Pfad `AiServiceConfig.getGeheimnisFileName()` liefert, gelesen. Jede Zeile wird dechifriert; der Key-Teil nach dem ersten `=` wird extrahiert. Die Ladung ist lazy und thread-unsicher (kein Synchronisationsmechanismus).
+
+=== 6.2 LlmModel
+
+[cols="2,2,6"]
+|===
+| Feld
+| Typ
+| Beschreibung
+
+| `company`
+| `String`
+| einer von `ollama`, `openai`, `anthropic`
+
+| `modelName`
+| `String`
+| z. B. `qwen3.5:9b`, `gpt-5.6-luna`, `claude-haiku-4-5`
+
+| `isAnthropic()`
+| `boolean`
+| `company.equals("anthropic")`
+
+| `isOpenAi()`
+| `boolean`
+| `company.equals("openai")`
+
+| `isOllama()`
+| `boolean`
+| `company.equals("ollama")`
+
+| `getInputTokenPrice()`
+| `int`
+| Aktuell immer 0 (Platzhalter).
+
+| `getOutputTokenPrice()`
+| `int`
+| Aktuell immer 0 (Platzhalter).
+|===
+
+=== 6.3 LlmModelProvider
+
+Lädt die Modellliste aus einer Tab-getrennten Datei (Pfad aus `AiEinstellungen.getFilePath("AiServices/Modelle.txt")`).
+
+[cols="2,8"]
+|===
+| Spalte 1
+| Spalte 2
+
+| `company` (z. B. `ollama`)
+| `modelName` (z. B. `qwen3.5:9b`)
+|===
+
+==== Methoden
+
+* `getModel(String modelName)` – Sucht exakt nach dem Modellnamen.
+
+* `findModel(String modelName)` – Alias für `getModel`.
+
+* `isAllowedParameter(String name, String modelName)` – Für OpenAI-Modelle wird `temperature` **nicht** erlaubt; für alle anderen Provider ist `temperature` erlaubt. Alle anderen Parameter werden erlaubt.
+
+* `getModels()` – Gibt die vollständige Liste zurück.
+
+=== 6.4 TokenLogger
+
+Protokolliert jede Anfrage in eine Datei (Pfad aus `AiServiceConfig.getTokenFileName()`).
+
+==== Log-Zeilenformat
+
+----
+yyyy-MM-dd HH:mm:ss {model} IT:{inputTokens} OT:{outputTokens} TT:{totalTokens} T:{seconds} TS:{tokensPerSecond}
+----
+
+Die Datei wird im Anhang-Modus (APPEND) geschrieben. Fehler beim Schreiben werden stillschweigend ignoriert.
+
+== 7. Package `...llm_client.infrastructure.contentmapping`
+
+=== 7.1 ContentPart (Sealed Interface)
+
+Definiert zwei Untertypen:
+
+[cols="3,4,3"]
+|===
+| Untertyp
+| Felder
+| Zweck
+
+| `ContentPartText`
+| `String text`
+| Reiner Textblock
+
+| `ContentPartImage`
+| `String mimeType`, `String base64`
+| Base64-codierte Bilddaten
+|===
+
+Die Jackson-Serialisierung nutzt `@JsonTypeInfo` mit dem Property `type` und `@JsonSubTypes`.
+
+=== 7.2 ContentPartToMapMapper (Strategy)
+
+Schnittstelle, die die Transformation von `ContentPart` in provider-spezifische `Map<String, Object>`-Strukturen kapselt.
+
+[cols="3,7"]
+|===
+| Methode
+| Beschreibung
+
+| `map(String role, ContentPart part)`
+| Transformiert einen einzelnen ContentPart in das Ziel-JSON-Format.
+
+| `getContentIdentifier()`
+| Gibt den JSON-Schlüssel zurück, unter dem die Nachrichten stehen (z. B. `messages`, `input`).
+
+| `shouldSendSystemSeparately()`
+| `true` → Systemnachricht wird in ein separates `system`-Feld gezogen (Anthropic). Default: `false`.
+
+| `replaceFileNamesWithFileContents(String)`
+| Default: ruft `JsonFileAppendUtil.appendAllFiles` auf, um `<$ datei.txt>`-Marker zu ersetzen.
+|===
+
+=== 7.3 Konkrete Mapper
+
+[cols="3,3,4"]
+|===
+| Mapper
+| ContentIdentifier
+| Besonderheit
+
+| `ContentPartMapperOllama`
+| `messages`
+| Bild als `image_url` mit `data:mime;base64,...`
+
+| `ContentPartMapperOpenAi`
+| `input`
+| Text-Typ wechselt je nach Rolle: `input_text` (user) / `output_text` (assistant). Bild als `input_image`.
+
+| `ContentPartMapperAnthropic`
+| `messages`
+| Bild in `source`-Objekt mit `type: base64`, `media_type`, `data`. System wird separat gesendet.
+|===
+
+=== 7.4 LlmMessageMapper / LlmMessageRaw
+
+* `LlmMessageMapper` wandelt eine `LlmMessage` in eine `LlmMessageRaw` um.
+
+* `LlmMessageRaw` enthält `role` und `List<Map<String, Object>> content` und kann via `getJsonString()` serialisiert werden.
+
+=== 7.5 LlmRequestJsonMapper
+
+Erzeugt das vollständige JSON für den HTTP-Aufruf:
+
+1. Alle `LlmMessage`-Objekte werden via `LlmMessageMapper` in `LlmMessageRaw` umgewandelt.
+
+2. Falls der Mapper `shouldSendSystemSeparately()` zurückgibt (Anthropic), wird die erste System-Nachricht in ein eigenes `system`-Feld verschoben.
+
+3. Parameter werden nur hinzugefügt, wenn `LlmModelProvider.isAllowedParameter` sie erlaubt.
+
+4. Das Ergebnis wird via Jackson `ObjectMapper` serialisiert.
+
+=== 7.6 JsonFileAppendUtil
+
+Ermöglicht das Einbetten von Dateiinhalten in Prompts über Marker:
+
+[cols="3,7"]
+|===
+| Marker
+| Bedeutung
+
+| `<$ datei.txt`
+| Fügt den Inhalt der regulären Datei als JSON an.
+
+| `<$P bild.jpg`
+| Fügt eine Bilddatei zur Bild-Liste hinzu.
+
+| `<$D verzeichnis/`
+| Ersetzt den Marker durch alle Dateien im Verzeichnis (einem `<$`-Marker pro Datei).
+
+| `<$DA verzeichnis/`
+| Wie `<$D`, aber rekursiv (alle Unterverzeichnisse).
+|===
+
+* Alle Pfade müssen unter einem vorher via `addAllowedDirectories` freigegebenen Verzeichnis liegen (Security-Check).
+
+* Die Klasse ist thread-sicher (`ConcurrentHashMap`, `ConcurrentHashMap.newKeySet()`).
+
+== 8. Package `...llm_client.infrastructure.ollama`
+
+=== 8.1 OllamaClient
+
+[cols="3,7"]
+|===
+| Konstante / Feld
+| Wert / Beschreibung
+
+| `HOST_MACSTUDIO`
+| `"macstudio"`
+
+| `HOST_MACSTUDIO2`
+| `"192.168.178.119"`
+
+| `HOST_MACBOOK`
+| `"macbookeb"`
+
+| `HOST_MAC`
+| `"macs"`
+
+| `HOST_MACBOOKAIR`
+| `"macbookair"`
+
+| `HOST_XT13`
+| `"xt13"`
+
+| `HOSTS`
+| Array: `macs`, `macstudio`, `192.168.178.119`, `macbookeb`, `xt13`, `127.0.0.1`
+
+| `QWEN35_4` / `QWEN35_9`
+| `"qwen3.5:4b"` / `"qwen3.5:9b"`
+
+| `MODELLE`
+| Aktuell: `QWEN35_4`, `QWEN35_9`
+
+| `HOST`
+| Statisches Feld; aktueller Ollama-Host. Wird beim ersten Aufruf via `determineHost()` gesetzt.
+|===
+
+==== `determineHost()`
+
+Durchläuft die `HOSTS`-Liste asynchron und prüft via `CheckNetworkService.isOllamaAvailableAsync` (HTTP GET auf `http://host:11434/api/version`, Timeout 3 s). Ist kein Host in der Liste erreichbar, scannt die Methode die IPv4-Adressen `192.168.178.1` bis `192.168.178.254` synchron. Der erste erreichbare Host wird in `HOST` gespeichert.
+
+==== `sendRequest`
+
+* Baut das JSON via `LlmRequestJsonMapper` + `ContentPartMapperOllama`.
+
+* POST an `http://{HOST}:11434/v1/chat/completions`, Timeout 30 Minuten.
+
+* Parst die Antwort in `OllamaResponse`.
+
+* Erzeugt `LlmResponse`, ruft `calcTokens()` und `TokenLogger.log()` auf.
+
+==== `getAvailableModels()`
+
+* GET auf `http://{HOST}:11434/api/tags`.
+
+* Parst `models[].name` und gibt eine `List<String>` zurück.
+
+==== `getAvailableModelsString(String)`
+
+Statische Hilfsmethode: ruft `getAvailableModels` ab und erzeugt eine Tab-getrennte Zeichenkette im Format der Modeldatei:
+
+----
+ollama\tqwen3.5:9b\t0,0\t0,0\t1
+----
+
+=== 8.2 OllamaResponse
+
+JSON-Entität für die Ollama-API (kompatibel zum OpenAI-Format):
+
+[cols="2,3,5"]
+|===
+| Feld
+| Typ
+| Beschreibung
+
+| `id`, `object`, `created`, `model`
+| –
+| Meta-Daten der Antwort
+
+| `systemFingerprint`
+| `String`
+| `@JsonProperty("system_fingerprint")`
+
+| `choices`
+| `List<Choice>`
+| Liste der Antworten (meist eine)
+
+| `usage`
+| `Usage`
+| Token-Verbrauch
+|===
+
+==== Innere Klassen
+
+* **Choice**: `index`, `message` (role, content, reasoning), `finishReason`
+
+* **Message**: `role`, `content`, `reasoning`
+
+* **Usage**: `promptTokens` (`prompt_tokens`), `completionTokens` (`completion_tokens`), `totalTokens` (`total_tokens`), `promptTokensDetails`
+
+=== 8.3 ContentPartMapperOllama
+
+Transformiert:
+
+* `ContentPartText` → `{ "type": "text", "text": "..." }`
+
+* `ContentPartImage` → `{ "type": "image_url", "image_url": { "url": "data:{mime};base64,{data}" } }`
+
+== 9. Package `...llm_client.infrastructure.openai`
+
+=== 9.1 OpenAiClient
+
+* POST an `https://api.openai.com/v1/responses`, Timeout 30 Minuten.
+
+* Autorisierung: `Bearer {apiKey}`.
+
+* Parst die Antwort in `OpenAiResponse`.
+
+* Durchläuft `output`-Liste, sucht den ersten Eintrag mit `type == "message"` und extrahiert `content[0].text` als Antwort.
+
+* Setzt `inputTokens`, `outputTokens`, `totalTokens` aus dem `usage`-Block.
+
+* Ruft `TokenLogger.log()` auf.
+
+=== 9.2 ContentPartMapperOpenAi
+
+* Text-Typ ist rollenabhängig: `input_text` für User, `output_text` für Assistant.
+
+* Bild: `{ "type": "input_image", "image_url": "data:{mime};base64,{data}" }`
+
+* ContentIdentifier: `input`
+
+=== 9.3 OpenAiResponse
+
+Enthält die Struktur der OpenAI Responses-API:
+
+[cols="2,3,5"]
+|===
+| Feld
+| Typ
+| Beschreibung
+
+| `id`, `object`, `created_at`, `status`
+| –
+| Meta-Daten
+
+| `model`
+| `String`
+| Verwendetes Modell
+
+| `output`
+| `List<Output>`
+| Ausgabe-Einträge (message, function_call, …)
+
+| `usage`
+| `Usage`
+| `input_tokens`, `output_tokens`, `total_tokens`, Detail-Maps
+
+| `reasoning`
+| `Reasoning`
+| `context`, `effort`, `mode`, `summary`
+
+| `billing`
+| `Billing`
+| `payer`
+|===
+
+==== Innere Klassen
+
+* **Output**: `id`, `type`, `status`, `phase`, `role`, `content` (List of `Content`)
+
+* **Content**: `type`, `annotations`, `logprobs`, `text`
+
+* **Reasoning**: `context`, `effort`, `mode`, `summary`
+
+* **Usage**: `input_tokens`, `output_tokens`, `total_tokens`, `input_tokens_details`, `output_tokens_details`
+
+* **Text / Format**: `format.type`
+
+== 10. Package `...llm_client.infrastructure.anthropic`
+
+=== 10.1 AnthropicClient
+
+* POST an `https://api.anthropic.com/v1/messages`.
+
+* Header: `x-api-key`, `anthropic-version: 2023-06-01`, `Content-Type: application/json`.
+
+* Setzt standardmäßig `max_tokens = 20000`, falls nicht vorhanden.
+
+* Parst in `AnthropicResponse`.
+
+* Extrahiert den ersten Content-Eintrag mit `type == "text"`.
+
+* `TokenLogger.log()` wird aufgerufen.
+
+=== 10.2 AnthropicResponse
+
+[cols="2,3,5"]
+|===
+| Feld
+| JSON-Key
+| Beschreibung
+
+| `model`
+| `model`
+| Verwendetes Modell
+
+| `id`
+| `id`
+| Antwort-ID
+
+| `type`
+| `type`
+| Antwort-Typ
+
+| `role`
+| `role`
+| Rolle (meist `assistant`)
+
+| `content`
+| `content`
+| Liste von `Content`-Objekten
+
+| `stopReason`
+| `stop_reason`
+| Grund für Beendigung
+
+| `stopSequence`
+| `stop_sequence`
+| Stop-Sequenz
+
+| `stopDetails`
+| `stop_details`
+| Zusätzliche Stop-Details (Object)
+
+| `usage`
+| `usage`
+| Token-Verbrauch inkl. Cache
+|===
+
+==== Usage (Anthropic-spezifisch)
+
+[cols="3,4,3"]
+|===
+| Feld
+| JSON-Key
+| Beschreibung
+
+| `inputTokens`
+| `input_tokens`
+| Eingabe-Tokens
+
+| `cacheCreationInputTokens`
+| `cache_creation_input_tokens`
+| Tokens für Cache-Erstellung
+
+| `cacheReadInputTokens`
+| `cache_read_input_tokens`
+| Tokens aus dem Cache
+
+| `cacheCreation`
+| `cache_creation`
+| `CacheCreation`-Objekt (ephemeral 5 min / 1 h)
+
+| `outputTokens`
+| `output_tokens`
+| Ausgabe-Tokens
+
+| `serviceTier`
+| `service_tier`
+| Service-Stufe
+
+| `inferenceGeo`
+| `inference_geo`
+| Inferenz-Region
+|===
+
+=== 10.3 ContentPartMapperAnthropic
+
+* Text → `{ "type": "text", "text": "..." }`
+
+* Bild → `{ "type": "image", "source": { "type": "base64", "media_type": "...", "data": "..." } }`
+
+* `shouldSendSystemSeparately()` liefert `true` → die Systemnachricht wird in ein separates `system`-Feld im Request-Body verschoben.
+
+== 11. Package `com.eb.base.ai_service.llmreqstore`
+
+=== 11.1 LlmRequestStoreItem
+
+[cols="2,3,5"]
+|===
+| Feld
+| Typ
+| Beschreibung
+
+| `requestId`
+| `long`
+| Zeitstempel-basierte ID (`Date.getTime()`).
+
+| `llmRequest`
+| `LlmRequest`
+| Die vollständige Anfrage inkl. Messages und Response.
+
+| `title`
+| `String`
+| Optionaler Titel.
+
+| `description`
+| `String`
+| Optionale Beschreibung.
+|===
+
+=== 11.2 LlmRequestManager
+
+Singleton, der alle LLM-Anfragen in verschlüsselten `.dat`-Dateien persistiert.
+
+==== Speicherort
+
+`{AiEinstellungen.AiPfad}/requests/Request_{requestId}.dat`
+
+==== Ablauf
+
+* **Konstruktor**: Ruft `loadRequests()` – liest alle `Request_*.dat`-Dateien, dechiffriert sie mit `Crypt.loadEncryptedFile` (Passwort aus `GlobaleEinstellungen.getSimplePassword()`), deserialisiert sie und füllt Liste + Map.
+
+* **`store(LlmRequest)`**: Prüft, ob ein Item mit derselben `requestId` existiert. Falls ja → aktualisieren (neu schreiben). Falls nein → `storeNewRequest` (neue ID = `Date.getTime()`, Datei schreiben, in Liste + Map eintragen).
+
+* **`deleteRequest(LlmRequest)`**: Entfernt aus Liste und Map, löscht die zugehörige `.dat`-Datei.
+
+* **`getLlmRequests()`**: Gibt alle `LlmRequest`-Objekte als Stream zurück.
+
+* **`getLlmRequest(Long id)`**: Rückgabe per ID.
+
+==== Serialisierung
+
+* `ObjectMapper` mit: `ACCEPT_CASE_INSENSITIVE_PROPERTIES`, `WRITE_DATES_AS_TIMESTAMPS` aus, `FAIL_ON_UNKNOWN_PROPERTIES` aus, `JavaTimeModule` registriert.
+
+* Verschleicherung: `Crypt.saveEncryptedFile` (Twofish-basiert).
+
+== 12. Package `...llm_client.api` – CheckNetworkService
+
+=== 12.1 CheckNetworkService
+
+Statische Helfer für Netzwerkprüfungen.
+
+==== `isOllamaAvailableAsync(String host, int port)`
+
+* Erzeugt einen `HttpClient` (HTTP/1.1, Connect-Timeout 3 s).
+
+* GET auf `http://{host}:11434/api/version`, Request-Timeout 3 s.
+
+* Liefert `CompletableFuture<Boolean>`: `true` wenn Status < 300, sonst `false`.
+
+==== `isExistingHost(String url)`
+
+* Prüft, ob eine `InetAddress` existiert und einer lokalen `NetworkInterface` zugeordnet ist.
+
+==== `main`
+
+Testet alle `OllamaClient.HOSTS` asynchron und druckt das Ergebnis.
+
+== 13. Konfigurationsdateien
+
+=== 13.1 AiServiceConfig.ini
+
+[cols="3,3,4"]
+|===
+| Abschnitt
+| Key
+| Bedeutung
+
+| `[Einstellungen]`
+| `AiModelFileName`
+| Pfad zur Modeldatei (Tab-getrennt).
+
+| `[Einstellungen]`
+| `AiGeheimnisFileName`
+| Pfad zur verschlüsselten Key-Datei (Twofish).
+
+| `[Einstellungen]`
+| `AiTokenFileName`
+| Pfad zur Token-Logdatei.
+
+| `[Data]`
+| `Data1`, `Data2`
+| Frei nutzbare Platzhalter.
+|===
+
+=== 13.2 Modelle.txt (Tab-getrennt)
+
+[cols="3,4,3,3,3"]
+|===
+| Spalte 1
+| Spalte 2
+| Spalte 3
+| Spalte 4
+| Spalte 5
+
+| `company`
+| `modelName`
+| Input-Token-Preis
+| Output-Token-Preis
+| aktiv (1/0)
+|===
+
+Beispielzeile:
+
+----
+ollama	qwen3.5:9b	0,0	0,0	1
+openai	gpt-5.6-luna	1,5	2,0	1
+anthropic	claude-haiku-4-5	0,3	1,5	1
+----
+
+=== 13.3 Geheimnis-Datei (Twofish-verschlüsselt)
+
+Zwei Zeilen:
+
+----
+openai_key=<apiKey>
+anthropic_key=<apiKey>
+----
+
+Jede Zeile wird mit dem Passwort aus `GlobaleEinstellungen.getSimplePassword()` dechiffriert.
+
+== 14. Datenfluss (end-to-end)
+
+----
+1. Aufrufer
+   └── LlmRequest.builder()
+         .addSystemMsg(...)
+         .addUserMsg(...)
+         .setModel("qwen3.5:9b")
+         .addParameter("temperature", 0.0)
+         .build()
+         │
+2. LlmClient.sendRequest(request)
+         └── LlmClientFactory.getLlmClient(request)
+               ├── LlmModelProvider.getModel("qwen3.5:9b")
+               │     └── LlmModel { company="ollama", modelName="qwen3.5:9b" }
+               └── new OllamaClient(httpClient)
+         │
+3. OllamaClient.sendRequest(request)
+         ├── LlmRequestJsonMapper + ContentPartMapperOllama → JSON
+         ├── POST http://{HOST}:11434/v1/chat/completions
+         ├── Parse OllamaResponse
+         ├── LlmResponse (calcTokens)
+         └── TokenLogger.log(request, response)
+         │
+4. Ergebnis: LlmResponse mit answer, model, tokens, secondsToRun
+----
+
+== 15. Provider-Vergleich
+
+[cols="2,2,2,2,2"]
+|===
+| Aspekt
+| Ollama
+| OpenAI
+| Anthropic
+
+| Endpoint
+| `http://{host}:11434/v1/chat/completions`
+| `https://api.openai.com/v1/responses`
+| `https://api.anthropic.com/v1/messages`
+
+| Content-Identifier
+| `messages`
+| `input`
+| `messages`
+
+| System separat?
+| Nein
+| Nein
+| Ja (`system`-Feld)
+
+| Text-Typ
+| `text`
+| `input_text` / `output_text`
+| `text`
+
+| Bild-Repräsentation
+| `image_url` + data-URI
+| `input_image` + data-URI
+| `image` + `source`-Objekt
+
+| Temperatur erlaubt?
+| Ja
+| Nein
+| Ja
+
+| API-Key nötig?
+| Nein (leerer Bearer)
+| Ja (Bearer)
+| Ja (`x-api-key`)
+
+| Default max_tokens
+| –
+| –
+| 20000
+
+| Timeout
+| 30 Minuten
+| 30 Minuten
+| Standard HttpClient
+|===
+
+== 16. Sicherheitshinweise
+
+* API-Keys werden ausschließlich verschlüsselt (Twofish) auf der Festplatte gespeichert und beim Bedarf dechiffriert.
+
+* `JsonFileAppendUtil` begrenzt den Dateizugriff auf explizit freigegebene Verzeichnisse (`allowedPaths`).
+
+* Die verschlüsselte Speicherung der LLM-Anfragen (`LlmRequestManager`) nutzt `Crypt.saveEncryptedFile` / `Crypt.loadEncryptedFile`.
+
+* Das `LlmClientFactory.loadKeys`-Verfahren ist **nicht** thread-sicher; bei gleichzeitiger Initialisierung durch mehrere Threads kann es zu Race-Conditions kommen.
+
+== 17. Bekannte Einschränkungen
+
+* `LlmModel.getInputTokenPrice()` und `getOutputTokenPrice()` liefern stets `0` – die Preislogik ist noch nicht implementiert.
+
+* `OllamaClient` setzt `inputTokens = 0` und `outputTokens = 0` und nutzt nur `totalTokens` aus der Antwort.
+
+* `LlmRequestManager.deleteRequest` ruft `getLlmRequestStoreItem`, das ein potenziell `null`-Ergebnis liefern kann (NPE-Risiko, wenn die ID nicht in der Map gefunden wird).
+
+* `OllamaClient.getAvailableModelsString` akzeptiert einen String-Parameter `s`, der nicht verwendet wird (Überrest aus einer früheren Signatur).
+
+* Die `LlmRequestBuilder`-Klasse implementiert `LlmRequestBuilderUserMsg.addUserMsg`, das zurück `this` (als `LlmRequestBuilderFinish`) liefert, was vom Interface `LlmRequestBuilderUserMsg` so definiert ist – die Return-Typ-Äußerung im Interface ist `LlmRequestBuilderUserMsg`, die Implementierung gibt aber `this` zurück, was durch die Mehrfachimplementierung zulässig ist.
+
+== 18. Abhängigkeiten
+
+[cols="3,7"]
+|===
+| Bibliothek
+| Zweck
+
+| Jackson (`com.fasterxml.jackson`)
+| JSON-Serialisierung / -Deserialisierung
+
+| Lombok (`@Getter`, `@Setter`)
+| Reduktion von Boilerplate
+
+| `com.eb.base.crypt` (Twofish)
+| Verschlüsselung der Key-Datei und der Request-Store-Dateien
+
+| `com.eb.base.inifile`
+| INI-Datei-Handling für `AiServiceConfig`
+
+| `java.net.http.HttpClient`
+| HTTP-Kommunikation mit den LLM-Servern
+
+| `JavaTimeModule`
+| Jackson-Unterstützung für `java.time`-Typen
+|===
+
+== 19. Verzeichnisstruktur
+
+----
+com/eb/base/ai_service/
+├── AiServiceConfig.java
+├── ai_chat/
+│   ├── SimpleImageService.java
+│   ├── SimpleUebersetzungService.java
+│   └── SimpleWoerterbuchService.java
+├── llmreqstore/
+│   ├── LlmRequestManager.java
+│   └── LlmRequestStoreItem.java
+└── llm_client/
+    ├── api/
+    │   ├── CheckNetworkService.java
+    │   ├── ImageUrl.java
+    │   ├── ILlmClient.java
+    │   ├── LlmClient.java
+    │   ├── LlmMessage.java
+    │   ├── LlmMessageInfo.java
+    │   ├── LlmRequest.java
+    │   ├── LlmRequestBuilder.java
+    │   ├── LlmRequestBuilderFinish.java
+    │   ├── LlmRequestBuilderModel.java
+    │   ├── LlmRequestBuilderSystemOrUserMsg.java
+    │   ├── LlmRequestBuilderUserMsg.java
+    │   ├── LlmRequestService.java
+    │   ├── LlmResponse.java
+    │   └── Parameter.java
+    └── infrastructure/
+        ├── ILlmClient.java
+        ├── LlmClientFactory.java
+        ├── LlmModel.java
+        ├── LlmModelProvider.java
+        ├── TokenLogger.java
+        ├── anthropic/
+        │   ├── AnthropicClient.java
+        │   ├── AnthropicResponse.java
+        │   └── ContentPartMapperAnthropic.java
+        ├── ollama/
+        │   ├── OllamaClient.java
+        │   ├── OllamaResponse.java
+        │   └── ContentPartMapperOllama.java
+        ├── openai/
+        │   ├── OpenAiClient.java
+        │   ├── OpenAiResponse.java
+        │   └── ContentPartMapperOpenAi.java
+        └── contentmapping/
+            ├── ContentPart.java
+            ├── ContentPartImage.java
+            ├── ContentPartText.java
+            ├── ContentPartToMapMapper.java
+            ├── JsonFileAppendUtil.java
+            ├── LlmMessageMapper.java
+            ├── LlmMessageRaw.java
+            └── LlmRequestJsonMapper.java
+----
+
+== 20. Zusammenfassung
+
+Das `AiService`-Subsystem ist ein modularer, provider-unabhängiger LLM-Zugang, der über ein Builder-Muster für Requests, ein Strategy-Muster für die Content-Mapping je Provider und eine Factory für die Client-Auswahl arbeitet. Die Konfiguration ist INI-basiert, die Persistenz verschlüsselt, und das Token-Logging wird zentral durch `TokenLogger` gehandhabt. Die drei Demo-Dienste (`SimpleImageService`, `SimpleUebersetzungService`, `SimpleWoerterbuchService`) dienen als schnellstartbare Testfälle für Bildanalyse, Textübersetzung und Wörterbuchabfrage.
