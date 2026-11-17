@@ -10,7 +10,7 @@ public class JsonExtensions {
     /**
      * Serialisiert String zu JSON
      */
-    public static String ebJsonFromString(String str) {
+    public static String jsonFromString(String str) {
         if (str == null) return "\"\"";
         try {
             return mapper.writeValueAsString(str);
@@ -23,7 +23,7 @@ public class JsonExtensions {
     /**
      * Deserialisieret JSON zu String
      */
-    public static String ebJsonToString(String str) {
+    public static String jsonToString(String str) {
         if (StringExtensions.ebIsNilOrEmpty(str)) return "";
         try {
             return mapper.readValue(str, String.class);
@@ -36,7 +36,7 @@ public class JsonExtensions {
     /**
      * Serialisiert List<String> zu JSON
      */
-    public static String ebJsonFromStringList(List<String> str) {
+    public static String jsonFromStringList(List<String> str) {
         if (str == null) return "[]";
         try {
             return mapper.writeValueAsString(str);
@@ -49,7 +49,7 @@ public class JsonExtensions {
     /**
      * Deserialisieret JSON zu List<String>
      */
-    public static List<String> ebJsonToStringList(String str) {
+    public static List<String> jsonToStringList(String str) {
         if (StringExtensions.ebIsNilOrEmpty(str)) return new java.util.ArrayList<>();
         try {
             return mapper.readValue(str, mapper.getTypeFactory().constructCollectionType(List.class, String.class));
@@ -58,5 +58,4 @@ public class JsonExtensions {
             return new java.util.ArrayList<>();
         }
     }
-
 }

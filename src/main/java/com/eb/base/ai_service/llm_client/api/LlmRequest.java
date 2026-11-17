@@ -1,5 +1,6 @@
 package com.eb.base.ai_service.llm_client.api;
 
+import com.eb.apps.ebchat_client.app.AiPlaygroundCtrl;
 import com.eb.base.extensions.StringExtensions;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -100,4 +101,47 @@ public class LlmRequest {
         return sb.toString();
     }
 
+
+    public class LastLlmMessageInfo
+    {
+        public String system;
+        public String user;
+        public String assistant;
+
+        public LastLlmMessageInfo() {
+            system = "";
+            user = "";
+            assistant = "";
+        }
+    }
+
+    public LastLlmMessageInfo getLastLlmMessageInfo() {
+
+        LastLlmMessageInfo lastLlmMessageInfo = new LastLlmMessageInfo();
+        int messageCount = getMessages().size();
+        if (messageCount == 0) {
+            return lastLlmMessageInfo;
+        }
+
+        LlmMessage llmMessage = getMessages().get(0);
+        if (llmMessage.isSystem())
+            lastLlmMessageInfo.system = llmMessage.getMessageString();
+
+        int i=messageCount-1;
+        llmMessage = getMessages().get(i);
+        if (llmMessage.isAssistent()) {
+            lastLlmMessageInfo.assistant = llmMessage.getMessageString();
+            i--;
+            if (i>=0 ) {
+                llmMessage = getMessages().get(i);
+                if (llmMessage.isUser()) {
+                    lastLlmMessageInfo.user = getMessages().get(i).getMessageString();
+                }
+            }
+        }
+        else if (llmMessage.isUser())
+            lastLlmMessageInfo.user = llmMessage.getMessageString();
+
+        return lastLlmMessageInfo;
+    }
 }

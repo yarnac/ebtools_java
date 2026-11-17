@@ -163,7 +163,6 @@ public class JsonFileAppendUtil {
             Path path = Paths.get(name);
             return path.isAbsolute() && isInAllowedDirectory(path.toRealPath());
         } catch (Exception e) {
-            logger.log(Level.WARNING, "Fehler bei Prüfung des Dateinamens: " + name, e);
             return false;
         }
     }

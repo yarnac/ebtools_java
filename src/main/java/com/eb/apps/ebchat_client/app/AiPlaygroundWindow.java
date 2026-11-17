@@ -108,13 +108,6 @@ public class AiPlaygroundWindow extends JFrame {
 
     }
 
-    public String getNewInputString() {
-        StringBuilder builder = new StringBuilder();
-        if (!StringExtensions.ebIsNilOrEmpty(aiInputOutputPanel.getTextFieldInputPraefix().getText()))
-            builder.append(aiInputOutputPanel.getTextFieldInputPraefix().getText()).append("\n");
-        builder.append(aiInputOutputPanel.getTextPaneInput().getText());
-        return builder.toString();
-    }
 
     public String getInputString() {
         return aiInputOutputPanel.getTextPaneInput().getText();
@@ -139,7 +132,6 @@ public class AiPlaygroundWindow extends JFrame {
         persister.addComponentItem(aiInputOutputPanel.getTextPaneInput(),"Input");
         persister.addComponentItem(aiInputOutputPanel.getTextPaneOutput(),"Output");
         persister.addComponentItem(splitPanelMain.getSplitPane(), "SplitPanelMain");
-        persister.addComponentItem(aiInputOutputPanel.getSplitPanelInput().getSplitPane(), "aiInputOutputPanel.getSplitPanelMessages()");
         persister.addComponentItem(aiInputOutputPanel.getSplitPanelInput().getSplitPane(), "SplitPanelInput");
 
     }
@@ -262,7 +254,7 @@ public class AiPlaygroundWindow extends JFrame {
         if (aiInputOutputPanel == null)
         {
             aiInputOutputPanel = new AiInputOutputPanel();
-            aiInputOutputPanelCtrl = new AiInputOutputPanelCtrl(aiInputOutputPanel);
+            aiInputOutputPanelCtrl = new AiInputOutputPanelCtrl(aiInputOutputPanel, this);
         }
         return aiInputOutputPanel;
     }

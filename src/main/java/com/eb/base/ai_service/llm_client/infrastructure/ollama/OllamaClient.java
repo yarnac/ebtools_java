@@ -196,4 +196,15 @@ public class OllamaClient implements ILlmClient {
             return new ArrayList<>();
         }
     }
+
+    public static String getAvailableModelsString(String s) {
+        OllamaClient client = new OllamaClient(HttpClient.newHttpClient());
+
+        List<String> models = client.getAvailableModels();
+        StringBuilder strb = new StringBuilder();
+        for (String model : models) {
+            strb.append("ollama\t%s\t0,0\t0,0\t1\n".formatted(model));
+        }
+        return strb.toString();
+    }
 }

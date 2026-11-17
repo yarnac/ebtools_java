@@ -1,8 +1,8 @@
 package com.eb.base.gui.persist;
 
+import com.eb.base.extensions.JsonExtensions;
 import com.eb.base.extensions.StringExtensions;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.eb.base.gui.EbSplitPanel;
 
 import javax.swing.*;
 import java.awt.*;
@@ -43,60 +43,48 @@ class ComponentPersister implements IComponentPersister {
     }
 
     @Override
-    public void addComponentItem(Object component, String key) {
+    public void addComponentItem(Object newComponent, String key) {
 
-        if (component instanceof JTextPane) {
-            JTextPane control = (JTextPane) component;
-            components.add(new ComponentItem<>(control, key, ()-> getJsonStringFromString(control.getText()), x->control.setText(getStringFromJasonString(x))));
+        Object component = (newComponent instanceof EbSplitPanel ebSplitPanel)
+                ? ebSplitPanel.getSplitPane()
+                : newComponent;
+
+        if (component instanceof JTextPane jTextPane)
+            components.add(new ComponentItem<>(jTextPane, key, ()-> getJsonStringFromString(jTextPane.getText()), x->jTextPane.setText(getStringFromJsonString(x))));
+
+        if (component instanceof JTextField jTextField)
+            components.add(new ComponentItem<>(jTextField, key, ()-> getJsonStringFromString(jTextField.getText()), x->jTextField.setText(getStringFromJsonString(x))));
+
+        else if (component instanceof JTextArea jTextArea)
+            components.add(new ComponentItem<>(jTextArea, key, ()-> getJsonStringFromString(jTextArea.getText()), x->jTextArea.setText(getStringFromJsonString(x))));
+
+        else if (component instanceof JComboBox jComboBox)
+            components.add(new ComponentItem<>(jComboBox, key, () -> "" + jComboBox.getSelectedIndex(), x->jComboBox.setSelectedIndex(getInt(x))));
+
+        else if (component instanceof JList jList)
+            components.add(new ComponentItem<>(jList,key, () -> "" + jList.getSelectedIndex(), x->jList.setSelectedIndex(getInt(x))));
+
+        else if (component instanceof JSplitPane jSplitPane)
+        {
+            components.add(new ComponentItem<>(jSplitPane, key + "_Distance", () -> "" + max(jSplitPane.getDividerLocation(),50), x->jSplitPane.setDividerLocation(max(getInt(x), 50))));
+            components.add(new ComponentItem<>(jSplitPane, key + "_Orientation", () -> "" + jSplitPane.getOrientation(), x->jSplitPane.setOrientation(getInt(x))));
         }
-        if (component instanceof JTextField) {
-            JTextField control = (JTextField) component;
-            components.add(new ComponentItem<>(control, key, ()-> getJsonStringFromString(control.getText()), x->control.setText(getStringFromJasonString(x))));
-        }
-        else if (component instanceof JTextArea) {
-            JTextArea control = (JTextArea) component;
-            components.add(new ComponentItem<>(control, key, ()-> getJsonStringFromString(control.getText()), x->control.setText(getStringFromJasonString(x))));
-        }
-        else if (component instanceof JSplitPane) {
-            JSplitPane control = (JSplitPane) component;
-            components.add(new ComponentItem<>(control, key + "_Distance", () -> "" + max(control.getDividerLocation(),50), x->control.setDividerLocation(max(getInt(x), 50))));
-            components.add(new ComponentItem<>(control, key + "_Orientation", () -> "" + control.getOrientation(), x->control.setOrientation(getInt(x))));
-        }
-        else if (component instanceof JComboBox) {
-            JComboBox control = (JComboBox) component;
-            components.add(new ComponentItem<>(control, key, () -> "" + control.getSelectedIndex(), x->control.setSelectedIndex(getInt(x))));
-        }
-        else if (component instanceof JList) {
-            JList control = (JList) component;
-            components.add(new ComponentItem<>(control,key, () -> "" + control.getSelectedIndex(), x->control.setSelectedIndex(getInt(x))));
-        }
-        else if (component instanceof JScrollPane) {
-            JScrollPane control = (JScrollPane) component;
-            components.add(new ComponentItem<>(control,key, () -> "" + getPointString(control.getViewport().getViewPosition()), x->control.getViewport().setViewPosition(getPoint(x))));
-            Point pos = control.getViewport().getViewPosition();
-            control.getViewport().setViewPosition(new Point(pos.x, pos.y));
+
+        else if (component instanceof JScrollPane jScrollPane)
+        {
+            components.add(new ComponentItem<>(jScrollPane,key, () -> "" + getPointString(jScrollPane.getViewport().getViewPosition()), x->jScrollPane.getViewport().setViewPosition(getPoint(x))));
+            Point pos = jScrollPane.getViewport().getViewPosition();
+            jScrollPane.getViewport().setViewPosition(new Point(pos.x, pos.y));
         }
     }
 
     private String getJsonStringFromString(String text) {
-        ObjectMapper mapper = new ObjectMapper();
-        try {
-            return mapper.writeValueAsString(text);
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
-        }
+
+        return JsonExtensions.jsonFromString(text);
     }
 
-    private String getStringFromJasonString(String text) {
-        if (StringExtensions.ebIsNilOrEmpty(text)) {
-            return "";
-        }
-        ObjectMapper mapper = new ObjectMapper();
-        try {
-            return mapper.readValue(text, String.class);
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
-        }
+    private String getStringFromJsonString(String text) {
+        return JsonExtensions.jsonToString(text);
     }
 
     private Point getPoint(String x) {
