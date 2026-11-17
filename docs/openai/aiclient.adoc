@@ -1,0 +1,915 @@
+= EB Chat Client – Anwendungs- und Domänendokumentation
+:toc:
+:toclevels: 4
+:sectnums:
+
+== Überblick
+
+Der dokumentierte Code umfasst eine Swing-basierte Chat- und Prompt-Anwendung sowie Komponenten zur Verwaltung von Kontexten, Chats, Requests und Dateianhängen. Die Anwendung verwendet die LLM-Service-Schnittstellen für den Versand von Modellanfragen und stellt dafür eine grafische Oberfläche bereit.
+
+Die wesentlichen Bereiche sind:
+
+* *AI Playground*: Hauptfenster zum Erstellen, Versenden und Anzeigen von Modellanfragen.
+
+* *Kontextverwaltung*: Bearbeiten, Filtern, Exportieren und Organisieren von Prompt-Kontexten in einer Baumstruktur.
+
+* *Chatverwaltung*: Einlesen von Chat-Konfigurationen und Nachrichten sowie Bereitstellen von Modell- und Kontextinformationen.
+
+* *Requestverwaltung*: Anzeigen und Bearbeiten gespeicherter LLM-Requests und ihrer Nachrichten.
+
+* *Dateiauswahl*: Übernehmen lokaler Dateipfade per Drag & Drop und Einfügen dieser Pfade in Prompts.
+
+* *Hilfsfunktionen*: Wiederherstellen von Fenstern, Undo/Redo, Ersetzen von Codeblöcken und ein eigenständiger Tor-HTTP-Test.
+
+Die Beschreibung bezieht sich auf das Verhalten, das im bereitgestellten Code erkennbar ist. Einige Methoden sind ausdrücklich leer oder nur teilweise implementiert; diese Einschränkungen sind an den jeweiligen Stellen dokumentiert.
+
+== Paketübersicht
+
+[cols="3,5"]
+|===
+|Paketbereich |Aufgabe
+
+|`com.eb.apps.ebchat_client.app`
+|Starten und Steuern des AI Playgrounds, Aufbau des Hauptfensters, Request-Historienbaum, Undo/Redo und weitere Swing-Fenster.
+
+|`com.eb.apps.ebchat_client.components`
+|Hilfskomponenten für Dateiinhalte und die Umwandlung von Codeblöcken in Dateimarker.
+
+|`com.eb.apps.ebchat_client.components.fileprovider`
+|Swing-Fenster zum Sammeln lokaler Dateinamen, einschließlich Drag & Drop und Dateiliste.
+
+|`com.eb.apps.ebchat_client.domain.context.app`
+|Startklassen und Dialoge für die Kontextbearbeitung und Prompt-Entwicklung.
+
+|`com.eb.apps.ebchat_client.domain.context.gui`
+|Kontexteditor, Detailansicht, Kontextbaum, Filter und Drag-and-Drop-Verschieben von Kontexten.
+
+|`com.eb.apps.ebchat_client.domain.context.domain`
+|Kontextdatenmodell und Lesen beziehungsweise Schreiben der Kontextdatei.
+
+|`com.eb.apps.ebchat_client.domain.chat`
+|Chat-, Nachrichten-, Sitzungs-, Kosten- und Pfadverwaltung.
+
+|`com.eb.apps.ebchat_client.domain.chatsession`
+|Einfaches Sitzungsmodell und Verwaltung von Nachrichten in einer LLM-Session.
+
+|`com.eb.apps.ebchat_client.domain.edrequest`
+|Fenster und Controller zur Anzeige und Bearbeitung gespeicherter LLM-Requests.
+
+|`com.eb.apps.ebchat_client.domain.edrequest.gui`
+|Swing-Panel für Request- und Nachrichtenlisten.
+|===
+
+== AI Playground
+
+=== Start der Anwendung
+
+`AiPlaygroundApp.main()` initialisiert zunächst `AiChatManager.getCurrent()`. Anschließend wird die Erstellung des Controllers über `SwingUtilities.invokeLater()` auf den Swing Event Dispatch Thread (EDT) gelegt.
+
+[source,java]
+----
+AiChatManager.getCurrent();
+
+SwingUtilities.invokeLater(() -> {
+    AiPlaygroundCtrl ctrl = new AiPlaygroundCtrl();
+});
+----
+
+Der Controller erstellt und konfiguriert das Hauptfenster. Die Initialisierung des Chat-Managers erfolgt vor dem geplanten EDT-Aufruf; der übrige Aufbau wird innerhalb des EDT-Callbacks gestartet.
+
+=== `AiPlaygroundCtrl`
+
+`AiPlaygroundCtrl` ist der Controller des AI Playgrounds. Er verbindet Fenster, Modelle, Chats, Kontextverwaltung, gespeicherte Requests und LLM-Service.
+
+Bei der Initialisierung führt der Controller im Wesentlichen folgende Schritte aus:
+
+. Erstellt einen `LlmRequestManager` und holt den aktuellen `AiChatManager`.
+. Wählt außerhalb von Windows das plattformübergreifende Look-and-Feel.
+. Liest `JavaAiPlaygroundCtrl.ini`.
+. Übergibt die in der INI-Datei unter `AllowedPaths` definierten Verzeichnisse an `JsonFileAppendUtil`.
+. Erstellt und zeigt `AiPlaygroundWindow`.
+. Dekoriert Haupt-, Eingabe-, Ausgabe- und Baum-Toolbars.
+. Erstellt den Historienbaum und richtet die Speicherung von ausgewählten GUI-Komponenten ein.
+. Verbindet die Prompt-Callbacks des Kontexteditors mit dem Eingabefeld des Playgrounds.
+. Registriert einen Shutdown-Hook, der den Executor beendet.
+
+Der Controller verwendet einen statischen Executor mit vier Threads. Modellaufrufe, das Abrufen von Ollama-Modellen und die Generierung von Inhaltsbeschreibungen laufen damit außerhalb des UI-Threads.
+
+Die Oberfläche wird bei Erfolg oder Fehler über `SwingUtilities.invokeLater()` aktualisiert. So werden diese UI-Änderungen auf den EDT gelegt.
+
+=== Toolbars und Menüs
+
+Die Haupttoolbar bietet unter anderem Aktionen für das Bearbeiten von Requests und Kontexten sowie das Öffnen der Modelldatei.
+
+[cols="2,4"]
+|===
+|Bereich |Aktionen
+
+|Haupttoolbar
+|Modelldatei bearbeiten, Request-Editor öffnen, Kontexteditor öffnen und die Modelldatei im Dateisystem öffnen.
+
+|Eingabetoolbar und Menü
+|Anfrage starten oder fortsetzen, Ollama-Modelle anzeigen, Dateiauswahl öffnen und Kontexteditor aufrufen. Das Menü enthält außerdem Speichern und eine Checkbox für die Protokollierung.
+
+|Ausgabetoolbar
+|Code generieren, Vollansicht umschalten, Inhaltsbeschreibung generieren oder speichern und den aktuellen Request löschen.
+
+|Baumtoolbar
+|Request aus der Auswahlliste in die Eingabe- und Ausgabefelder übernehmen sowie gespeicherte Requests auswählen.
+
+|Kontexteditor-Toolbars
+|Kontexte erstellen, löschen, speichern, rückgängig machen, Prompt beziehungsweise Ausgabe exportieren und Dateiinhalt expandieren.
+|===
+
+Nicht alle Toolbar-Aktionen führen im vorliegenden Code zu einer fachlichen Änderung. Beispielsweise haben „Speichern Main“, `setModel()` und `setChat()` leere Implementierungen. Die Checkbox „Abfragen protokollieren“ wird erstellt, aber die Versandlogik wertet ihren Zustand nicht aus.
+
+=== Eingabe und Validierung
+
+Die Playground-Eingabe besteht aus einem Präfixfeld und einem Texteingabefeld. `getNewInputString()` verbindet beide Felder: Ein nicht leerer Präfix wird mit einem Zeilenumbruch vor den eigentlichen Eingabetext gestellt.
+
+`setInput(String)` trennt einen übergebenen Text am Trenner `>>`. Gibt es mindestens zwei Teile, wird der erste Teil einschließlich `>>` in das Präfixfeld und der zweite Teil in das Texteingabefeld geschrieben. Andernfalls wird das Präfix geleert und der erste Teil als Eingabe gesetzt.
+
+Vor dem Versand prüft `validateInput()`:
+
+* Eine leere Eingabe wird abgelehnt.
+
+* Beginnt die Eingabe mit einem `<<`, muss danach ein `>>` vorkommen.
+
+* Bei einem Fehler wird ein Dialog angezeigt und der Versand abgebrochen.
+
+Zusätzlich prüft `sendRequest()` auf einen leeren, getrimmten Prompt und zeigt in diesem Fall ebenfalls einen Fehlerdialog an.
+
+=== Neue Anfrage und Fortsetzung
+
+`sendRequest(boolean append)` unterscheidet zwischen einer neuen Anfrage und dem Fortsetzen einer bestehenden Anfrage:
+
+* Bei einer neuen Anfrage wird `getNewInputString()` verwendet. Der Text wird mit `LlmRequestBuilder.addRequestMsg()` verarbeitet und das ausgewählte Modell gesetzt.
+
+* Bei einer Fortsetzung mit vorhandenem `actLlmRequest` wird nur der Inhalt des Eingabetextfelds verwendet. Dieser wird über `addUserMsg()` als weitere User-Nachricht angehängt.
+
+* Vor dem Versand wird das aktuell ausgewählte Modell erneut in `actLlmRequest` gesetzt.
+
+* Die Anfrage wird anschließend asynchron an `LlmRequestService.sendRequest()` übergeben.
+
+Die lokale Liste `imageFileNames` wird beim Erstellen der Anfrage aktuell leer angelegt. Die im Controller auskommentierten Aufrufe zur Expansion von Datei- und Verzeichnismarkern werden nicht ausgeführt. Das Einfügen von Pfadmarkern in den Prompt ist daher nicht gleichbedeutend damit, dass der Controller diese Marker dort bereits selbst expandiert.
+
+Nach erfolgreichem Versand speichert der Controller die Anfrage über `llmRequestManager.store()`, zeigt den Antworttext an und aktualisiert die Statuszeile mit den Kurzdetails der Antwort.
+
+=== Hintergrundarbeit und Statusanzeige
+
+Vor einem Hintergrundauftrag ruft der Controller `setWaitingModus()` auf. Diese Methode setzt die Fortschrittsanzeige auf unbestimmt und zeigt „Waiting for request answer“ an.
+
+Bei Erfolg:
+
+* wird die Ausgabe im Fenster aktualisiert,
+
+* wird die Ausgabe bei vorhandenem `JTextPaneAdapter` zum Anfang gescrollt,
+
+* wird der Fortschrittsbalken beendet.
+
+Bei einer Exception zeigt `HandleException()` `Error: ` gefolgt von der Fehlermeldung an und beendet ebenfalls die Fortschrittsanzeige.
+
+`withProgressbarAnimationDo()` führt die übergebene Aktion direkt aus und setzt danach den Fortschrittsbalken zurück. Die Methode wird im gezeigten Controller nicht für den regulären asynchronen Requestversand verwendet.
+
+=== Gespeicherte Requests im Playground
+
+Die Request-ComboBox wird mit `llmRequestManager.getLlmRequests()` befüllt. Bei Auswahl eines Requests setzt `handleRequestChanged()` diesen als aktiven Request, aktiviert die Vollansicht und überträgt den Inhalt in die Ausgabeansicht.
+
+`handleSetRequest()` übernimmt die erste Systemnachricht sowie die letzte User- und Assistant-Nachricht, soweit vorhanden, in die Eingabe- und Ausgabefelder. Die Rollennamen werden bei der Übernahme aus den lesbaren Nachrichtendarstellungen entfernt.
+
+`getLastLlmMessageInfo()` geht dabei davon aus, dass bei einer letzten Assistant-Nachricht eine vorherige Nachricht vorhanden ist und diese als User-Nachricht verwendet werden kann.
+
+Der Controller bietet außerdem folgende Aktionen:
+
+[cols="2,4"]
+|===
+|Methode oder Aktion |Wirkung
+
+|`speichereRequest()`
+|Speichert den aktiven Request, sofern einer ausgewählt ist.
+
+|`deleteRequest()`
+|Entfernt den aktiven Request aus dem Manager und aus dem ComboBox-Modell.
+
+|`switchFullView()`
+|Wechselt zwischen der gesamten Request-Historie und der Darstellung der letzten Nachricht.
+
+|`saveContentDescription()`
+|Setzt `contentMemo` auf den Text im Ausgabefeld und speichert den Request.
+
+|`generateContentDescription()`
+|Serialisiert den aktiven Request als JSON und lässt ein fest vorgegebenes Ollama-Modell eine deutsche Überschrift generieren.
+
+|`handleGenerateCode()`
+|Übergibt den Ausgabetext an `AiCodeGeneratorCtrl`.
+|===
+
+`generateContentDescription()` führt den Auftrag im Executor aus. Der eingeblendete Prompt weist das Modell ausdrücklich an, den serialisierten Request als Daten und nicht als auszuführende Anweisungen zu behandeln.
+
+=== Ollama-Modellliste
+
+`showOllamaModelsFromClient()` startet eine Hintergrundaufgabe. `getOllamaModelsString()` fragt über einen neuen `OllamaClient` die verfügbaren Ollama-Modelle ab und formatiert jedes Modell als tabulatorgetrennte Zeile:
+
+[source,text]
+----
+ollama<TAB>Modellname<TAB>0,0<TAB>0,0<TAB>1
+----
+
+Der formatierte Text wird anschließend in der Ausgabe angezeigt. Die im Code angelegte Schleife über die Zeilen führt keine weitere Verarbeitung aus.
+
+=== Fenster für Dateipfade
+
+Die Aktion „Open append file window“ öffnet `GuiFileNameProvider`. Nach Bestätigung werden die ausgewählten Pfade an `appendFileNames()` übergeben. Diese Methode hängt an den aktuellen Eingabetext je Pfad eine Zeile der Form `<$ <Pfad>` an.
+
+Die Methode verwendet `window.getInputString()` und übernimmt damit den Inhalt des Eingabetextfeldes. Ein etwaiger Präfix aus dem separaten Präfixfeld wird hierbei nicht mit angehängt.
+
+== `AiPlaygroundWindow`
+
+`AiPlaygroundWindow` ist das Hauptfenster des Playgrounds. Es baut die Swing-Komponenten auf, bietet Zugriff auf die Eingabe- und Ausgabefelder und stellt Methoden für die Aktualisierung der Anzeige bereit.
+
+=== Fensteraufbau
+
+Das Fenster wird mit dem Titel „AI Playground“, einer Größe von `800 × 600` und zentrierter Position initialisiert. Beim Schließen wird die Anwendung beendet.
+
+Der Hauptbereich besteht aus verschachtelten `EbSplitPanel`-Komponenten:
+
+[cols="2,4"]
+|===
+|Bereich |Inhalt
+
+|Hauptsplitter
+|Links der Kontexteditor, rechts der Nachrichtenbereich.
+
+|Nachrichtensplitter
+|Oben die Eingabe mit Präfixfeld, unten die Ausgabe mit Statuszeile.
+
+|Eingabesplitter
+|Links das Präfixfeld, rechts das eigentliche Texteingabefeld.
+|===
+
+Das Hauptfenster enthält außerdem eine Menüleiste, eine nicht verschiebbare Haupttoolbar und einen Kontexteditor. Das zweite Toolbarfeld des Hauptsplitters wird ausgeblendet.
+
+`getTreePanel()` erstellt bei Bedarf ein Panel mit Toolbar und Historienbaum. Dieses Panel ist in der gezeigten Konstruktion des Hauptsplitters nicht anstelle des Kontexteditors eingesetzt; der Hauptsplitter erhält `getContextEditorPanel()` als linke Komponente.
+
+=== Texteingabe und Ausgabe
+
+`getNewInputString()` verbindet Präfix und Eingabe. `getInputString()` liefert nur den Inhalt des Eingabetextfeldes. `setInputText()` und `setInputPraefixText()` aktualisieren die jeweiligen Felder.
+
+`setOutputText()` plant die Aktualisierung des Ausgabefeldes mit `EventQueue.invokeLater()`, setzt den Text und verschiebt den Caret an den Anfang. Exceptions innerhalb dieses UI-Callbacks werden abgefangen und ignoriert.
+
+`setInOutEnabled(boolean)` schaltet Eingabe und Ausgabe sowie mehrere Toolbars ein oder aus.
+
+=== Schrift und Undo
+
+Das Fenster verwendet eine Monospace-Schrift. `setFontSizes()` sucht eine passende Schrift unter den angegebenen Fontnamen und wendet sie auf Eingabe, Ausgabe, Präfix, Statuszeile und Tree-Panel an.
+
+`UndoDecorator.registerForTextArea()` wird für Eingabe- und Ausgabefeld aufgerufen. Im Fenster selbst erfolgt die Registrierung beim Aufbau der Komponenten; der Controller ruft die Registrierung nochmals für dieselben Textfelder auf.
+
+=== Komponentenpersistenz
+
+`registerPersister()` registriert das Präfix, die Eingabe, die Ausgabe und die drei Split-Panes unter benannten Schlüsseln. Der Controller erstellt den Persister aus der INI-Datei und ruft beim Schließen `persistComponentItems()` auf.
+
+Die ComboBoxen für Chat und Modell werden ebenfalls beim Persister registriert, sobald sie erstellt sind.
+
+== Request- und Historienansichten
+
+=== Historienbaum
+
+`AiHistoryTreeCtrl` setzt für ein übergebenes `JTree` ein neues `DefaultTreeModel`. Die aktuelle Historie ist fest im Code definiert:
+
+* Die Wurzel heißt „History“.
+
+* Darunter liegt „Januar“ mit den Einträgen „Neujahr“ und „3 Könige“.
+
+* Ein leerer „Februar“-Knoten wird ebenfalls angelegt.
+
+Der Baum wird derzeit nicht aus gespeicherten LLM-Requests aufgebaut. `AiHistoryNode<T>` ist ein einfacher `DefaultMutableTreeNode`-Untertyp mit einem Feld `name`; im dargestellten Historienaufbau wird dieser Typ nicht verwendet.
+
+=== Request-Editor
+
+`EdRequestCtrl` und `EdRequestWindow` stellen ein eigenes Fenster zum Bearbeiten beziehungsweise Anzeigen gespeicherter Requests bereit.
+
+Beim Start:
+
+. Wird `EdRequestWindow` erstellt.
+. Wird die Fensterkonfiguration aus `EdRequests.ini` geladen.
+. Werden Toolbars für Request- und Nachrichtenauswahl eingerichtet.
+. Wird die Split-Panel-Position persistiert.
+. Wird das Fenster auf dem EDT sichtbar gemacht.
+. Erstellt der Controller einen `LlmRequestManager` und lädt die Requests in die Liste.
+. Wird der erste Request ausgewählt, sofern vorhanden.
+
+Die linke Seite des Fensters enthält Request- und Nachrichtenlisten sowie Felder für `contentMemo` und Modellname. Die rechte Seite zeigt die ausgewählten Nachrichten als Text.
+
+Bei Auswahl einer Nachricht werden die lesbaren Nachrichtendarstellungen in das Textfeld übernommen. Bei Auswahl eines Requests werden Memo, Modell und Nachrichtenliste aktualisiert.
+
+Die Löschaktionen sind wie folgt implementiert:
+
+* `deleteRequestClicked()` löscht alle ausgewählten Requests über den Manager und entfernt sie aus dem ListModel.
+
+* `deleteMessageClicked()` entfernt die ausgewählte Nachricht aus dem aktiven Request und speichert diesen.
+
+Im Nachrichtenlöschpfad wird danach ein neues ListModel erstellt, aber die Zeile, die dieses Model der Swing-Liste zuweisen würde, ist auskommentiert. Die sichtbare Nachrichtenliste wird an dieser Stelle daher nicht ausdrücklich erneuert.
+
+`RequestEditorPanel.transferViewToModel()` ohne Request-Argument ist leer. Die angezeigten Felder für Memo und Modell werden beim Auswählen eines Requests gesetzt; eine allgemeine Speicherung der Feldänderungen über diese parameterlose Methode ist nicht implementiert.
+
+== Fensterverwaltung und Video-Fenster
+
+=== `WindowUtility`
+
+`WindowUtility.showOrCreateWindow(window, windowFactory)` verwaltet die Wiederverwendung eines Swing-Fensters:
+
+. Ist `window` `null` oder nicht mehr anzeigbar, wird ein neues Fenster über `windowFactory` erstellt.
+. Ist das Fenster ein minimiertes `Frame`, wird sein Zustand auf `Frame.NORMAL` gesetzt.
+. Ein unsichtbares Fenster wird sichtbar gemacht.
+. Das Fenster wird nach vorne geholt.
+. Der Fokus wird über `SwingUtilities.invokeLater()` angefordert.
+. Das verwendete Fenster wird zurückgegeben.
+
+Die Methode unterstützt Typen, die von `Window` abgeleitet sind. `ContextEditDlg` wird im Playground auf diese Weise geöffnet beziehungsweise wiederverwendet.
+
+=== `VlcVidFrame` und `VlcVidCtrl`
+
+`VlcVidFrame` ist ein einfaches `JFrame` mit einer Toolbar und einem horizontalen `EbSplitPanel`. Das Fenster erhält eine Größe von `800 × 600` und wird zentriert. Die Toolbar ist nicht verschiebbar.
+
+`VlcVidCtrl` lädt `VlcVidCtrl.ini`, erstellt das Fenster und richtet über `GuiDecorator` Toolbarcontainer und Schaltflächen zur INI-Dateibearbeitung ein. Das Fenster wird anschließend über `SwingUtilities.invokeLater()` angezeigt.
+
+Der im Quelltext vorhandene `main()`-Einstiegspunkt des Frames erstellt lediglich eine Instanz. Die Anzeige des Fensters wird in diesem Einstiegspunkt nicht ausdrücklich aufgerufen.
+
+== Undo und Redo
+
+`UndoDecorator` registriert einen `UndoManager` auf dem Dokument eines `JTextPane`. Änderungen werden über einen `UndoableEditListener` gesammelt.
+
+Die Tastenkürzel verwenden den plattformabhängigen Menü-Shortcut-Mask:
+
+[cols="2,3"]
+|===
+|Aktion |Tastenkürzel
+
+|Undo
+|`Ctrl+Z` beziehungsweise auf macOS `Cmd+Z`
+
+|Redo
+|`Ctrl+Y` beziehungsweise auf macOS `Cmd+Y`
+
+|Alternatives Redo
+|`Ctrl+Shift+Z` beziehungsweise auf macOS `Cmd+Shift+Z`
+|===
+
+Ist das übergebene `JTextPane` `null`, wirft die Registrierung eine `IllegalArgumentException`. Undo oder Redo werden nur ausgeführt, wenn der `UndoManager` die jeweilige Operation unterstützt.
+
+== Dateipfade und Inhalte
+
+=== `FileNameListModel`
+
+`FileNameListModel` ist das Datenmodell für die Dateiliste. Es hält Dateinamen in einer Liste und zusätzlich in einem Set, um Duplikate zu verhindern.
+
+`addFileName()` und `addFileNames()` trimmen Einträge und ignorieren `null`- oder leere Werte. Die Einfügereihenfolge bleibt in der Liste erhalten. Beim Hinzufügen und Entfernen werden passende ListModel-Ereignisse ausgelöst.
+
+`getFileNames()` liefert eine neue Liste mit den aktuellen Dateinamen. Änderungen an dieser Rückgabeliste verändern das interne Modell nicht.
+
+=== `FileNameDropTarget`
+
+`FileNameDropTarget` richtet Drag-and-Drop auf der Dateiliste ein. Die Listener-Implementierung fügt bei einem Drop die absoluten Pfade der übertragenen `File`-Objekte in das `FileNameListModel` ein.
+
+Die Methode `isFileFlavor()` gibt im vorliegenden Code immer `true` zurück. Die auskommentierte Prüfung des tatsächlichen `DataFlavor` wird nicht ausgeführt. Der Listener akzeptiert deshalb auch Drag-Vorgänge, die nicht zwingend eine Java-Dateiliste enthalten. Ein Fehler beim Lesen der übertragenen Daten wird abgefangen, ausgegeben und der Drop abgelehnt.
+
+=== `FileNameListPanel`
+
+Das Panel bietet eine Dateiliste mit Mehrfachauswahl und Schaltflächen zum Bearbeiten der Liste:
+
+[cols="2,4"]
+|===
+|Schaltfläche |Verhalten
+
+|`Löschen`
+|Entfernt die ausgewählten Einträge. Die Indizes werden rückwärts verarbeitet, damit das Entfernen die noch zu löschenden Indizes nicht verschiebt.
+
+|`Alle löschen`
+|Leert das ListModel.
+
+|`Ok`
+|Übergibt eine Kopie der Dateinamen an den registrierten Consumer, sofern einer gesetzt ist.
+
+|`Abbrechen`
+|Führt die registrierte Close-Action aus.
+|===
+
+Die Bestätigung über „Ok“ schließt das Fenster nicht automatisch. Das Panel zeigt außerdem einen Hinweis an, dass Dateien per Drag & Drop hinzugefügt werden können.
+
+=== `GuiFileNameProvider`
+
+`GuiFileNameProvider` ist ein eigenständiges `JFrame` für die Dateiauswahl. Es erstellt ein `FileNameListPanel`, schließt sich bei `Abbrechen` durch `dispose()` und bietet `addListConsumer()` als Weiterleitung an das Panel an.
+
+Der Dialog verwendet `DISPOSE_ON_CLOSE`, hat eine Startgröße von `600 × 400` und wird zentriert angezeigt. Das eigene `main()` zeigt das Fenster auf dem EDT an.
+
+=== `JasonFileContentProvider`
+
+`JasonFileContentProvider` liest Dateien und serialisiert sie als JSON-Objekte des Typs `Codedatei`. Jedes Objekt enthält:
+
+[cols="2,4"]
+|===
+|Feld |Inhalt
+
+|`fileName`
+|Übergebener Dateipfad.
+
+|`type`
+|Kleingeschriebene Dateiendung oder `unknown`, falls keine verwendbare Endung vorhanden ist.
+
+|`codeText`
+|Vollständiger, mit `Files.readString()` gelesener Dateiinhalt.
+|===
+
+Die Ein-Argument-Methode `getJsonFileString(String)` erzeugt eine Liste mit genau einem `Codedatei`-Objekt und gibt diese als JSON in einem `json`-Codeblock zurück.
+
+Die Listenmethode `getJsonFileString(List<String>)` erstellt ebenfalls eine Liste von Dateiobjekten. Ihre Formatierung fügt zusätzlich zum von Jackson serialisierten Listen-JSON ein `[` vor und ein `]` nach dem serialisierten Wert ein. Da Jackson eine Liste bereits als JSON-Array serialisiert, ergibt die zusammengesetzte Zeichenfolge in dieser Methode eine zusätzliche äußere Klammerung.
+
+Beide Methoden können `IOException` auslösen, beispielsweise wenn eine Datei nicht gelesen werden kann.
+
+=== `CodeBlockReplacer`
+
+`CodeBlockReplacer.replaceCodeBlocks(input)` sucht in einem Text nach Markdown-Codeblöcken. Innerhalb jedes Codeblocks sucht die Methode nach JSON-Eigenschaften mit dem Namen `fileName`.
+
+Für jeden gefundenen Dateinamen wird ein Pfadmarker der Form `<$ <Dateiname>` erzeugt. Gibt es mehrere `fileName`-Eigenschaften, werden mehrere Marker mit dem Systemzeilentrenner verbunden. Codeblöcke ohne `fileName` bleiben unverändert. Bei `null` als Eingabe liefert die Methode `null`.
+
+Die Pfadangabe wird laut Implementierung im JSON-escaped Zustand übernommen; Escapes werden nicht ausdrücklich in normale Pfadzeichen umgewandelt.
+
+== Kontextverwaltung
+
+=== Kontextmodell
+
+`Context` ist die Basisklasse für einen Kontext. Sie enthält:
+
+[cols="2,4"]
+|===
+|Feld |Bedeutung
+
+|`name`
+|Anzeigename des Kontexts.
+
+|`knoten`
+|Hierarchiepfad für die Ablage im Kontextbaum.
+
+|`userString`
+|Prompt- beziehungsweise Kontexttext.
+|===
+
+`toString()` gibt den Kontextnamen zurück. `getContextString()` liefert den Prompttext.
+
+`ContextWithFiles` erweitert `Context` um eine Liste von Dateinamen. `getContextString()` erzeugt den Prompttext, gefolgt von einer Zeile `<$ <Dateiname>` für jede Datei.
+
+=== `ContextManager`
+
+`ContextManager` liest und schreibt eine Liste von `ContextWithFiles`-Objekten in einer UTF-8-kodierten JSON-Datei.
+
+Beim Erzeugen wird der übergebene Dateipfad gespeichert und `readKontexte()` aufgerufen. Existiert die Datei nicht, wird eine leere Liste verwendet. Fehler beim Lesen oder Deserialisieren werden abgefangen und führen ebenfalls zu einer leeren Liste.
+
+`writeKontexte()` serialisiert die aktuelle Liste als JSON und schreibt sie in die konfigurierte Datei. Diese Methode legt das übergeordnete Verzeichnis nicht selbst an.
+
+Weitere Abfragen:
+
+[cols="2,4"]
+|===
+|Methode |Ergebnis
+
+|`getContextList()`
+|Gibt die interne Liste der Kontexte zurück.
+
+|`getContext(name)`
+|Liefert den ersten Kontext mit passendem Namen oder `null`.
+
+|`getKnoten()`
+|Liefert nicht-null Knotenpfade ohne Duplikate.
+
+|`getRootKnoten()`
+|Liefert die Knotenpfade aller Kontexte; im Unterschied zu `getKnoten()` werden Duplikate und `null`-Werte nicht herausgefiltert.
+|===
+
+Der Jackson-Mapper akzeptiert Groß-/Kleinschreibung bei Eigenschaftsnamen, ignoriert unbekannte Eigenschaften und registriert `JavaTimeModule`.
+
+=== `AiContextProvider`
+
+`AiContextProvider` stellt einen statischen `ContextManager` bereit. Die Kontextdatei wird über `AiEinstellungen.getFilePath("AiServices/Kontexte_Java.txt")` bestimmt.
+
+`getAvailableContexts()` bezieht den Manager über `AiChatManager.getCurrent().getContextManager()` und liefert dessen Kontextliste.
+
+=== Kontextbaum
+
+`ContextTreeBuilder.createTreeModel()` erzeugt einen Baum mit der Wurzel „Kontexte“. Die Werte aus `ContextWithFiles.getKnoten()` werden als durch `/` getrennte Ordnerhierarchien abgebildet. Kontextobjekte werden als Blätter unter dem jeweiligen Ordner abgelegt.
+
+Leerzeichen um `/` sind zulässig. Leere Pfadteile werden übersprungen. Wiederkehrende Ordnerpfade werden über eine Map wiederverwendet.
+
+`ContextTreePanel` zeigt den Baum in einem `JTree` an. Die künstliche Wurzel ist im UI ausgeblendet. Alle Baumzeilen werden nach dem Neuaufbau expandiert.
+
+Bei Auswahl eines Baumknotens liefert `getSelectedContext()` nur dann einen Kontext, wenn das User-Objekt des Knotens ein `ContextWithFiles` ist. Ordnerknoten liefern `null`.
+
+`rebuildTree()` baut das Modell neu auf, leert die Auswahl und versucht danach, den zuvor ausgewählten Kontext erneut auszuwählen. Die Suche erfolgt über das Kontextobjekt als User-Objekt eines Baumblatts.
+
+=== Verschieben von Kontexten
+
+`ContextTreeTransferHandler` erlaubt das Verschieben von Kontextblättern in Ordnerknoten:
+
+* Als Ziehquelle werden ausschließlich `ContextWithFiles`-Blätter akzeptiert.
+
+* Als Ziel muss der User-Objektwert des Zielknotens ein `String` sein, was im Baum für Ordnerknoten gilt.
+
+* Beim Drop wird der fachliche Ordnerpfad aus dem Zielknoten ermittelt und in `context.setKnoten()` geschrieben.
+
+* Danach wird die übergebene Aktualisierungsaktion ausgeführt.
+
+Der unsichtbare Wurzelknoten wird beim Ermitteln des Pfads ignoriert. Ein Drop auf die Wurzel führt daher zu einem leeren Knotenpfad.
+
+`ContextTreePanel.setContextList()` registriert den TransferHandler neu mit der angegebenen Liste. Nach Änderungen ruft dieser die Callback-Aktion auf, die optional `saveAction` ausführt und anschließend den Baum neu aufbaut.
+
+== Kontexteditor und Prompt-Design
+
+=== `ContextEditorPanel`
+
+`ContextEditorPanel` kombiniert einen `ContextTreePanel` mit einem `ContextEditDetailsPanel` in einem horizontalen `EbSplitPanel`.
+
+Der Konstruktor registriert eine Save-Action am Baum, die in dieser Klasse selbst leer ist. Das Panel bietet außerdem `registerEvents()`, womit die Auswahl im Baum an die Detailansicht übergeben wird.
+
+`setDividerLocation(int)` verwendet im vorliegenden Code unabhängig vom Argument stets den Wert `300`.
+
+=== `ContextEditDetailsPanel`
+
+Das Detailpanel zeigt Felder für Name, Knoten, Prompt und Ausgabe an. Der Konstruktor steuert über `ignoreLabels`, ob Feldbeschriftungen ausgelassen werden, und über `ignoreOutput`, ob die Ausgabezeile ausgelassen wird.
+
+`transferModelToView(context)` setzt die Felder aus dem Kontext. Ist `context` `null`, wird stattdessen ein neues, leeres `ContextWithFiles` als aktiver Kontext verwendet.
+
+`transferViewToModel(context)` überträgt Name, Knoten und Prompt in das angegebene Modell. Das Ausgabefeld wird dabei nicht in `ContextWithFiles` übertragen.
+
+`undo()` stellt den aktiven Kontext erneut in der Ansicht dar. Es handelt sich damit um eine Rückübertragung des gespeicherten Modellzustands und nicht um den `UndoManager` aus `UndoDecorator`.
+
+Das Panel speichert einen `saveListener`, der im dargestellten Code nicht ausgelöst wird.
+
+=== `ContextEditorPanelCtrl`
+
+`ContextEditorPanelCtrl` verbindet den Kontexteditor mit `AiContextProvider` und `ContextManager`. Beim Erzeugen lädt er die verfügbaren Kontexte und richtet die Events sowie Toolbars ein.
+
+Funktionen des Controllers:
+
+* `saveContext()` überträgt die Detailfelder in das Modell, schreibt die Kontextliste und baut den Baum neu auf.
+
+* `deleteContext()` entfernt den ausgewählten Kontext aus der Liste, speichert und aktualisiert den Baum.
+
+* `createNewContext()` erzeugt einen neuen Kontext unter dem Knoten des aktuell ausgewählten Kontexts.
+
+* `setOutputContent()` expandiert Datei- und Verzeichnismarker aus dem Prompt und schreibt das Ergebnis in das Ausgabefeld.
+
+* `exportPrompt()` und `exportOutput()` geben Prompt beziehungsweise Ausgabe an registrierte Consumer weiter.
+
+* `setFilter()` filtert die Kontextliste nach den Präfixen `Prompts` oder `Snippets`; die Option „Alle“ lässt alle Einträge zu.
+
+`createNewContext()` tut nichts, wenn kein Kontext ausgewählt ist. Ein neuer Kontext erhält den Namen „Neuer Knoten“, übernimmt den Knotenpfad des ausgewählten Kontexts und bekommt einen leeren Prompt.
+
+Die Felder `promptConsumer` und `promptOutputConsumer` sind optional. Ist kein Consumer gesetzt, haben die Exportaktionen keine Wirkung.
+
+=== Kontexteditor-Dialog
+
+`ContextEditDlg` zeigt den `ContextEditorPanel` in einem Fenster mit dem Titel „Chat Kontexte bearbeiten“. Das Fenster lädt `ContextEditor.ini`, richtet Menüaktionen ein und setzt die Position des Splitters.
+
+Das Menü „Kontext“ bietet:
+
+[cols="2,4"]
+|===
+|Menüaktion |Verhalten
+
+|Neu
+|Delegiert an `ContextEditorPanelCtrl.createNewContext()`.
+
+|Löschen
+|Delegiert an `ContextEditorPanelCtrl.deleteContext()`.
+
+|Speichern
+|Delegiert an `ContextEditorPanelCtrl.saveContext()`.
+
+|Undo
+|Ruft `ContextEditorPanel.undo()` auf.
+
+|Copy Prompt
+|Kopiert den Prompttext des Detailpanels in die Systemzwischenablage.
+|===
+
+`Show()` erstellt und zeigt den Dialog unmittelbar an. `ShowWindow()` erstellt einen Dialog, setzt die Schließoperation auf `DISPOSE_ON_CLOSE` und gibt ihn zurück, ohne ihn selbst sichtbar zu machen.
+
+=== Prompt-Design-Dialog
+
+`PromptDesignDlg` ist eine separate Oberfläche zur Bearbeitung von Prompt-Kontexten. Sie verwendet eine `ContextTreePanel`-ähnliche Baumansicht und ein `ContextEditDetailsPanel`.
+
+Beim Anzeigen werden die verfügbaren Kontexte über `AiContextProvider` geladen. Das Inhaltsfilterfeld bietet „Alle“, „Prompts“ und „Snippets“. Gefiltert wird anhand des Anfangs des Knotenpfads.
+
+Aktionen umfassen:
+
+* Erstellen und Löschen von Kontexten.
+
+* Speichern der Kontextliste.
+
+* Rückgängigmachen durch erneutes Übertragen des aktiven Modellzustands in die Ansicht.
+
+* Kopieren des Prompttexts in die Zwischenablage.
+
+* Expandieren von Datei- und Verzeichnismarkern über „Get Output“.
+
+Beim Speichern wird der Ansichtsinhalt zunächst in das Modell übertragen, anschließend schreibt `ContextManager` die Datei und der Baum wird neu aufgebaut.
+
+Beim Löschen wird der ausgewählte Kontext aus der Kontextliste entfernt, die Liste gespeichert und der Baum neu aufgebaut. Danach wird `undo()` am Detailpanel aufgerufen.
+
+Die Methode `setOutputContent()` verarbeitet zuerst Verzeichnismarker und anschließend Dateimarker. Wenn sich die Expansion bereits nach der Verzeichnisverarbeitung ändert, wird das Promptfeld aktualisiert und die Methode beendet. Andernfalls wird abhängig vom Vorhandensein eines Zeilenumbruchs vor `<$D` entweder das Prompt- oder das Ausgabefeld aktualisiert.
+
+Im Konstruktor wird für Menü- und Toolbaraktionen eine lokale `GuiDecorator`-Instanz angelegt. Das Fenster besitzt daneben ein eigenes Feld `decorator`, das zuvor mit Fenster, INI-Datei und Abschnitt initialisiert wurde. Die Aktionskonfiguration in `initMenuAndToolBar()` verwendet die lokale Instanz.
+
+`PromptDesignApp` startet den Dialog über `SwingUtilities.invokeLater(PromptDesignDlg::Show)`. `ContextEditApp` startet entsprechend den Kontexteditor.
+
+=== `PromptEditorPanel`
+
+`PromptEditorPanel` ist ein separates Panel mit Name, Knoten, Prompt und Ausgabe. Es stellt ähnliche Modell-/Ansichtsübertragungen wie `ContextEditDetailsPanel` bereit.
+
+Im Konstruktor von `initializeComponents()` werden zunächst `JScrollPane`-Objekte aus den Feldern `edPrompt` und `edOutput` erstellt, bevor diese Felder durch `EbGridBagUtil` mit Textareas belegt werden. Die zuerst erzeugten Scroll-Panes werden anschließend nicht in das Panel eingefügt. Der sichtbare Aufbau wird über die späteren Aufrufe von `addLabeledScrollPaneWithFieldRow()` erstellt.
+
+== Chatverwaltung
+
+=== `AiChat`
+
+`AiChat` ist das Datenobjekt für einen Chat. Es enthält Name, Titel, Nachrichten, Modell, URL, Kontext, geladene Kontextdaten, eine optionale `IniFile`-Referenz und den berechneten Preis.
+
+Der Konstruktor ohne Argumente und der Konstruktor mit Name und Titel initialisieren die Nachrichtenliste. Der `IniFile`-Konstruktor liest Titel und Name aus dem Abschnitt `Einstellungen`.
+
+`getMessages()` stellt sicher, dass eine nicht initialisierte Nachrichtenliste neu angelegt wird. `setMessages()` setzt die Nachrichten, berechnet den Gesamtpreis neu und nummeriert nicht-null Nachrichten ab `1`.
+
+`addMessage()` ignoriert `null`. Hat eine Nachricht noch keine ID, wird eine ID aus der letzten Nachricht abgeleitet oder auf `1` gesetzt. Danach wird die Nachricht angehängt und ihr Preis zum Chatpreis addiert.
+
+`clearMessages()` leert die Nachrichten und setzt den Preis zurück. `getLastMessage()` liefert die letzte Nachricht oder `null`, wenn keine vorhanden ist.
+
+`getTotalTokens()`, `getInputTokens()` und `getOutputTokens()` summieren die entsprechenden Werte über alle nicht-null Nachrichten.
+
+`store()` schreibt Name, Titel, Modell, URL und Kontextnamen in den INI-Abschnitt `Einstellungen`. Ist keine `IniFile` gesetzt, beendet die Methode die Arbeit ohne Aktion.
+
+=== Chatpfade
+
+`getFilePath()` verwendet den Ordner der INI-Datei, sofern eine `IniFile` mit Dateinamen vorhanden ist. Andernfalls wird der Pfad aus `AiEinstellungen.AiPfad`, `Chats` und dem Chatnamen zusammengesetzt.
+
+`getChunkPath()` erzeugt einen Pfad zu einem `chunks`-Unterordner. `getMessageFile()` erzeugt den Pfad zur Datei `message.json`.
+
+Die Pfadbildung in der Klasse verwendet teilweise Backslashes, während andere Teile des Projekts Schrägstriche verwenden. Die konkreten Pfade hängen damit auch von den verwendeten Hilfsfunktionen und der Laufzeitplattform ab.
+
+=== `AiChatManager`
+
+`AiChatManager` ist für verfügbare Chats, Sessions, Kategorien und Kontextinformationen zuständig. `getCurrent()` liefert eine statische Singleton-Instanz.
+
+Beim Erzeugen werden Chat- und Session-Konfigurationen eingelesen sowie die verfügbaren Knoten aus dem `ContextManager` übernommen. Die Chat-Dateien werden über `FileUtil.getAllFiles()` in den Verzeichnissen `chats` beziehungsweise `sessions` unter `AiEinstellungen.AiPfad` gesucht.
+
+`createChat(name, title)`:
+
+. Erstellt ein neues `AiChat`.
+. Legt den Chunk-Ordner an.
+. Erstellt eine `chat.ini` im Chatverzeichnis.
+. Speichert die Chatdaten in die INI-Datei.
+. Fügt den Chat der verfügbaren Chatliste hinzu.
+
+`readChat(name)` liest zunächst die INI-Datei und anschließend `message.json`. Fehlt die Nachrichtendatei, wird der Chat mit einer leeren Nachrichtenliste versehen. Fehler beim Einlesen der Nachrichten werden abgefangen; die Methode liefert in diesem Fehlerpfad eine leere Liste.
+
+`writeChatMessages(chat)` setzt die Version jeder Nachricht auf `1.0`, serialisiert die Nachrichten und schreibt sie nach `message.json`.
+
+`getChat(name, title)` liefert einen vorhandenen Chat mit passendem Namen oder erzeugt ein neues Chatobjekt mit einer zugehörigen INI-Datei-Referenz. Der neu erzeugte Chat wird in dieser Methode nicht in `availableChats` eingefügt.
+
+`getChatWithFileName()` sucht zunächst über den INI-Dateinamen und anschließend über den Chatpfad. `getAvailableChats()` gibt die interne Chatliste zurück.
+
+Die Sessions werden beim Laden in `availableSessions` abgelegt. Im dargestellten Code gibt es jedoch keine öffentliche Methode zum Abrufen dieser Liste.
+
+=== `AiChatSerializer`
+
+`AiChatSerializer` serialisiert eine Liste von `AiChatMessage`-Objekten als JSON. Bei einem Fehler beim Serialisieren wird eine `RuntimeException` ausgelöst.
+
+`deserializeAiChatMessages()` versucht, eine JSON-Liste zu lesen. Fehler werden abgefangen und führen zu einer leeren Liste.
+
+=== `AiChatMessage`
+
+`AiChatMessage` bildet eine gespeicherte Chatnachricht ab. Sie enthält unter anderem System- und Userfrage, Ergebnis, Modell, Start- und Endzeit, gespeicherte Antwort, Zeilenpositionen, ID, Session, Tokenwerte und Version.
+
+Der Konstruktor mit Nachrichteninhalten erzeugt eine neue `AiSession` und fügt System- und Usernachricht zu dieser Session hinzu.
+
+`getAnswer()` liefert `storedAnswer`, wenn vorhanden. Andernfalls liefert die Methode bei fehlendem Ergebnistext „Kein Output erhalten“ und sonst den unveränderten Ergebnistext. Eine weitergehende JSON-Auswertung des Ergebnisses ist im bereitgestellten Code nicht implementiert.
+
+`getModelNameFromResult()` liefert derzeit konstant `unknown`.
+
+`toString()` verwendet zuerst einen nicht leeren Titel. Andernfalls setzt die Methode die ID und abhängig von den statischen Anzeigeoptionen Modell, Userfrage oder Antworttext zusammen. Die Ausgabe wird auf maximal 100 Zeichen gekürzt.
+
+=== `AiSession`
+
+`AiSession` hält einen Namen und eine geordnete Liste von `LlmMessage`-Objekten. Es bietet Methoden zum Hinzufügen von System-, User- und Assistant-Nachrichten sowie zum Hinzufügen einer Antwort.
+
+`getCombinedMessages()` kombiniert eine erste Systemnachricht und eine unmittelbar darauf folgende Usernachricht zu einer einzelnen Usernachricht. Der Systemtext wird dabei in `<<...>>` eingebettet. Alle nachfolgenden Nachrichten werden unverändert angehängt.
+
+`getHistory()` erzeugt eine lesbare Textdarstellung mit Rollenüberschriften und Trennzeilen.
+
+Der Kopierkonstruktor kopiert die Liste, aber nicht die einzelnen Nachrichtenobjekte. Die ursprünglichen und kopierten Sessions enthalten daher Referenzen auf dieselben `LlmMessage`-Objekte.
+
+== Kosten und globale Einstellungen
+
+=== `Kosten` und `AiModelKostenInfo`
+
+`Kosten.getPreis(modelName, input, output)` sucht das Modell im `LlmModelProvider` und berechnet den Preis aus den Ein- und Ausgabetokenpreisen des `LlmModel`. Ist das Modell nicht vorhanden, liefert die Methode `0.0`.
+
+`getPreisEuroMwst()` multipliziert den Basispreis mit `1.19` und anschließend mit `0.88`.
+
+Im bereitgestellten `LlmModel` liefern `getInputTokenPrice()` und `getOutputTokenPrice()` jeweils `0`. Auf Grundlage dieser Implementierung ergibt die Berechnung für Modelle daher zunächst keinen Preis, solange diese Preiswerte nicht anderweitig verändert oder überschrieben werden.
+
+`AiModelKostenInfo` enthält zusätzlich eine separate Liste beispielhafter Preiswerte für bestimmte OpenAI-Modelle. Die statischen Methoden dieser Klasse verwenden für Preisberechnungen jedoch `Kosten`; die Beispielwerte aus `GetKostenListe()` werden von `Kosten.getPreis()` nicht herangezogen.
+
+=== `GlobaleEinstellungen`
+
+`GlobaleEinstellungen` ermittelt verschiedene Datenverzeichnisse aus fest codierten Kandidatenlisten und speichert gefundene Pfade statisch zwischen.
+
+`findDirectory()` gibt das erste existierende Verzeichnis zurück. Wird keines gefunden, wird eine `RuntimeException` ausgelöst.
+
+Die Klasse bietet unter anderem:
+
+* `getAiPfad()` für das AI-Datenverzeichnis.
+
+* `getDataPfadJava()` für das Java-Datenverzeichnis.
+
+* `getDataPfadJUser(fileName)` für einen Pfad unterhalb von `user.home/EbToolsDaten`.
+
+* `getDataPfadShared()` und `getDataPfadShared(fileName)` für gemeinsam verwendete Daten.
+
+* `getPfad(localIniFilePath)` zum Zusammensetzen eines Pfads unter dem AI-Verzeichnis.
+
+* `getTempFileName(fileName)` für einen Namen im temporären Systemverzeichnis.
+
+* `isWindows()` zur Betriebssystemprüfung anhand von `os.name`.
+
+* `isMacOs()` zur Prüfung, ob der ermittelte Java-Datenpfad mit `/User` beginnt.
+
+`getSimplePassword()` und `getPassword()` bilden Werte aus `AiServiceConfig.getData1()` und `getData2()` mithilfe von `Twofish_Crypter` und fest codierten Zusatzzeichenfolgen.
+
+=== `AiEinstellungen` und INI-Fabrik
+
+`AiEinstellungen` stellt statische Pfade und Datei-Hilfsmethoden bereit. `AiPfad` wird bei der Klasseninitialisierung aus `GlobaleEinstellungen.getAiPfad()` ermittelt. Weitere Methoden bilden Dateipfade unterhalb dieses Verzeichnisses oder legen Verzeichnisse über `FileUtil.ensureDirectory()` an.
+
+`IniFileFactory.create(name)` delegiert an `IniFileProvider.createIniFile(name)`. `DefaultIniFileFactory` ist eine leere Unterklasse, die diese Standardimplementierung verwendet.
+
+== Session-Hilfsklassen
+
+`LlmSession` enthält Felder für Name, Beschreibung und `LlmRequest`. Im vorliegenden Code sind keine öffentlichen Zugriffsmethoden oder weitere Verarbeitungslogik implementiert.
+
+`LlmSessionManager` ist ein Singleton. `addUserMessage()` hängt eine User-Nachricht an die Request-Nachrichtenliste an. `addResponse()` hängt den Antworttext als Assistant-Nachricht an.
+
+`LlmSessionMessageItem` kann entweder mit einem `LlmMessage` oder mit einem `LlmResponse` erstellt werden. Die enthaltenen Felder sind im vorliegenden Code nicht über Zugriffsmethoden verfügbar.
+
+`Snippet` ist ein einfaches Datenobjekt mit Name, Knotenpfad und Snippettext. `toString()` liefert den Namen, sodass das Objekt in Swing-Komponenten über diesen Text angezeigt werden kann.
+
+== Request-Editor im Detail
+
+`EdRequestWindow` enthält ein `RequestEditorPanel` und ein Textfeld für Nachrichteninhalte. Der Fensterinhalt wird mit einem Split-Panel aufgebaut. Die Listen für Requests und Nachrichten werden jeweils über neue `DefaultListModel`-Instanzen gesetzt.
+
+Das Fenster stellt außerdem Methoden zum Setzen und Lesen von `contentMemo` und Modellname bereit. `setMessageText()` aktualisiert das Anzeigefeld und setzt die erste sichtbare Zeile über `JTextPaneAdapter` auf den Anfang.
+
+`RequestEditorPanel` enthält:
+
+[cols="2,4"]
+|===
+|Komponente |Verwendungszweck
+
+|Requestliste
+|Auswahl gespeicherter `LlmRequest`-Objekte.
+
+|Memo-Feld
+|Anzeigen und Bearbeiten von `contentMemo`.
+
+|Modellfeld
+|Anzeigen und Bearbeiten des Modellnamens.
+
+|Nachrichtenliste
+|Auswahl einzelner `LlmMessage`-Objekte.
+
+|Toolbars
+|Bereitstellen von Request- und Nachrichtenaktionen.
+|===
+
+`transferModelToView(request)` überträgt Memo und Modell in die Eingabefelder. `transferViewToModel(request)` schreibt diese beiden Feldwerte zurück in ein Request-Objekt.
+
+== Tor-HTTP-Test
+
+`TorRequest` ist ein eigenständiger Kommandozeilentest. Er baut eine SOCKS-Proxyverbindung zu `127.0.0.1:9150` auf und sendet eine GET-Anfrage an `https://www.heise.de`.
+
+Die Anfrage verwendet:
+
+* Weiterleitung von Redirects.
+
+* 15 Sekunden Verbindungs-Timeout.
+
+* 30 Sekunden Lese-Timeout.
+
+* Den User-Agent `Java-Tor-Client/1.0`.
+
+Der HTTP-Status und der Antworttext werden auf der Konsole ausgegeben. Der Inputstream wird als UTF-8 gelesen und die Verbindung wird im `finally`-Block getrennt. Das Programm wirft Exceptions aus `main()` weiter.
+
+== Wesentliche Einschränkungen des vorliegenden Codes
+
+* Die Historie im `AiHistoryTreeCtrl` besteht aus fest codierten Beispielknoten und ist nicht mit den gespeicherten Requests verbunden.
+
+* Im Playground sind `setChat()` und `setModel()` leer. Die ComboBox-Auswahlen aktualisieren daher über diese Methoden keine weitere Controllerlogik.
+
+* Die Checkbox für das Protokollieren von Abfragen wird im gezeigten Versandpfad nicht ausgewertet.
+
+* Das Einfügen von Dateimarkern aus dem Dateiauswahlfenster schreibt Marker in den Prompt. Die Datei-Expansion im Playground ist im Versandpfad auskommentiert.
+
+* `ContextEditorPanel.saveContextList()` ist leer. Der Controller des Panels verwendet für das Speichern stattdessen direkt `ContextManager.writeKontexte()`.
+
+* `ContextEditDetailsPanel` speichert zwar einen `saveListener`, löst ihn im bereitgestellten Code aber nicht aus.
+
+* `ContextTreePanel` speichert einen ausgewählten Kontext beim Neuaufbau nur dann zuverlässig wieder, wenn die Auswahl zuvor über `getSelectedContext()` in `selectedContext` übernommen wurde.
+
+* `PromptEditorPanel` erstellt zunächst Scroll-Panes aus noch nicht initialisierten Textarea-Feldern. Diese Scroll-Panes werden danach nicht verwendet.
+
+* Die Drag-and-Drop-Dateiprüfung in `FileNameDropTarget` ist deaktiviert, weil `isFileFlavor()` immer `true` zurückgibt.
+
+* `JasonFileContentProvider.getJsonFileString(List<String>)` fügt um die bereits serialisierte JSON-Liste eine zusätzliche Array-Klammerung.
+
+* `AiChatManager` lädt Sessions, stellt die geladene Sessionliste im bereitgestellten Code jedoch nicht über eine öffentliche Methode bereit.
+
+* Die Tokenpreise des verwendeten `LlmModel` sind standardmäßig `0`; die Preisberechnung liefert damit für diese Modelle zunächst ebenfalls `0`.
+
+== Zentrale Klassenreferenz
+
+[cols="3,4"]
+|===
+|Klasse |Verantwortung
+
+|`AiPlaygroundApp`
+|Initialisiert den Chat-Manager und startet den Playground-Controller auf dem EDT.
+
+|`AiPlaygroundCtrl`
+|Steuert Requests, Toolbars, Chat- und Modellauswahl, Hintergrundarbeit und Ausgabe.
+
+|`AiPlaygroundWindow`
+|Erstellt das Hauptfenster und stellt Ein- und Ausgabe sowie Komponentenpersistenz bereit.
+
+|`WindowUtility`
+|Erstellt, zeigt und fokussiert Swing-Fenster wiederverwendbar.
+
+|`UndoDecorator`
+|Ergänzt `JTextPane` um Undo- und Redo-Unterstützung.
+
+|`Context`
+|Basismodell eines Prompts mit Name, Knotenpfad und Text.
+
+|`ContextWithFiles`
+|Erweitert einen Kontext um Dateinamen und erzeugt Datei-Marker.
+
+|`ContextManager`
+|Liest und schreibt Kontextlisten im JSON-Format.
+
+|`ContextTreeBuilder`
+|Baut aus Kontextpfaden eine hierarchische Swing-Baumstruktur.
+
+|`ContextTreePanel`
+|Zeigt Kontexte in einem Baum an und verwaltet die Auswahl.
+
+|`ContextTreeTransferHandler`
+|Verschiebt Kontextobjekte per Drag & Drop zwischen Ordnerknoten.
+
+|`ContextEditorPanelCtrl`
+|Verbindet Kontextmodell, Detailansicht, Baum und Editoraktionen.
+
+|`ContextEditDlg`
+|Stellt den Kontexteditor als eigenes Fenster bereit.
+
+|`PromptDesignDlg`
+|Bietet eine separate Oberfläche zum Filtern und Bearbeiten von Prompts.
+
+|`AiChat`
+|Modelliert einen Chat inklusive Nachrichten, Modell, Kontext und Kosten.
+
+|`AiChatManager`
+|Lädt und verwaltet Chatkonfigurationen und Chatnachrichten.
+
+|`AiChatMessage`
+|Modelliert eine gespeicherte Chatnachricht mit Ergebnis- und Tokeninformationen.
+
+|`AiSession`
+|Verwaltet eine Folge von LLM-Nachrichten.
+
+|`LlmSessionManager`
+|Ergänzt Requests um User- und Assistant-Nachrichten.
+
+|`EdRequestCtrl`
+|Steuert die Request- und Nachrichtenauswahl im Request-Editor.
+
+|`EdRequestWindow`
+|Stellt das Request-Editorfenster dar.
+
+|`RequestEditorPanel`
+|Enthält Listen und Felder zur Requestanzeige.
+
+|`GuiFileNameProvider`
+|Stellt ein Fenster zum Sammeln lokaler Dateipfade bereit.
+
+|`JasonFileContentProvider`
+|Liest Dateien und verpackt ihre Inhalte in JSON-Codeblöcke.
+
+|`CodeBlockReplacer`
+|Ersetzt Codeblöcke mit `fileName`-Angaben durch Dateimarker.
+|===

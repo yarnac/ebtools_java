@@ -1,0 +1,594 @@
+= LLM-Service – Technische Dokumentation
+:toc:
+:toclevels: 3
+:sectnums:
+
+== Überblick
+
+Der LLM-Service kapselt die Erstellung und den Versand von Anfragen an Sprachmodelle verschiedener Anbieter. Die Implementierung unterstützt Anthropic, OpenAI und Ollama. Eine gemeinsame Anfrage- und Antwortstruktur hält die Anbieter-spezifischen HTTP- und JSON-Formate von den aufrufenden Anwendungen fern.
+
+Zum Funktionsumfang gehören:
+
+* Erstellen von Text- und Bildanfragen über einen Builder.
+
+* Umwandeln der gemeinsamen Nachrichtenstruktur in das jeweilige Anbieterformat.
+
+* Auswählen eines Clients anhand einer Modellliste.
+
+* Erfassen von Token- und Laufzeitinformationen.
+
+* Speichern und Laden von Anfragen in verschlüsselten Dateien.
+
+* Einfügen von Datei- und Verzeichnisinhalten anhand von Markern im Nachrichtentext.
+
+Die Dokumentation beschreibt das Verhalten, das aus dem vorliegenden Code ersichtlich ist. Sie setzt voraus, dass die im Projekt verwendeten externen Klassen und Bibliotheken verfügbar sind.
+
+== Paketübersicht
+
+[cols="2,5"]
+|===
+|Paket |Aufgabe
+
+|`com.eb.base.ai_service`
+|Liest die Konfiguration des Dienstes aus einer INI-Datei.
+
+|`llm_client.api`
+|Enthält Anfragen, Nachrichten, Antworten, Builder und die öffentliche Client-API.
+
+|`llm_client.infrastructure`
+|Wählt Anbieter-Clients und Modelle aus, stellt gemeinsame Schnittstellen bereit und protokolliert Token-Daten.
+
+|`llm_client.infrastructure.contentmapping`
+|Modelliert Nachrichteninhalte und erstellt aus ihnen JSON-fähige Anfragekörper.
+
+|`llm_client.infrastructure.anthropic`
+|Enthält den Anthropic-Client, den Antworttyp und den Anthropic-spezifischen Content-Mapper.
+
+|`llm_client.infrastructure.openai`
+|Enthält den OpenAI-Client, den Antworttyp und den OpenAI-spezifischen Content-Mapper.
+
+|`llm_client.infrastructure.ollama`
+|Enthält den Ollama-Client, den Antworttyp und den Ollama-spezifischen Content-Mapper.
+
+|`llmreqstore`
+|Verwaltet das lokale, verschlüsselte Speichern und Laden von Anfragen.
+
+|`ai_chat`
+|Enthält einfache Anwendungsbeispiele für Bildanalyse, Übersetzung und Wörterbuchabfragen.
+|===
+
+== Ablauf einer Anfrage
+
+Ein typischer Anfrageablauf besteht aus folgenden Schritten:
+
+. Die aufrufende Anwendung erstellt mit `LlmRequest.builder()` eine Anfrage.
+. Der Builder sammelt Nachrichten, Modellname und optionale Parameter.
+. `LlmClient` oder `LlmRequestService` übergibt die Anfrage an die `LlmClientFactory`.
+. Die Factory sucht das Modell in der Modellliste und ermittelt den zugehörigen Anbieter.
+. Der ausgewählte Client wandelt die Anfrage in das anbieterspezifische JSON-Format um und sendet sie per HTTP.
+. Die Antwort wird in ein gemeinsames `LlmResponse`-Objekt übertragen.
+. Die Anbieter-Clients protokollieren die verfügbaren Token- und Laufzeitdaten.
+. `LlmRequestService.sendRequest` ergänzt die Anfrage zusätzlich um eine Assistant-Nachricht mit der Antwort.
+
+`LlmClient.sendRequest` und `LlmRequestService.sendRequest` unterscheiden sich beim Umgang mit der Anfragehistorie: `LlmRequestService` ruft `addResponse` auf; `LlmClient` gibt die Antwort lediglich zurück.
+
+== Konfiguration
+
+=== `AiServiceConfig`
+
+`AiServiceConfig` ist ein Singleton. Die erste Ausführung von `current()` erstellt die Instanz und lädt über `IniFileProvider` die Datei `AiServiceConfig.ini`.
+
+Die Klasse stellt folgende Konfigurationswerte bereit:
+
+[cols="2,2,3"]
+|===
+|Methode |INI-Abschnitt und Schlüssel |Standardwert
+
+|`getModelFileName()`
+|`Einstellungen` / `AiModelFileName`
+|`AiServicesConfig.ini`
+
+|`getGeheimnisFileName()`
+|`Einstellungen` / `AiGeheimnisFileName`
+|Leerer String
+
+|`getData1()`
+|`Data` / `Data1`
+|Leerer String
+
+|`getData2()`
+|`Data` / `Data2`
+|Leerer String
+
+|`getTokenFileName()`
+|`Einstellungen` / `AiTokenFileName`
+|Leerer String
+|===
+
+`getIniFile()` gibt das zugrunde liegende `IniFile`-Objekt zurück. Die Modellprovider-Klasse bestimmt den Pfad der Modelldatei in ihrem vorliegenden Code jedoch über `AiEinstellungen.getFilePath("AiServices/Modelle.txt")`.
+
+=== Anbieter-Schlüssel
+
+`LlmClientFactory` lädt OpenAI- und Anthropic-Schlüssel bei Bedarf aus der Datei, deren Pfad `AiServiceConfig.current().getGeheimnisFileName()` liefert. Das Passwort bezieht die Factory aus `GlobaleEinstellungen.getSimplePassword()`.
+
+Der Code erwartet mindestens zwei Zeilen:
+
+[cols="1,3"]
+|===
+|Zeile |Verwendung
+
+|Erste Zeile
+|Wird entschlüsselt und der Teil hinter dem ersten `=` als OpenAI-Schlüssel verwendet.
+
+|Zweite Zeile
+|Wird entschlüsselt und der Teil hinter dem ersten `=` als Anthropic-Schlüssel verwendet.
+|===
+
+Die Schlüssel werden statisch zwischengespeichert und beim ersten Zugriff geladen. Ein `IOException` beim Lesen der Datei wird als `RuntimeException` weitergegeben. Andere Probleme beim Zugriff auf die erwarteten Zeilen oder beim Entschlüsseln werden in `loadKeys()` nicht ausdrücklich behandelt.
+
+== Anfrage erstellen
+
+=== `LlmRequest`
+
+`LlmRequest` repräsentiert eine Modellanfrage. Sie enthält:
+
+* `model`: den Modellnamen.
+
+* `messages`: eine geordnete Liste von Nachrichten.
+
+* `parameters`: eine Liste benannter Parameter, zum Beispiel `temperature` oder `max_tokens`.
+
+* `contentMemo`: optionaler Text, der für die Darstellung über `toString()` verwendet wird.
+
+* `lastResponse` und `requestId`: interne Zusatzinformationen, die von Jackson ignoriert werden.
+
+Die Konstruktoren mit Argumenten verlangen einen Modellnamen und nicht-null Listen. Der Konstruktor ohne Argumente ist für Frameworks wie Jackson vorhanden.
+
+`toString()` gibt `contentMemo` zurück, wenn dieser Wert nicht leer ist. Andernfalls wird der Text der ersten Nachricht zurückgegeben. `getAllMessageString()` liefert die Darstellungen aller Nachrichten, jeweils mit Zeilenumbruch. Diese Methode wird nicht als JSON-Eigenschaft serialisiert.
+
+`addUserMsg()` fügt eine User-Nachricht hinzu. `addResponse()` speichert die Antwort als `lastResponse` und hängt ihren Antworttext als neue Assistant-Nachricht an. `getParameter(name)` sucht den ersten Parameter mit dem angegebenen Namen; bei einem Treffer liefert die Methode das `Parameter`-Objekt, andernfalls `null`. `hasParameter(name)` prüft, ob ein solcher Parameter existiert.
+
+=== Builder-API
+
+Die Builder-API führt den Aufrufer schrittweise durch die Anfrageerstellung. Der Einstiegspunkt ist `LlmRequest.builder()`.
+
+[source,java]
+----
+LlmRequest request = LlmRequest.builder()
+        .addSystemMsg("Du bist ein hilfreicher Assistent.")
+        .addUserMsg("Fasse den folgenden Text zusammen.")
+        .setModel("modellname")
+        .addParameter("temperature", 0.0)
+        .build();
+----
+
+Der Builder bietet unter anderem folgende Operationen:
+
+[cols="2,4"]
+|===
+|Methode |Wirkung
+
+|`addSystemMsg(text)`
+|Fügt eine Nachricht mit der Rolle `system` hinzu.
+
+|`addUserMsg(text)`
+|Fügt eine Nachricht mit der Rolle `user` hinzu.
+
+|`addRequestMsg(text)`
+|Verarbeitet eine kombinierte Anfrage und kann daraus eine System- sowie eine User-Nachricht erzeugen.
+
+|`addRequestMsg(text, imageFileNames)`
+|Verarbeitet eine kombinierte Anfrage und ergänzt die User-Nachricht um Bilddateien.
+
+|`addUserMsgWithImage(text, imagePath)`
+|Erstellt eine User-Nachricht mit Text und versucht, ein Bild aus einer lokalen Datei hinzuzufügen.
+
+|`setModel(model)`
+|Legt den Modellnamen fest.
+
+|`addParameter(name, value)`
+|Fügt einen benannten Parameter hinzu.
+
+|`build()`
+|Erstellt ein `LlmRequest` mit den bis dahin gesammelten Werten.
+|===
+
+Der Builder fügt einfache Nachrichten nur hinzu, wenn der Text nicht `null` und nicht leer ist. Für `addRequestMsg` wird der Eingabetext zunächst mit `StringExtensions.ebTrimAll` bearbeitet. Beginnt der bereinigte Text mit `<<`, wird der Text bis zum nächsten `>>` als Systemnachricht verwendet; der restliche Text wird zur User-Nachricht.
+
+Bei `addUserMsgWithImage` wird das Bild nur verarbeitet, wenn auch der Nachrichtentext nicht leer ist. Ein `IOException` beim Einlesen der Bilddatei wird als `RuntimeException` weitergegeben.
+
+=== `Parameter`
+
+`Parameter` enthält einen unveränderlichen Namen und einen Wert vom Typ `Object`. Der Wert wird beim Serialisieren der Anfrage in den JSON-Anfragekörper übernommen, sofern der Parameter für das Modell erlaubt ist.
+
+== Nachrichten und multimodale Inhalte
+
+=== `LlmMessage`
+
+Eine `LlmMessage` enthält eine Rolle, eine Liste von `ContentPart`-Objekten und optional `LlmMessageInfo`.
+
+Übliche Rollen sind:
+
+* `system`
+
+* `user`
+
+* `assistant`
+
+Der Konstruktor für Textnachrichten fügt einen `ContentPartText` hinzu. Ein weiterer Konstruktor akzeptiert zusätzlich Bilddateinamen und versucht, diese als Bilder einzulesen.
+
+`getMessageString()` erzeugt eine lesbare Darstellung der Nachricht. Textblöcke werden ausgegeben; Bildblöcke werden durch `Image ...` dargestellt. `getMessage()` gibt eine ausführlichere Darstellung der Content-Parts zurück. Die Methoden `isAssistent()`, `isUser()` und `isSystem()` prüfen die jeweilige Rolle.
+
+=== Content-Parts
+
+`ContentPart` ist ein versiegeltes Interface mit zwei erlaubten Implementierungen:
+
+[cols="2,4"]
+|===
+|Typ |Inhalt
+
+|`ContentPartText`
+|Ein Textblock mit dem Feld `text`.
+
+|`ContentPartImage`
+|Ein Bild mit MIME-Typ und Base64-kodierten Bilddaten.
+|===
+
+Jackson erhält über `@JsonTypeInfo` und `@JsonSubTypes` Informationen zum Typ des jeweiligen Content-Parts. Die Typkennungen sind `text` und `image`.
+
+=== Bilder aus lokalen Dateien
+
+`LlmMessage.addImageFromPath()` liest die Datei vollständig ein und kodiert ihre Bytes mit Base64. Die Dateiendung bestimmt den MIME-Typ:
+
+[cols="1,2"]
+|===
+|Endung |MIME-Typ
+
+|`.png`
+|`image/png`
+
+|`.jpg` oder `.jpeg`
+|`image/jpeg`
+|===
+
+Bei anderen Dateiendungen wird kein Bild-Content-Part hinzugefügt. Der Code prüft die Endung, nicht den tatsächlichen Dateiinhalt.
+
+`ImageUrl` ist ein separates Datenobjekt mit `url` und optionalem `detail`-Wert. Die vorliegenden Client-Mapper verwenden für die Bildübertragung jedoch `ContentPartImage` und nicht `ImageUrl`.
+
+== Client-Auswahl und Modellverwaltung
+
+=== `LlmModel`
+
+Ein `LlmModel` enthält `company` und `modelName`. Die Methoden `isAnthropic()`, `isOpenAi()` und `isOllama()` vergleichen den Anbieterwert mit `anthropic`, `openai` beziehungsweise `ollama`.
+
+Die Methoden `getInputTokenPrice()` und `getOutputTokenPrice()` liefern derzeit jeweils `0`.
+
+=== `LlmModelProvider`
+
+Der Provider liest Modelle aus einer tabulatorgetrennten Textdatei. Für jede nicht leere Zeile werden die ersten beiden Felder als Anbieter und Modellname verwendet. Zeilen mit weniger als zwei Feldern führen zu einer `IllegalArgumentException`.
+
+Der Dateipfad wird durch `AiEinstellungen.getFilePath("AiServices/Modelle.txt")` bestimmt. Kann die Datei gelesen werden, werden ihre Einträge in einer Liste gespeichert. Eine `IOException` beim Laden führt im Konstruktor zu einer leeren Modellliste.
+
+`getModel(name)` sucht nach einer exakten Übereinstimmung des Modellnamens und liefert bei einem Fehlschlag `null`. `findModel(name)` delegiert an `getModel(name)`.
+
+Für Parameter gilt derzeit diese zusätzliche Regel:
+
+* Ein unbekanntes Modell erlaubt keine Parameter.
+
+* Der Parameter `temperature` wird für OpenAI-Modelle nicht zugelassen.
+
+* Andere Parameter werden für gefundene Modelle zugelassen.
+
+`getCurrent()` stellt zusätzlich eine Singleton-Instanz bereit. Die `LlmClientFactory` erstellt in ihrem Konstruktor jedoch selbst einen `LlmModelProvider`.
+
+=== `LlmClientFactory`
+
+Die Factory sucht anhand von `request.getModel()` das passende Modell. Bei einem unbekannten Modell wirft sie eine `IllegalArgumentException`. Anhand des im Modell hinterlegten Anbieters erstellt sie einen Client:
+
+[cols="2,3"]
+|===
+|Anbieterkennung |Client
+
+|`anthropic`
+|`AnthropicClient` mit neuem `HttpClient` und Anthropic-Schlüssel.
+
+|`openai`
+|`OpenAiClient` mit neuem `HttpClient` und OpenAI-Schlüssel.
+
+|`ollama`
+|`OllamaClient` mit neuem `HttpClient`.
+|===
+
+Ist der Anbieterwert nicht erkannt, wirft die Factory ebenfalls eine `IllegalArgumentException`.
+
+=== Gemeinsame Client-Schnittstelle
+
+`ILlmClient` definiert `sendRequest(LlmRequest)`. Die Methode kann `IOException` und `InterruptedException` auslösen.
+
+`LlmClient` ist ein Wrapper, der intern über die Factory den passenden Client auswählt. Er fängt Ausnahmen ab und verpackt sie in eine `RuntimeException`.
+
+`LlmRequestService.sendRequest()` erstellt ebenfalls eine Factory und einen passenden Client. Bei erfolgreichem Versand fügt diese Service-Methode die Antwort über `llmRequest.addResponse(response)` zur Anfrage hinzu. `IOException` und `InterruptedException` werden jeweils in `RuntimeException` umgewandelt.
+
+`LlmRequestService.sendSimpleRequest(message, modelName, host)` setzt zunächst `OllamaClient.HOST`, erstellt eine Anfrage mit einer User-Nachricht und dem Modellnamen und sendet sie anschließend über `sendRequest()`.
+
+== JSON-Abbildung
+
+=== Gemeinsamer Mapper
+
+`LlmRequestJsonMapper` erstellt den Anfragekörper für einen Anbieter. Dazu verwendet er einen `ContentPartToMapMapper`, der festlegt, wie Content-Parts in Maps umgewandelt werden.
+
+Der Mapper führt folgende Schritte aus:
+
+. Er wandelt jede `LlmMessage` über `LlmMessageMapper` in eine `LlmMessageRaw` um.
+. Er fügt das Modell unter dem JSON-Schlüssel `model` ein.
+. Er verwendet `getContentIdentifier()` als Schlüssel für die Nachrichtenliste.
+. Er überträgt Parameter, die laut `LlmModelProvider` für das Modell zulässig sind.
+. Er serialisiert den Anfragekörper mit Jackson.
+
+Alle drei vorliegenden Anbieter-Mapper liefern `messages` als Content-Identifier bis auf den OpenAI-Mapper, der `input` verwendet.
+
+`ContentPartToMapMapper` bietet außerdem `shouldSendSystemSeparately()`. Der Standardwert ist `false`. Wenn ein Mapper diese Option aktiviert, prüft `LlmRequestJsonMapper` die erste Nachricht. Ist sie eine Systemnachricht, wird sie aus der Nachrichtenliste entfernt und ihr Content unter dem Schlüssel `system` in den Anfragekörper verschoben.
+
+Die Mapper rufen für Textblöcke außerdem `replaceFileNamesWithFileContents()` auf. Die Standardimplementierung delegiert an `JsonFileAppendUtil.appendAllFiles()`.
+
+=== Anbieterformate
+
+[cols="2,2,3"]
+|===
+|Mapper |Content-Schlüssel |Abbildung
+
+|`ContentPartMapperAnthropic`
+|`messages`
+|Text wird als `type: text` übertragen. Bilder werden als `type: image` mit einem Base64-`source`-Objekt abgebildet. Systemnachrichten werden separat verarbeitet.
+
+|`ContentPartMapperOllama`
+|`messages`
+|Text wird als `type: text` übertragen. Bilder werden als `image_url` mit einer Data-URL abgebildet.
+
+|`ContentPartMapperOpenAi`
+|`input`
+|Text wird je nach Rolle als `input_text` oder `output_text` übertragen. Bilder werden als `input_image` mit einer Data-URL abgebildet.
+|===
+
+== Anbieter-Clients
+
+=== Anthropic
+
+`AnthropicClient` sendet Anfragen an `https://api.anthropic.com/v1/messages`. Es setzt die Header `Content-Type`, `x-api-key` und `anthropic-version`.
+
+Wenn die Anfrage keinen Parameter `max_tokens` enthält, ergänzt der Client den Standardwert `20000`. Der Request-Mapper filtert anschließend Parameter anhand der Modellregeln.
+
+Die Antwort wird in `AnthropicResponse` deserialisiert. Der Client übernimmt den ersten Content-Block des Typs `text` als Antworttext. Modellname, Ein- und Ausgabetoken sowie Laufzeit werden in `LlmResponse` übertragen. Danach berechnet der Client Tokenwerte, soweit erforderlich, und ruft `TokenLogger.log()` auf.
+
+`AnthropicResponse` modelliert neben dem Antworttext unter anderem Modell, Rolle, Stop-Informationen und Nutzungsdaten. Unbekannte JSON-Felder werden ignoriert. Die verschachtelten Typen `Content`, `Usage` und `CacheCreation` bilden Antwortinhalte und Nutzungsinformationen ab.
+
+=== OpenAI
+
+`OpenAiClient` sendet Anfragen an `https://api.openai.com/v1/responses`. Der Client verwendet den Bearer-Token im `Authorization`-Header und setzt ein Timeout von 30 Minuten.
+
+Ein HTTP-Statuscode ungleich `200` führt zu einer `RuntimeException`, deren Meldung den Response-Body enthält. Bei Erfolg wird die Antwort in `OpenAiResponse` deserialisiert. Der Client sucht in `output` nach dem ersten Eintrag mit dem Typ `message` und übernimmt dessen ersten Content-Text als Antwort.
+
+Modellname, Ein- und Ausgabetoken, Gesamtzahl der Token und Laufzeit werden in `LlmResponse` gespeichert. Anschließend ruft der Client `TokenLogger.log()` auf.
+
+`OpenAiResponse` enthält unter anderem Ausgabeeinträge, Nutzungsdaten, Metadaten und optional weitere Antwortinformationen. Der Client verarbeitet für seine gemeinsame Antwort insbesondere Modell, Tokenwerte und Textausgabe.
+
+=== Ollama
+
+`OllamaClient` sendet Anfragen an den konfigurierten Host über `http://<host>:11434/v1/chat/completions`. Der Request verwendet ein Timeout von 30 Minuten und einen leeren Bearer-Token.
+
+Der Host wird über das statische Feld `OllamaClient.HOST` verwaltet. Ist es beim Versand nicht gesetzt, ruft der Client `determineHost()` auf. `LlmRequestService.sendSimpleRequest()` kann den Host vor dem Versand explizit setzen.
+
+Die Klasse definiert mehrere Hostnamen und Modellkonstanten. `HOSTS` enthält die bei der Verfügbarkeitsprüfung verwendeten Hosts; `MODELLE` enthält eine Auswahl an Modellnamen.
+
+Nach dem HTTP-Aufruf deserialisiert der Client die Antwort als `OllamaResponse` und verwendet die Nachricht der ersten Choice. Die Eingabetoken und Ausgabetoken werden im gemeinsamen Antwortobjekt auf `0` gesetzt; die Gesamtzahl wird aus `usage.total_tokens` übernommen. Danach ruft der Client `calcTokens()` und `TokenLogger.log()` auf.
+
+`getAvailableModels()` fragt `http://<host>:11434/api/tags` ab. Bei Status `200` werden die Werte aus `models[].name` zurückgegeben. Bei einem anderen Status oder einer abgefangenen `IOException` beziehungsweise `InterruptedException` liefert die Methode eine leere Liste.
+
+`OllamaResponse` bildet unter anderem Choices, Nachrichten und Nutzungsdaten ab. Unbekannte Felder werden ignoriert.
+
+== Netzwerkprüfung
+
+`CheckNetworkService.isOllamaAvailableAsync(host, port)` prüft die Ollama-Version über eine HTTP-Anfrage an `http://<host>:11434/api/version`. Die Connect- und Request-Timeouts betragen jeweils drei Sekunden. Bei einem Statuscode unter `300` liefert die Methode `true`; bei `IOException` oder `InterruptedException` liefert sie `false`.
+
+Der Parameter `port` ist in der URL-Erstellung nicht berücksichtigt; der Code verwendet fest den Port `11434`. Trotz des Namens `isOllamaAvailableAsync` wird die HTTP-Anfrage synchron ausgeführt und das Ergebnis anschließend als bereits abgeschlossenes `CompletableFuture` zurückgegeben.
+
+`isExistingHost(url)` löst den Hostnamen über `InetAddress` auf und prüft, ob eine lokale `NetworkInterface` für die Adresse gefunden wird. Bei `UnknownHostException` oder `SocketException` liefert die Methode `false`.
+
+`main()` startet für jeden Eintrag in `OllamaClient.HOSTS` eine Verfügbarkeitsprüfung und gibt deren Ergebnis über einen Callback aus.
+
+== Antwort- und Leistungsdaten
+
+=== `LlmResponse`
+
+`LlmResponse` ist die gemeinsame Antwortstruktur. Sie enthält:
+
+[cols="2,4"]
+|===
+|Feld |Bedeutung
+
+|`status`
+|Statuswert der Antwort; die vorliegenden Clients setzen ihn nicht sichtbar.
+
+|`answer`
+|Antworttext des Modells.
+
+|`model`
+|Modellname aus der Anbieterantwort.
+
+|`reasoning`
+|Zusätzlicher Reasoning-Text, sofern ein Client ihn setzt.
+
+|`error`
+|Fehlertext, sofern ein Client ihn setzt.
+
+|`inputTokens`, `outputTokens`, `totalTokens`
+|Token-Zähler der Antwort.
+
+|`secondsToRun`
+|Gemessene Laufzeit in Sekunden.
+
+|`tokensPerSecond`
+|Berechnete Tokenrate.
+
+|`request`
+|Zugehörige Anfrage; von Jackson ignoriert.
+|===
+
+`calcTokens()` setzt `totalTokens` auf die Summe aus Ein- und Ausgabetoken, wenn der Gesamtwert `0` ist. Ist die Laufzeit größer als `0`, berechnet die Methode die Tokenrate als `totalTokens / secondsToRun`.
+
+`getMessageInfo()` erstellt ein `LlmMessageInfo` mit Modell-, Token- und Laufzeitdaten. `getShortDetails()` und `getDetails()` erzeugen lesbare Zusammenfassungen. `getAnswerWithDetails()` verbindet die Kurzdetails mit dem Antworttext.
+
+Die formatierten Details berücksichtigen bei Modellnamen, die mit `q` beginnen, den Ollama-Host. `getDetails()` ersetzt außerdem bestimmte Hostnamen durch lesbare Gerätenamen.
+
+=== `LlmMessageInfo`
+
+`LlmMessageInfo` enthält Ein- und Ausgabetoken, Gesamtzahl, Modell, Laufzeit und Tokenrate. `LlmRequest.addResponse()` übernimmt diese Informationen aus der Antwort und setzt sie an der erzeugten Assistant-Nachricht.
+
+== Token-Protokollierung
+
+`TokenLogger.log(request, response)` erstellt eine Zeile mit Zeitstempel, Modell, Ein- und Ausgabetoken, Gesamtzahl, Laufzeit und Tokenrate. Der Zielpfad stammt aus `AiServiceConfig.current().getTokenFileName()`.
+
+`appendLogMessage()` hängt die Zeile in UTF-8 an die Datei an und erstellt die Datei bei Bedarf. Eine `IOException` beim Schreiben wird derzeit ignoriert; sie wird nicht an den Aufrufer weitergegeben.
+
+== Einfügen von Datei- und Verzeichnisinhalten
+
+`JsonFileAppendUtil` verarbeitet spezielle Marker in Nachrichtentexten und kann passende Datei-Inhalte an die Anfrage anhängen. Die Pfade müssen zuvor mit `addAllowedDirectories()` freigegeben worden sein.
+
+Die Klasse bietet unter anderem:
+
+* `addAllowedDirectories(directories)` zum Hinzufügen vorhandener Verzeichnisse zur Liste erlaubter Pfade.
+
+* `appendDirectoryFiles(text)` zum Ersetzen von Verzeichnis-Markern durch Dateimarker.
+
+* `appendFiles(text, imageFileNames)` zum Auflösen von Datei- und Bilddatei-Markern.
+
+* `appendAllFiles(text)` als Kombination aus Verzeichnisverarbeitung und Datei-Auflösung.
+
+* `clearAllowedPaths()` zum Entfernen aller erlaubten Verzeichnisse.
+
+* `getAllowedPathCount()` zum Abrufen der Anzahl erlaubter Pfade.
+
+Die Pfadprüfung akzeptiert nur absolute Pfade, deren aufgelöster Pfad innerhalb eines freigegebenen Verzeichnisses liegt. Dateien müssen zusätzlich reguläre Dateien sein. Ein `LinkedHashSet` verhindert doppelte Einträge und erhält die Einfügereihenfolge.
+
+=== Marker
+
+[cols="2,3"]
+|===
+|Marker |Verhalten
+
+|`<$ <Dateipfad>`
+|Fügt eine erlaubte reguläre Datei zur Verarbeitung hinzu.
+
+|`<$P <Bildpfad>`
+|Verarbeitet eine erlaubte Bilddatei, sofern sie über die Bilddateiliste zugelassen ist.
+
+|`<$D <Verzeichnis>`
+|Ersetzt den Marker durch Dateimarker für Dateien direkt im Verzeichnis.
+
+|`<$DA <Verzeichnis>`
+|Ersetzt den Marker durch Dateimarker für alle Dateien, die über die verwendete Dateifunktion gefunden werden.
+|===
+
+Wenn ein Marker nicht auf einen erlaubten oder vorhandenen Pfad verweist, bleibt die betreffende Eingabezeile erhalten. Bei erfolgreichen Datei-Auflösungen wird der ursprüngliche Marker entfernt und der Inhalt über `JasonFileContentProvider` ergänzt. Ein Fehler beim Abrufen der Dateiinhalte wird protokolliert und als `RuntimeException` weitergegeben.
+
+Die Klasse hält erlaubte Pfade sowie Prüf-Caches in statischen, nebenläufigen Collections. In dem gezeigten Code werden die Maps `fileExistsCache` und `isDirectoryCache` zwar angelegt, aber nicht verwendet.
+
+== Gespeicherte Anfragen
+
+=== `LlmRequestStoreItem`
+
+`LlmRequestStoreItem` enthält eine Anfrage-ID, ein `LlmRequest`-Objekt sowie Titel und Beschreibung. `toString()` stellt diese Werte tabulatorgetrennt dar.
+
+=== `LlmRequestManager`
+
+`LlmRequestManager` verwaltet gespeicherte Anfragen in einer Liste und einer Map nach Anfrage-ID. `current()` stellt eine Singleton-Instanz bereit. Beim Erzeugen lädt der Manager vorhandene Anfragen aus dem Request-Verzeichnis.
+
+Das Verzeichnis wird als `AiEinstellungen.AiPfad + "/requests"` gebildet. Für jede Anfrage wird eine Datei nach dem Muster `Request_<ID>.dat` verwendet. Der JSON-Inhalt wird mit `Crypt.saveEncryptedFile()` unter Verwendung des globalen Passworts verschlüsselt gespeichert.
+
+Beim Speichern:
+
+. Prüft der Manager, ob die Anfrage bereits eine ID besitzt und im Manager bekannt ist.
+. Bei einer neuen Anfrage wird eine ID aus der aktuellen Zeit in Millisekunden gesetzt.
+. Der `LlmRequestStoreItem` wird serialisiert und verschlüsselt gespeichert.
+. Neue Einträge werden zusätzlich in Liste und Map aufgenommen.
+
+Beim Laden sucht der Manager nach Dateien mit dem Muster `Request_*.dat`, entschlüsselt sie und deserialisiert sie. Die geladene Anfrage erhält die ID des zugehörigen Store-Items. Fehler beim Lesen oder Deserialisieren führen in `readItem()` zu `null`.
+
+`getLlmRequests()` liefert die Anfragen aus der internen Liste. `getLlmRequest(id)` sucht anhand der ID und liefert bei einem Fehlschlag `null`. `deleteRequest(request)` entfernt den Eintrag aus Liste und Map und versucht, die zugehörige Datei zu löschen.
+
+== Einfache Anwendungsbeispiele
+
+=== Bildanalyse
+
+`SimpleImageService.getImageDescription(userMessage, image, model)` erstellt eine User-Nachricht mit Bild, setzt das Modell sowie `temperature` auf `0.0` und sendet die Anfrage über `LlmClient`. Zurückgegeben werden Antworttext und Leistungsdaten.
+
+Die Beispielanweisung in `main()` fordert ein deutschsprachiges JSON-Ergebnis für die Verschlagwortung eines Bildes. Sie ist Anwendungsinhalt und kein allgemeines Ausgabeformat des LLM-Service.
+
+=== Übersetzung
+
+`SimpleUebersetzungService.getUebersetzungen(word, sprache, model)` erzeugt eine Systemnachricht und eine User-Nachricht mit dem Übersetzungsauftrag. Die Anfrage setzt `temperature` auf `0.0`. Die Methode gibt den Antworttext zusammen mit Modell-, Token- und Laufzeitangaben zurück.
+
+=== Wörterbuch
+
+`SimpleWoerterbuchService.getUebersetzungen(word, sprache, model)` erstellt ebenfalls eine System- und User-Nachricht. Die Anweisung fordert mehrere Übersetzungen in einem durch `|` getrennten Format. Anders als das Übersetzungsbeispiel fügt diese Methode keinen `temperature`-Parameter hinzu.
+
+== Fehlerverhalten und Betriebsaspekte
+
+* Ein nicht registriertes Modell führt bei der Client-Auswahl zu einer `IllegalArgumentException`.
+
+* Ein nicht unterstützter Anbieterwert führt ebenfalls zu einer `IllegalArgumentException`.
+
+* Fehler beim HTTP-Aufruf können als `IOException` oder `InterruptedException` auftreten. Die Wrapper `LlmClient` und `LlmRequestService` wandeln abgefangene Ausnahmen in `RuntimeException` um.
+
+* Der OpenAI-Client behandelt HTTP-Statuscodes ungleich `200` ausdrücklich als Fehler. Die anderen vorliegenden Clients prüfen den HTTP-Statuscode nicht auf dieselbe Weise, bevor sie den Response-Body deserialisieren.
+
+* Datei- und Bildzugriffe benötigen passende lokale Berechtigungen. Die Bildverarbeitung liest die gesamte Datei in den Speicher ein.
+
+* Anthropic- und OpenAI-Schlüssel werden aus einer verschlüsselten Datei geladen. Der Zugriff auf das globale Passwort und die Entschlüsselung hängen von den projektinternen Hilfsklassen ab.
+
+* Token-Logfehler werden beim Schreiben ignoriert. Fehler beim Auflösen von Datei-Inhalten können dagegen den Request-Aufbau abbrechen.
+
+* `OllamaClient.HOST` ist statisch und wird von allen Instanzen gemeinsam verwendet. Ein explizit gesetzter Host beeinflusst daher weitere Ollama-Aufrufe im selben Prozess.
+
+== Zugehörige Quellklassen
+
+[cols="3,4"]
+|===
+|Klasse |Verantwortung
+
+|`AiServiceConfig`
+|Konfigurationszugriff.
+
+|`LlmRequest`, `LlmMessage`, `Parameter`
+|Gemeinsames Datenmodell der Anfrage.
+
+|`LlmRequestBuilder` und Builder-Interfaces
+|Fluent API zum Erstellen von Anfragen.
+
+|`LlmResponse`, `LlmMessageInfo`
+|Gemeinsames Antwortmodell und Leistungsdaten.
+
+|`LlmClient`, `LlmRequestService`
+|Öffentliche Einstiegspunkte zum Versenden von Anfragen.
+
+|`LlmClientFactory`, `LlmModelProvider`, `LlmModel`
+|Modellverwaltung und Auswahl des Anbieter-Clients.
+
+|`LlmRequestJsonMapper`, `LlmMessageMapper`
+|Erstellen des anbieterspezifischen JSON-Anfragekörpers.
+
+|`ContentPartMapperAnthropic`, `ContentPartMapperOpenAi`, `ContentPartMapperOllama`
+|Abbildung der Content-Parts auf die jeweiligen API-Formate.
+
+|`AnthropicClient`, `OpenAiClient`, `OllamaClient`
+|HTTP-Kommunikation mit den Anbietern.
+
+|`TokenLogger`
+|Anhängen von Anfrage- und Token-Daten an eine Logdatei.
+
+|`LlmRequestManager`, `LlmRequestStoreItem`
+|Verschlüsseltes Speichern und Laden von Anfragen.
+
+|`JsonFileAppendUtil`
+|Freigabeprüfung und Einfügen lokaler Datei-Inhalte.
+|===
