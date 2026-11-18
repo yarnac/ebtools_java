@@ -22,6 +22,7 @@ public class InspectMapping<T> {
     private Class theClass;
     private Function<T, ?> toStringFunction;
     private Function<T, List<Object>> getSubObjectsFunction;
+    private InspectMappingConfig inspectMappingConfig;
 
 
 

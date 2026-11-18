@@ -10,9 +10,8 @@ import java.util.*;
 
 public class FileHashcodeWithCacheService implements IFileHashcodeService {
 
-    final String Index_File_Name = "/.ebsh256_16";
-    final long Index_Buffer_Size = 16 * 1024;
-
+    final String Index_File_Name = "/.ebsh256_4";
+    final long Index_Buffer_Size = 4 * 1024;
 
     Map<String, String> cachedFileHashcodes = new HashMap<String, String>();
     Set<String> indexFiles = new HashSet<String>();
@@ -30,7 +29,7 @@ public class FileHashcodeWithCacheService implements IFileHashcodeService {
     }
 
     private String createCachedEntry(String fileName, String indexFileName) {
-         String hash = fileHashcodeService.getHashCode(fileName);
+        String hash = fileHashcodeService.getHashCode(fileName);
         appendLine(indexFileName, hash + "\t" + Path.of(fileName).getFileName().toString());
         indexFiles.add(indexFileName);
         return hash;
@@ -79,11 +78,20 @@ public class FileHashcodeWithCacheService implements IFileHashcodeService {
             i++;
             if (Files.isRegularFile(file))
             {
+                String fileName = file.getFileName().toString();
+                if (fileName.startsWith("."))
+                    continue;
+
+                String fileHashCode = fileHashcodeService.getHashCode(file);
+                cachedFileHashcodes.put(file.toAbsolutePath().toString(), fileHashCode);
+
                 strb
-                        .append(fileHashcodeService.getHashCode(file))
+                        .append(fileHashCode)
                         .append("\t")
-                        .append(file.getFileName().toString())
-                        .append("\n");
+                        .append(fileName)
+                        .append("\t")
+                        .append(file.toFile().length())
+                        .append("\r\n");
             }
         }
         try {

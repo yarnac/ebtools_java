@@ -57,10 +57,11 @@ public class SizeHashcodeDuplicateScanService implements IDuplicateScanService {
 
     private boolean isAllowedFile(Path path) {
         File file = path.toFile();
+        String localFileName = path.getFileName().toString();
         if (file.isDirectory() || file.length()==0)
             return false;
         String fileName = path.toString();
-        return !fileName.contains(".ebindex") &&
+        return !localFileName.startsWith(".") &&
                 !fileName.contains("\\bin\\") && !fileName.contains("/bin/") &&
                 !fileName.contains("\\obj\\") && !fileName.contains("/obj/");
     }
