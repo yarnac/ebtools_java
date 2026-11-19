@@ -63,8 +63,8 @@ public class DoubleFinderPanelCtrl extends AbstrPanelCtrl {
 				
 		guiDecorator.toolBars().addToolbarButton("Delete", IC.DELETE_RED, x->deleteDoubletten());
 		guiDecorator.toolBars().addToolbarButton("Delete All", IC.SAVE_DEL, x->deleteDoublettenAll());
-		guiDecorator.toolBars().addToolbarButton("Delete All", IC.MB_REVERSE, x->moveDuplicates());
-		guiDecorator.toolBars().addToolbarButton("Delete All", IC.BOX_FLOW, x->removeDuplicates());
+		guiDecorator.toolBars().addToolbarButton("Move Duplicates", IC.MB_REVERSE, x->moveDuplicates());
+		guiDecorator.toolBars().addToolbarButton("Remove Duplicates", IC.BOX_FLOW, x-> removeDuplicateFiles());
 	}	
 	
 	
@@ -162,19 +162,17 @@ public class DoubleFinderPanelCtrl extends AbstrPanelCtrl {
 		moveTo(d, "~/Data/Medien/Porno/unreadable");
 	}
 
-	private void moveTo(Doublette d, String string) {
+	private void moveTo(Doublette d, String directoryName) {
 		int index = getPanel().getLstDoubletten().getSelectedIndex();
 		
 		doubletten.remove(d);
 		transferDoublettenToView();
 		setIndex(index);
 		
-		FileUtil.move(d.getName(),string);
+		FileUtil.move(d.getName(),directoryName);
 		for (String fname : d.getFiles()) {
-			FileUtil.move(d.getName(),fname);
+			FileUtil.move(fname, directoryName);
 		}
-		
-		
 	}
 
 	private void copyToFavorites(String name) {
@@ -257,7 +255,7 @@ public class DoubleFinderPanelCtrl extends AbstrPanelCtrl {
 		}
 	}
 
-	private void removeDuplicates() {
+	private void removeDuplicateFiles() {
 		for (Doublette doublette : doubletten) {
 			for (String string : doublette.getFiles()) {
 				new File(string).delete();

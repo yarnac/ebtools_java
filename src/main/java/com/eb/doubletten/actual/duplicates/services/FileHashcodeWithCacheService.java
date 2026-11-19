@@ -1,5 +1,7 @@
 package com.eb.doubletten.actual.duplicates.services;
 
+import com.eb.base.extensions.FileExtensions;
+
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.DirectoryStream;
@@ -21,7 +23,7 @@ public class FileHashcodeWithCacheService implements IFileHashcodeService {
     public String getHashCode(Path file) {
         String fileName = file.toAbsolutePath().toString();
 
-        String indexFileName = file.getParent() + "\\" + Index_File_Name;
+        String indexFileName = FileExtensions.ebFileNameInDirectory(Index_File_Name,file.getParent().toString());
         if (!indexFiles.contains(indexFileName)) {
             appendIndexFile(indexFileName, true);
         }
@@ -59,7 +61,8 @@ public class FileHashcodeWithCacheService implements IFileHashcodeService {
 
             for (String line : lines) {
                 String[] parts = line.split("\t");
-                cachedFileHashcodes.put(parent + "\\" + parts[1], parts[0]);
+                String fileName = FileExtensions.ebFileNameInDirectory(parts[1], parent);
+                cachedFileHashcodes.put(fileName, parts[0]);
             }
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -73,13 +76,14 @@ public class FileHashcodeWithCacheService implements IFileHashcodeService {
         int n = files.size();
         int i=0;
         for (Path file : files) {
+            String fileName = file.toAbsolutePath().toString();
             if (i%50 == 0)
-                System.out.println(file.toAbsolutePath() + "\t(" + i + " / " + n + ")");
+                System.out.println(fileName + "\t(" + i + " / " + n + ")");
             i++;
             if (Files.isRegularFile(file))
             {
-                String fileName = file.getFileName().toString();
-                if (fileName.startsWith("."))
+                String localFileName = file.getFileName().toString();
+                if (localFileName.startsWith("."))
                     continue;
 
                 String fileHashCode = fileHashcodeService.getHashCode(file);

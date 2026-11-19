@@ -10,7 +10,6 @@ import com.eb.base.inifile.api.IniFileProvider;
 public abstract class AbstrPanelCtrl {
 	private IniFile iniFile;
 	private JFrame applicationFrame;
-	protected boolean started;
 	private Runnable onActivate; 
 
 	public IniFile getIniFile() {

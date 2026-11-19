@@ -1,0 +1,759 @@
+# DoubleFinder / Duplicate Finder – AsciiDoc Dokumentation
+
+== 1. Projektübersicht
+
+Das Projekt *DoubleFinder* (auch *Duplicate Finder* genannt) ist eine Java-Swing-Anwendung zur Erkennung und zum Umgang mit Duplikatdateien in Verzeichnissen. Es existieren zwei Implementierungsgenerationen:
+
+* **Legacy** (Paket `com.eb.doubletten`) – die ältere, monolithische Version mit fest codierten Verzeichnissen und Verknüpfung von View und Controller.
+* **Refactored** (Paket `com.eb.doubletten.actual`) – die neuere, modularisierte Version mit sauberer Trennung in View, Controller, Repository und Service-Ebene.
+
+Beide Generationen nutzen die Bibliothek `com.eb.base` für GUI-Dekoration, INI-Datei-Handling und Datei-Utilities.
+
+== 2. Architekturübersicht
+
+=== 2.1 Legacy-Generation
+
+* DoubleFinderApp / DoubleFinderFrame (Ein Punkt, Frame)
+* DoubleFinderPanel (GUI-Panel)
+* DoubleFinderPanelCtrl (Controller, erbt von AbstrPanelCtrl)
+* Doublette (Datenobjekt)
+
+=== 2.2 Refactored-Generation
+
+* DuplicateApp (Einstiegspunkt)
+* DuplicateView (JFrame-View)
+* DuplicateController (Controller)
+* DuplicateRepository (Datenhaltung)
+* IDuplicateScanService / FilenameDuplicateScanService / SizeHashcodeDuplicateScanService (Scan-Strategie)
+* IFileHashcodeService / FileHashcodeService / FileHashcodeWithCacheService (Hash-Berechnung)
+* IDuplikatContainer / ListBasedDuplikatContainer / SizeHashcodeDuplicateContainer (Datenmodell)
+
+== 3. Paketstruktur
+
+[cols="3,3,4"]
+|===
+| Paket
+| Art
+| Zweck
+
+| `com.eb.doubletten`
+| Legacy
+| Monolithische GUI + Controller + Datenobjekt
+
+| `com.eb.doubletten.actual.duplicateapp.app`
+| Refactored
+| Einstiegspunkt und Controller
+
+| `com.eb.doubletten.actual.duplicateapp.gui`
+| Refactored
+| Swing-View-Komponenten
+
+| `com.eb.doubletten.actual.duplicates.api`
+| Refactored
+| Schnittstellen und Factory
+
+| `com.eb.doubletten.actual.duplicates.domain`
+| Refactored
+| Datenklassen für Duplikatcontainer
+
+| `com.eb.doubletten.actual.duplicates.repositories`
+| Refactored
+| In-Memory-Datenhaltung
+
+| `com.eb.doubletten.actual.duplicates.services`
+| Refactored
+| Scan- und Hash-Implementierungen
+|===
+
+== 4. Legacy-Generation im Detail
+
+=== 4.1 DoubleFinderApp / DoubleFinderFrame
+
+Beide Klassen enthalten einen identischen `main`-Methode, die über `EventQueue.invokeLater` den Frame auf der AWT-Thread erzeugt, `initializeView()` aufruft und `setVisible(true)` setzt.
+
+[cols="2,3,5"]
+|===
+| Element
+| Typ
+| Beschreibung
+
+| `main(String[])`
+| `static void`
+| Einstiegspunkt; erzeugt `DoubleFinderFrame`, initiiert View, macht sichtbar
+
+| `initializeView()`
+| `protected void`
+| Erzeugt `DoubleFinderPanelCtrl`, setzt Test-Verzeichnisse, registriert ToolBar-Container
+
+| `DoubleFinderFrame()`
+| Konstruktor
+| Baut die BorderLayout mit `panelLeft`, `panelCenter`, `panelRight`, `panelSouth`, `mainToolBar`
+|===
+
+Wichtige Details zu `initializeView()`:
+
+* Es werden Test-Verzeichnisse hart codiert (`~/Data/Medien/Porno/dwhelper`, `d:\\Medien\\dwhelper2\\dwhelper`).
+* Ein `GuiDecorator` wird erzeugt und der `mainToolBar` als Container registriert.
+* `addTopMostButton(this)` fügt einen Always-on-top-Button hinzu.
+
+=== 4.2 DoubleFinderPanel
+
+Das Panel ist das zentrale GUI-Element der Legacy-Version. Es nutzt ein `null`-Layout mit absoluten Positionen.
+
+[cols="2,3,5"]
+|===
+| Feld / Methode
+| Typ
+| Beschreibung
+
+| `lstDoubletten`
+| `JList<Doublette>`
+| Hauptliste der gefundenen Duplikate
+
+| `comboBox`
+| `JComboBox<String>`
+| Auswahl des zu scannenden Verzeichnisses
+
+| `toolBar`
+| `JToolBar`
+| Werkzeugleiste innerhalb des Panels
+
+| `textFieldPos`
+| `JTextField`
+| Positiver Filter (Muss-enthaltene Begriffe, ggf. mit `+`-Präfix)
+
+| `textFieldNeg`
+| `JTextField`
+| Negativer Filter (Ausgeschlossene Begriffe)
+
+| `scrollPane`
+| `JScrollPane`
+| Umhüllt `lstDoubletten`
+
+| `selectedDirectoryAction`
+| `Consumer<String>`
+| Callback bei Änderung des Verzeichnisses
+
+| `selectedDoubletteAction`
+| `Consumer<Doublette>`
+| Callback bei Auswahl eines Duplikats
+
+| `selectedDoubletteFileAction`
+| `Consumer<Doublette>`
+| Callback bei Auswahl einer Datei innerhalb eines Duplikats
+
+| `register()`
+| `void`
+| Hängt Action- und Selection-Listener an, registriert `GuiDecorator`
+
+| `setIndex(int)`
+| `void`
+| Setzt den ausgewählten Index, ruft `ensureIndexIsVisible` mit `n+20` auf
+
+| `getFilterPos()` / `getFilterNeg()`
+| `String`
+| Liefert den aktuellen Filtertext
+|===
+
+Das Panel überschreibt `setSize(int, int)`, um `comboBox` und `scrollPane` dynamisch an die neue Breite anzupassen.
+
+=== 4.3 DoubleFinderPanelCtrl
+
+Der Controller erbt von `AbstrPanelCtrl` und übernimmt die gesamte Geschäftslogik der Legacy-Version.
+
+==== 4.3.1 Felder
+
+[cols="2,3,5"]
+|===
+| Feld
+| Typ
+| Beschreibung
+
+| `panel`
+| `DoubleFinderPanel`
+| Referenz auf das GUI-Panel
+
+| `directories`
+| `String[]`
+| Verzeichnislisste für den `JComboBox`
+
+| `lastDoublette`
+| `Doublette`
+| Letztgewähltes Duplikat (nicht aktiv genutzt)
+
+| `compSize`
+| `long`
+| Vergleichsgrenze für Dateigröße (10 KiB)
+
+| `doubletten`
+| `List<Doublette>`
+| Alle gefundenen Duplikate
+
+| `frame`
+| `JFrame`
+| Bezug zum übergeordneten Frame
+
+| `lstOtherDoubles`
+| `JList<String>`
+| Liste der parallelen Duplikat-Dateien (rechts)
+
+| `selectedDoublette`
+| `Doublette`
+| Aktuell selektiertes Duplikat
+
+| `zufall`
+| `boolean`
+| Schalter für zufällige Navigation
+
+| `random`
+| `Random`
+| Zufallsgenerator, mit `System.currentTimeMillis()` initialisiert
+
+| `sichtbareDoubletten`
+| `List<Doublette>`
+| Gefilterte, sichtbare Duplikate
+
+| `guiDecorator`
+| `GuiDecorator`
+| Dekoratior für ToolBar-Buttons
+
+| `iniFile`
+| `IniFile`
+| Konfigurationsdatei `DoubleFinder.ini`
+|===
+
+==== 4.3.2 Constructor und Decorate
+
+Der Konstruktor:
+
+* Registriert das Panel (`panel.register()`).
+* Setzt die Callbacks `selectedDirectoryAction`, `selectedDoubletteAction`, `keysAction`.
+* Setzt den Frame und die `applicationFrame`.
+* Ruft `decorate()` auf.
+
+`decorate()` registriert folgende ToolBar-Buttons im Container `"main"`:
+
+[cols="3,3,4"]
+|===
+| Label
+| Icon
+| Aktion
+
+| `Reload`
+| `IC.MB_PLAY`
+| Startet den Scan des aktuell gewählten Verzeichnisses
+
+| `Delete`
+| `IC.DELETE_RED`
+| Löscht alle *parallelen* Dateien eines Duplikats (`deleteDoubletten`)
+
+| `Delete All`
+| `IC.SAVE_DEL`
+| Löscht *alle* Dateien inklusive Hauptdatei (`deleteDoublettenAll`)
+
+| `Delete All` (umgelabelt)
+| `IC.MB_REVERSE`
+| Verschiebt parallele Dateien in `~/Data/Medien/Bilder/Tumblr/Doubles`
+
+| `Delete All` (umgelabelt)
+| `IC.BOX_FLOW`
+| Entfernt parallele Dateien endgültig vom Dateisystem (`removeDuplicates`)
+|===
+
+==== 4.3.3 Tastenkürzel
+
+Die Methode `handleDoublettenKey(KeyEvent)` verarbeitet folgende Shortcuts:
+
+[cols="2,3,5"]
+|===
+| Taste
+| Aktion
+| Beschreibung
+
+| `x`
+| `deleteDoublettenAll()`
+| Löscht alle Dateien des selektierten Duplikats
+
+| `f`
+| `copyToFavorites(name)`
+| Kopiert die Hauptdatei in `~/Data/Medien/Porno/favs`
+
+| `m`
+| `moveToUnreadable(doublette)`
+| Verschiebt in `~/Data/Medien/Porno/unreadable`
+
+| `d`
+| `moveTo(doublette, ...)`
+| Verschiebt in `~/Data/Medien/Porno/doubles`
+
+| `z`
+| zufall umschalten
+| Toggle Zufalls- vs. sequenzielle Navigation
+
+| `r`
+| `deleteDoubletten()`
+| Löscht nur die parallelen Dateien
+
+| `Enter` (code 10)
+| `start(...)`
+| Startet einen Neuscan des gewählten Verzeichnisses
+
+| `a`
+| Auto-Play-Trigger
+| Aktiviert/deaktiviert `nextAfter500MS` bei Window-Focus-Gain
+
+| `p`
+| `switchAutoPlay()`
+| Startet/stoppt einen `Timer` mit 3,5 s Intervall
+|===
+
+==== 4.3.4 Filterlogik
+
+* **Positivfilter** (`isAllowedDoublette`): Leertext → alles erlaubt. Sonst werden Begriffe per Leerzeichen getrennt. Ein Präfix `+` bedeutet *Muss-enthaltene* (AND-Logik, `return false` bei Nichteintreffen). Ohne Präfix gilt OR-Logik.
+* **Negativfilter** (`isForbiddenDoublette`): Leertext → nichts ausgeschlossen. Sonst wird jeder Leerzeichen-getrennte Begriff geprüft; ein Treffer schließt das Duplikat aus.
+
+==== 4.3.5 Auto-Play
+
+`switchAutoPlay()` erzeugt bei Erstaufruf einen `Timer` (Daemon) mit `scheduleAtFixedRate` in 3500 ms Intervall. Ein zweiter Aufruf stoppt den Timer. `nextAfter500MS` wird über `onActivate` (Window-Focus-Gain) ausgelöst und ruft nach 1 s `next()` auf.
+
+=== 4.4 Doublette
+
+Datenobjekt für ein Duplikat.
+
+[cols="2,3,5"]
+|===
+| Feld / Methode
+| Typ
+| Beschreibung
+
+| `name`
+| `String`
+| Hauptdatei-Name/Pfad
+
+| `files`
+| `List<String>`
+| Parallele Duplikat-Pfade
+
+| `addDouble(String)`
+| `void`
+| Fügt eine Datei hinzu. Enthält der neue Pfad `/Tumblr/` und der aktuelle Name nicht, wird der alte Name in `files` verschoben und `name` aktualisiert.
+
+| `toString()`
+| `String`
+| Format: `"<Anzahl+1> * <Dateiname>"`
+|===
+
+=== 4.5 AbstrPanelCtrl
+
+Abstrakte Basisklasse für Controller.
+
+[cols="2,3,5"]
+|===
+| Element
+| Typ
+| Beschreibung
+
+| `iniFile`
+| `IniFile`
+| Lazy-initialisiert über `IniFileProvider`
+
+| `applicationFrame`
+| `JFrame`
+| Übergeordneter Frame
+
+| `started`
+| `boolean`
+| Zustand (nicht weiter genutzt)
+
+| `onActivate`
+| `Runnable`
+| Wird bei `windowGainedFocus` ausgeführt
+
+| `getIniFileName()`
+| `abstract String`
+| Vom Subklassen zu implementieren
+|===
+
+== 5. Refactored-Generation im Detail
+
+=== 5.1 DuplicateApp
+
+Einstiegspunkt der neuen Generation.
+
+[cols="2,3,5"]
+|===
+| Element
+| Typ
+| Beschreibung
+
+| `main(String[])`
+| `static void`
+| Erzeugt `DuplicateView`, holt `SizeHashcodeDuplicateScanService` via Factory, erzeugt `DuplicateRepository`, konstruiert `DuplicateController`, macht View sichtbar
+|===
+
+=== 5.2 DuplicateView
+
+`JFrame`-basierte View mit `JSplitPane`.
+
+[cols="2,3,5"]
+|===
+| Komponente
+| Typ
+| Beschreibung
+
+| `mainToolBar`
+| `JToolBar`
+| Hauptwerkzeugleiste oben
+
+| `cbPaths`
+| `JComboBox<String>`
+| Editierbare Verzeichnis-Auswahl
+
+| `containerList`
+| `JList<IDuplikatContainer>`
+| Linke Split-Hälfte: Duplikat-Gruppen
+
+| `duplicateList`
+| `JList<String>`
+| Rechte Split-Hälfte: Dateien der selektierten Gruppe
+
+| `leftToolBar` / `rightToolBar`
+| `JToolBar`
+| Werkzeugleisten in den Split-Panels
+
+| `splitPane`
+| `JSplitPane`
+| Horizontale Aufteilung, Divider-Position aus INI
+
+| `setPathList(List<String>)`
+| `void`
+| Setzt das ComboBox-Modell
+
+| `getPathList()`
+| `List<String>`
+| Liest das ComboBox-Modell in eine Liste
+
+| `addPath(String)`
+| `void`
+| Fügt einen Pfad zum ComboBox hinzu
+|===
+
+=== 5.3 DuplicateController
+
+Kopplung zwischen View, ScanService und Repository.
+
+==== 5.3.1 Konstruktor
+
+* Erstellt `IniFileProvider` für `NewDuplicates.ini`.
+* Erzeugt einen `GuiDecorator` und registriert Container `"main"`, `"left"`, `"right"` mit je einem `Hilfe`-Button.
+* Ruft `transferInifileToView` und `wireEvents`.
+
+==== 5.3.2 Event-Handling
+
+[cols="3,3,5"]
+|===
+| Ereignis
+| Methode
+| Beschreibung
+
+| ComboBox-Aktion
+| `onPathChanged`
+| Prüft Pfad, ruft `scanService.scan`, setzt Repository und Container-Liste. Leerer/ungültiger Pfad → `clearLists`
+
+| Container-Selektion
+| `onContainerSelected`
+| Setzt `duplicateList` mit den Dateien der selektierten Gruppe
+
+| Window-Close
+| `onWindowClosing`
+| Ruft `transferViewToIniFile` – speichert Pfade (sortiert, ohne `""`) und Split-Position
+|===
+
+==== 5.3.3 INI-Sektion `Paths`
+
+* Beim Laden: Ein leerer String wird an Position 0 vorangestellt.
+* Beim Speichern: Der leere String wird entfernt, die Liste wird alphabetisch sortiert.
+
+=== 5.4 DuplicateRepository
+
+Ein einfacher In-Memory-Container.
+
+[cols="2,3,5"]
+|===
+| Feld
+| Typ
+| Beschreibung
+
+| `containers`
+| `List<? extends IDuplikatContainer>`
+| Initialisiert als `List.of()` (unveränderlich); wird durch `setContainers` ersetzt
+|===
+
+=== 5.5 Scan-Services
+
+==== 5.5.1 IDuplicateScanService (Schnittstelle)
+
+[cols="2,3,5"]
+|===
+| Methode
+| Rückgabe
+| Beschreibung
+
+| `scan(Path root)`
+| `List<? extends IDuplikatContainer>`
+| Durchsucht den Baum unter `root` nach Duplikaten
+|===
+
+==== 5.5.2 DuplicateScanServiceFactory
+
+[cols="3,3,5"]
+|===
+| Enum-Wert
+| Instantiierte Klasse
+| Beschreibung
+
+| `FileName`
+| `FilenameDuplicateScanService`
+| Duplikate nach Dateiname
+
+| `SizeAndFileName`
+| `null`
+| Noch nicht implementiert (gibt `null` zurück)
+
+| `HashCode`
+| `SizeHashcodeDuplicateScanService`
+| Duplikate nach SHA-256-Hash (Teilsample)
+|===
+
+==== 5.5.3 FilenameDuplicateScanService
+
+* Durchläuft `Files.walk(root)`, filtert Regular Files.
+* Gruppierungsschlüssel = `path.getFileName().toString()`.
+* `isAllowedFile` schließt Pfade aus, die `\\bin\\`, `/bin/`, `\\obj\\`, `/obj/` enthalten.
+* Duplikat = Gruppe mit `size > 1`.
+
+==== 5.5.4 SizeHashcodeDuplicateScanService
+
+* Verwendet `FileHashcodeWithCacheService` als Hashquelle.
+* Gruppierungsschlüssel = Hash-String.
+* `isAllowedFile` schließt zusätzlich leere Dateien und `.ebindex` aus.
+* Ergebnis wird nach Label (Hash) sortiert.
+
+=== 5.6 Hash-Services
+
+==== 5.6.1 IFileHashcodeService
+
+[cols="2,3,5"]
+|===
+| Methode
+| Rückgabe
+| Beschreibung
+
+| `getHashCode(Path file)`
+| `String`
+| Liefert den Hash-String einer Datei
+|===
+
+==== 5.6.2 FileHashcodeService
+
+Berechnet einen SHA-256-Hash durch *Teilsampling*:
+
+[cols="3,3,5"]
+|===
+| Schritt
+| Buffer-Größe
+| Beschreibung
+
+| Anfang
+| `bufferSize` (Default 64 KiB)
+| Erste Bytes der Datei
+
+| Mitte
+| `bufferSize`
+| Mitte der Datei, nur wenn `length > 2 * bufferSize`
+
+| Ende
+| `bufferSize`
+| Letzte `bufferSize` Bytes der Datei
+|===
+
+* `getFullHashCode(Path)` liest die *gesamte* Datei in 8 KiB-Blöcken.
+* `bytesToHex` konvertiert den Digest in eine hexadezimale Zeichenkette.
+* Bei Ausnahme wird `"<keine>"` zurückgegeben.
+
+==== 5.6.3 FileHashcodeWithCacheService
+
+Erweitert `FileHashcodeService` um eine Index-Datei pro Verzeichnis:
+
+[cols="3,3,5"]
+|===
+| Attribut / Methode
+| Wert / Typ
+| Beschreibung
+
+| `Index_File_Name`
+| `"/.ebsh256_16"`
+| Name der Indexdatei (16 KiB-Sample)
+
+| `Index_Buffer_Size`
+| `16 * 1024`
+| Buffer für die Hash-Berechnung
+
+| `cachedFileHashcodes`
+| `Map<String,String>`
+| In-Memory-Cache: absoluter Pfad → Hash
+
+| `indexFiles`
+| `Set<String>`
+| Bereits gelesene Indexdateien
+
+| `getHashCode(Path)`
+| `String`
+| Prüft Cache → liest/erzeugt Index → berechnet Hash → cacht
+
+| `createCachedEntry`
+| `String`
+| Berechnet Hash, appendet Zeile in Indexdatei, cacht
+
+| `appendIndexFile`
+| `void`
+| Liest existierende Indexdatei in Cache; erstellt bei Fehlen (mit Flag) einen vollen Index
+
+| `appendDirectoryFilesToIndex`
+| `void`
+| Durchläuft alle Regular Files eines Verzeichnisses, schreibt Hash+Name tab-getrennt
+
+| `appendLine` (static)
+| `void`
+| Appendet eine Zeile an eine Datei (CREATE + APPEND)
+|===
+
+=== 5.7 Datenmodell
+
+==== 5.7.1 IDuplikatContainer (Schnittstelle)
+
+[cols="2,3,5"]
+|===
+| Methode
+| Rückgabe
+| Beschreibung
+
+| `getLabel()`
+| `String`
+| Anzeigename in der Liste
+
+| `getKey()`
+| `Object`
+| Schlüssel für Gruppierung/Identität
+
+| `getDuplikate()`
+| `List<String>`
+| Liste der Dateipfade in dieser Gruppe
+|===
+
+==== 5.7.2 ListBasedDuplikatContainer
+
+Basis-Implementierung. `toString()` liefert `label`.
+
+==== 5.7.3 SizeHashcodeDuplicateContainer
+
+Erweitert `ListBasedDuplikatContainer`:
+
+* `getLabel()` liefert das erste Duplikat-Element (oder `"<keine>"` bei leerer Liste).
+* `getKey()` liefert ebenfalls `getLabel()`.
+
+== 6. Vergleich Legacy vs. Refactored
+
+[cols="3,3,4"]
+|===
+| Aspekt
+| Legacy
+| Refactored
+
+| Einstieg
+| `DoubleFinderApp` / `DoubleFinderFrame`
+| `DuplicateApp`
+
+| Verzeichnisauswahl
+| Hart codiert in `initializeView`
+| Editierbares `JComboBox`, aus INI geladen
+
+| Scan-Strategie
+| `FileUtil.getDoubles` (extern)
+| `IDuplicateScanService` mit Factory (Strategy-Pattern)
+
+| Hash-Berechnung
+| Nicht enthalten
+| `FileHashcodeService` (Teilsample) + Cache
+
+| Datenhaltung
+| `List<Doublette>` im Controller
+| `DuplicateRepository` (getrennt)
+
+| INI-Datei
+| `DoubleFinder.ini`
+| `NewDuplicates.ini`
+
+| Löschen/Verschieben
+| Im Controller, hart codierte Pfade
+| In der View über ToolBar-Buttons (leer)
+
+| Filter
+| Positiv/Negativ im Panel
+| Nicht vorhanden
+
+| Auto-Play
+| `Timer` + Tastatur
+| Nicht vorhanden
+|===
+
+== 7. Abhängigkeitsdiagramm (textuell)
+
+----
+DuplicateApp
+  │
+  ├── DuplicateView ──────────► GuiDecorator
+  │
+  ├── DuplicateController
+  │     ├── IDuplicateScanService ──► SizeHashcodeDuplicateScanService
+  │     │                                   │
+  │     │                                   └── IFileHashcodeService
+  │     │                                         ├── FileHashcodeService
+  │     │                                         └── FileHashcodeWithCacheService
+  │     ├── DuplicateRepository
+  │     ├── IDuplikatContainer
+  │     │     ├── ListBasedDuplikatContainer
+  │     │     └── SizeHashcodeDuplicateContainer
+  │     └── IniFile / IniFileProvider
+  │
+  └── (Legacy) DoubleFinderFrame ──► DoubleFinderPanelCtrl
+              │                          │
+              │                          ├── Doublette
+              │                          └── AbstrPanelCtrl ──► IniFile
+              └── DoubleFinderPanel
+----
+
+== 8. Konfigurationsdateien
+
+[cols="3,3,4"]
+|===
+| Datei
+| Sektion / Key
+| Beschreibung
+
+| `DoubleFinder.ini`
+| `Einstellungen` / `Index`
+| Speichert den letzten selektierten Duplikat-Index (Legacy)
+
+| `NewDuplicates.ini`
+| `Paths`
+| Liste der gescannten Verzeichnisse (Refactored)
+
+| `NewDuplicates.ini`
+| `Einstellungen` / `Split`
+| Divider-Position des `JSplitPane` (Default 100)
+|===
+
+== 9. Zusammenfassung
+
+Das Projekt durchläuft eine klare Evolution von einer monolithischen, hart codierten Swing-Anwendung hin zu einer schichtengetrennten Architektur mit Strategy-Pattern für den Scan, separatem Repository und INI-persistierter Konfiguration. Die Legacy-Version bietet umfangreiche interaktive Funktionen (Filter, Auto-Play, Tastenkürzel, Verschieben/Kopieren), die in der Refactored-Version noch nicht vollständig portiert sind. Die Hash-Berechnung mit Teilsampling und Caching stellt sicher, dass große Verzeichnisse in akzeptabler Zeit gescannt werden können.

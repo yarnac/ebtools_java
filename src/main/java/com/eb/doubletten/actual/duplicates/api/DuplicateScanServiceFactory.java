@@ -15,8 +15,7 @@ public class DuplicateScanServiceFactory {
         switch (type) {
             case FileName:
                 return new FilenameDuplicateScanService();
-            case SizeAndFileName:
-                return null;
+
             case HashCode:
                 return new SizeHashcodeDuplicateScanService();
         }
