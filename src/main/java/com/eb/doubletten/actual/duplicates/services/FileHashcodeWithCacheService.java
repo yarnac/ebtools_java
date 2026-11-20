@@ -9,31 +9,30 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class FileHashcodeWithCacheService implements IFileHashcodeService {
 
-    final String Index_File_Name = "/.ebsh256_4";
-    final long Index_Buffer_Size = 4 * 1024;
-
-    Map<String, String> cachedFileHashcodes = new HashMap<String, String>();
-    Set<String> indexFiles = new HashSet<String>();
-    private FileHashcodeService fileHashcodeService = new FileHashcodeService(Index_Buffer_Size);
+    private final Map<String, String> cachedFileHashcodes = new ConcurrentHashMap<>();
+    private final Set<Path> indexFiles = Collections.newSetFromMap(new ConcurrentHashMap<>());
+    private final FileHashcodeService fileHashcodeService = new FileHashcodeService(HashCodeConstants.Index_Buffer_Size);
 
     @Override
     public String getHashCode(Path file) {
-        String fileName = file.toAbsolutePath().toString();
+        String absolutePath = file.toAbsolutePath().toString();
+        String indexFileName = FileExtensions.ebFileNameInDirectory(HashCodeConstants.Index_File_Name, file.getParent().toString());
+        Path indexPath = Path.of(indexFileName);
 
-        String indexFileName = FileExtensions.ebFileNameInDirectory(Index_File_Name,file.getParent().toString());
-        if (!indexFiles.contains(indexFileName)) {
+        if (!indexFiles.contains(indexPath)) {
             appendIndexFile(indexFileName, true);
         }
-        return cachedFileHashcodes.computeIfAbsent(fileName, x -> createCachedEntry(x, indexFileName));
+        return cachedFileHashcodes.computeIfAbsent(absolutePath, x -> createCachedEntry(x, indexFileName));
     }
 
     private String createCachedEntry(String fileName, String indexFileName) {
         String hash = fileHashcodeService.getHashCode(fileName);
         appendLine(indexFileName, hash + "\t" + Path.of(fileName).getFileName().toString());
-        indexFiles.add(indexFileName);
+        indexFiles.add(Path.of(indexFileName));
         return hash;
     }
 
@@ -42,9 +41,8 @@ public class FileHashcodeWithCacheService implements IFileHashcodeService {
     }
 
     private void appendIndexFile(String indexFileName, boolean createFullIndexIfMissing) {
-
         Path path = Path.of(indexFileName);
-        if ( !Files.exists(path) ) {
+        if (!Files.exists(path)) {
             if (!createFullIndexIfMissing) {
                 return;
             }
@@ -56,81 +54,76 @@ public class FileHashcodeWithCacheService implements IFileHashcodeService {
         try {
             System.out.println("Reading index " + path.getParent());
             List<String> lines = Files.readAllLines(path);
-
-            String parent = path.getParent().toAbsolutePath().toString();
+            String parentDir = path.getParent().toAbsolutePath().toString();
 
             for (String line : lines) {
+                if (line.isEmpty()) continue;
                 String[] parts = line.split("\t");
-                String fileName = FileExtensions.ebFileNameInDirectory(parts[1], parent);
-                cachedFileHashcodes.put(fileName, parts[0]);
+                if (parts.length >= 2) {
+                    String fileName = FileExtensions.ebFileNameInDirectory(parts[1], parentDir);
+                    cachedFileHashcodes.put(fileName, parts[0]);
+                }
             }
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new RuntimeException("Failed to read index file: " + path, e);
         }
-        indexFiles.add(indexFileName);
+        indexFiles.add(path);
     }
 
     private void appendDirectoryFilesToIndex(Path parent) {
         List<Path> files = getFiles(parent);
-        StringBuilder strb = new StringBuilder();
-        int n = files.size();
-        int i=0;
-        for (Path file : files) {
-            String fileName = file.toAbsolutePath().toString();
-            if (i%50 == 0)
-                System.out.println(fileName + "\t(" + i + " / " + n + ")");
-            i++;
-            if (Files.isRegularFile(file))
-            {
+        StringBuilder stringBuilder = new StringBuilder();
+        int total = files.size();
+        for (int i = 0; i < total; i++) {
+            Path file = files.get(i);
+            if (i % 50 == 0) {
+                System.out.println(file + "\t(" + i + " / " + total + ")");
+            }
+            if (Files.isRegularFile(file)) {
                 String localFileName = file.getFileName().toString();
-                if (localFileName.startsWith("."))
-                    continue;
-
-                String fileHashCode = fileHashcodeService.getHashCode(file);
-                cachedFileHashcodes.put(file.toAbsolutePath().toString(), fileHashCode);
-
-                strb
-                        .append(fileHashCode)
-                        .append("\t")
-                        .append(fileName)
-                        .append("\t")
-                        .append(file.toFile().length())
-                        .append("\r\n");
+                if (isAllowedFileName(localFileName)) {
+                    String fileHashCode = fileHashcodeService.getHashCode(file);
+                    cachedFileHashcodes.put(file.toAbsolutePath().toString(), fileHashCode);
+                    try {
+                        long length = Files.size(file);
+                        stringBuilder.append("%s\t%s\t%s%n".formatted(fileHashCode, localFileName, length));
+                    } catch (IOException e) {
+                        throw new RuntimeException("Failed to get file size: " + file, e);
+                    }
+                }
             }
         }
+
         try {
-            Files.writeString(Path.of(parent.toString() + Index_File_Name), strb);
+            Path indexPath = Path.of(parent.toString() + HashCodeConstants.Index_File_Name);
+            Files.write(indexPath, stringBuilder.toString().getBytes(StandardCharsets.UTF_8), StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new RuntimeException("Failed to write index file: " + parent, e);
         }
+    }
+
+    private boolean isAllowedFileName(String localFileName) {
+        return !localFileName.startsWith(".");
     }
 
     private List<Path> getFiles(Path dirName) {
         List<Path> files = new ArrayList<>();
-
-        try (DirectoryStream<Path> stream =
-                     Files.newDirectoryStream(dirName)) {
+        try (DirectoryStream<Path> stream = Files.newDirectoryStream(dirName)) {
             for (Path p : stream) {
                 files.add(p);
             }
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new RuntimeException("Failed to read directory: " + dirName, e);
         }
         return files;
     }
 
-    public static void appendLine(String fileName, String line)  {
+    public static void appendLine(String fileName, String line) {
         Path path = Path.of(fileName);
-
         try {
-            Files.write(
-                    path,
-                    (line + System.lineSeparator()).getBytes(StandardCharsets.UTF_8),
-                    StandardOpenOption.CREATE,
-                    StandardOpenOption.APPEND
-            );
+            Files.write(path, (line + System.lineSeparator()).getBytes(StandardCharsets.UTF_8), StandardOpenOption.CREATE, StandardOpenOption.APPEND);
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new RuntimeException("Failed to append line to index: " + path, e);
         }
     }
 }
