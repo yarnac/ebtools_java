@@ -4,6 +4,7 @@ import com.eb.base.gui.BrowserLaunch;
 import com.eb.base.gui.GuiUtil;
 import com.eb.base.gui.IC;
 import com.eb.base.gui.ICF;
+import lombok.Setter;
 
 import javax.swing.*;
 import java.awt.*;
@@ -17,6 +18,7 @@ import static java.lang.System.out;
 public class GuiDecoratorToolBars {
     private final Map<String, Container> nameToContainerDictionary = new HashMap<>();
     private Container currentContainer;
+    @Setter
     private Component frame;
 
     GuiDecoratorToolBars(Component frame) {

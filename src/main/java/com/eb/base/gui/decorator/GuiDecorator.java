@@ -18,7 +18,6 @@ import java.util.logging.Logger;
 public class GuiDecorator {
 	private final IniFile iniFile;
 	@Setter
-    @Getter
     private JFrame frame;
 	private final GuiDecoratorMenuBars menuBars;
 	private final GuiDecoratorToolBars toolBars;
@@ -160,5 +159,11 @@ public class GuiDecorator {
 				System.out.println("Return oder Enter wurde gedrückt!");
 			}
 		}
+	}
+
+	public void setFrame(JFrame frame) {
+		this.frame = frame;
+		toolBars().setFrame(frame);
+		menuBars().setFrame(frame);
 	}
 }

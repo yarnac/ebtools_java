@@ -13,7 +13,8 @@ public class GuiDecoratorMenuBars {
     @Setter
     private JMenuBar menuBar;
     @Getter
-    private final JFrame frame;
+    @Setter
+    private JFrame frame;
 
     @Setter
     private String currentMenu;

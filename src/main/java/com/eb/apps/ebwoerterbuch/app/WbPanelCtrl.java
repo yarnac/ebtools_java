@@ -208,8 +208,10 @@ public class WbPanelCtrl {
 	
 
 	private void searchStrategyChanged(SearcherPair<Vokabel> x) {
-		manager.getAktWbSession().setTheSearcher(x);
-		einstellungenChanged();
+		if (!x.equals(manager.getAktWbSession().getTheSearcher())) {
+			manager.getAktWbSession().setTheSearcher(x);
+			einstellungenChanged();
+		}
 	}
 
 	
