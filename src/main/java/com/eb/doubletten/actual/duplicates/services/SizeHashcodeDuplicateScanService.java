@@ -49,6 +49,11 @@ public class SizeHashcodeDuplicateScanService implements IDuplicateScanService {
                     String key = fileHashcodeService.getHashCode(p);
                     if (!files.containsKey(key))
                         files.put(key, new ArrayList<>());
+                    else
+                    {
+                        if (files.get(key).contains(ebGetFile))
+                            continue;
+                    }
 
                     files.get(key).add(ebGetFile);
                 }

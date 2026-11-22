@@ -19,42 +19,48 @@ public class FileHashcodeWithCacheService implements IFileHashcodeService {
 
     @Override
     public String getHashCode(Path file) {
+        if (file == null) {
+            throw new IllegalArgumentException("File cannot be null");
+        }
+
         String absolutePath = file.toAbsolutePath().toString();
         String indexFileName = FileExtensions.ebFileNameInDirectory(HashCodeConstants.Index_File_Name, file.getParent().toString());
         Path indexPath = Path.of(indexFileName);
 
+        // Thread-sichere Initialisierung des Index
         if (!indexFiles.contains(indexPath)) {
-            appendIndexFile(indexFileName, true);
+            appendIndexFile(indexPath, true);
         }
-        return cachedFileHashcodes.computeIfAbsent(absolutePath, x -> createCachedEntry(x, indexFileName));
+
+        return cachedFileHashcodes.computeIfAbsent(absolutePath, this::createCachedEntry);
     }
 
-    private String createCachedEntry(String fileName, String indexFileName) {
+    private String createCachedEntry(String fileName) {
         String hash = fileHashcodeService.getHashCode(fileName);
+        String indexFileName = FileExtensions.ebFileNameInDirectory(HashCodeConstants.Index_File_Name, Path.of(fileName).getParent().toString());
         appendLine(indexFileName, hash + "\t" + Path.of(fileName).getFileName().toString());
         indexFiles.add(Path.of(indexFileName));
         return hash;
     }
 
-    private void appendIndexFile(String indexFileName) {
-        appendIndexFile(indexFileName, false);
+    private void appendIndexFile(Path indexPath) {
+        appendIndexFile(indexPath, false);
     }
 
-    private void appendIndexFile(String indexFileName, boolean createFullIndexIfMissing) {
-        Path path = Path.of(indexFileName);
-        if (!Files.exists(path)) {
+    private void appendIndexFile(Path indexPath, boolean createFullIndexIfMissing) {
+        if (!Files.exists(indexPath)) {
             if (!createFullIndexIfMissing) {
                 return;
             }
-            System.out.println("Indexing " + path.getParent());
-            appendDirectoryFilesToIndex(path.getParent());
+            System.out.println("Indexing " + indexPath.getParent());
+            appendDirectoryFilesToIndex(indexPath.getParent());
             return;
         }
 
         try {
-            System.out.println("Reading index " + path.getParent());
-            List<String> lines = Files.readAllLines(path);
-            String parentDir = path.getParent().toAbsolutePath().toString();
+            System.out.println("Reading index " + indexPath.getParent());
+            List<String> lines = Files.readAllLines(indexPath);
+            String parentDir = indexPath.getParent().toAbsolutePath().toString();
 
             for (String line : lines) {
                 if (line.isEmpty()) continue;
@@ -65,9 +71,9 @@ public class FileHashcodeWithCacheService implements IFileHashcodeService {
                 }
             }
         } catch (IOException e) {
-            throw new RuntimeException("Failed to read index file: " + path, e);
+            throw new RuntimeException("Failed to read index file: " + indexPath, e);
         }
-        indexFiles.add(path);
+        indexFiles.add(indexPath);
     }
 
     private void appendDirectoryFilesToIndex(Path parent) {
@@ -95,7 +101,7 @@ public class FileHashcodeWithCacheService implements IFileHashcodeService {
         }
 
         try {
-            Path indexPath = Path.of(parent.toString() + HashCodeConstants.Index_File_Name);
+            Path indexPath = parent.resolve(HashCodeConstants.Index_File_Name);
             Files.write(indexPath, stringBuilder.toString().getBytes(StandardCharsets.UTF_8), StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
         } catch (IOException e) {
             throw new RuntimeException("Failed to write index file: " + parent, e);
@@ -103,11 +109,15 @@ public class FileHashcodeWithCacheService implements IFileHashcodeService {
     }
 
     private boolean isAllowedFileName(String localFileName) {
-        return !localFileName.startsWith(".");
+        return localFileName != null && !localFileName.startsWith(".");
     }
 
     private List<Path> getFiles(Path dirName) {
         List<Path> files = new ArrayList<>();
+        if (dirName == null || !Files.exists(dirName) || !Files.isDirectory(dirName)) {
+            return files;
+        }
+
         try (DirectoryStream<Path> stream = Files.newDirectoryStream(dirName)) {
             for (Path p : stream) {
                 files.add(p);
@@ -119,6 +129,10 @@ public class FileHashcodeWithCacheService implements IFileHashcodeService {
     }
 
     public static void appendLine(String fileName, String line) {
+        if (fileName == null || line == null) {
+            throw new IllegalArgumentException("File name and line cannot be null");
+        }
+
         Path path = Path.of(fileName);
         try {
             Files.write(path, (line + System.lineSeparator()).getBytes(StandardCharsets.UTF_8), StandardOpenOption.CREATE, StandardOpenOption.APPEND);
