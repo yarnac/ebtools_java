@@ -34,7 +34,7 @@ public class WoerterbuchManager {
 		setIniFile(IniFileProvider.createIniFile(getPfad()+"/Java.ini"));
 		getIniFile().Read();
 		InitSprachen();
-		Woerterbuch.setAllSearcher(DictionarySearchStrategyFactory.getDirectorySearcher());		
+		Woerterbuch.setAllSearcher(DictionarySearchStrategyFactory.createDirectorySearcher());
 	}
 	
 	private void InitSprachen() {

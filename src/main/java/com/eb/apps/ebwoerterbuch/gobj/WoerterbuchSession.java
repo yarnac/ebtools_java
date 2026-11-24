@@ -68,7 +68,7 @@ public class WoerterbuchSession {
 		DictionarySearcher<Vokabel> searcher = new DictionarySearcher<Vokabel>();
 		searcher.setGrundliste(vokabeln);
 		
-		List<IDictionarySearchStrategy<Vokabel>> searchStrategies = DictionarySearchStrategyFactory.getDirectorySearcher();
+		List<IDictionarySearchStrategy<Vokabel>> searchStrategies = DictionarySearchStrategyFactory.createDirectorySearcher();
 		searcher.addMatcher(searchStrategies);
 		
 		

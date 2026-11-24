@@ -9,22 +9,13 @@ import com.eb.apps.ebwoerterbuch.gobj.Vokabel;
 
 public class DictionarySearchStrategyFactory
 {
-	public static List<IDictionarySearchStrategy<Vokabel>> directorySearcher;
-	
-	public static List<String> getSearchStrategyStrings() {
-		return getDirectorySearcher().stream().map(x->x.toString()).collect(Collectors.toList());
-	}
-	
-	public static List<IDictionarySearchStrategy<Vokabel>> getDirectorySearcher()
+	public static List<IDictionarySearchStrategy<Vokabel>> createDirectorySearcher()
 	{
-		if (directorySearcher != null)
-			return directorySearcher;
-		
 		List<IDictionarySearchStrategy<Vokabel>> res = new ArrayList<IDictionarySearchStrategy<Vokabel>>();
 		
 	 
 
-		res.add(new IDictionarySearchStrategy<Vokabel>() {										
+		res.add(new IDictionarySearchStrategy<>() {
 			@Override public String getKey(Vokabel obj) { return getKey(obj.getWort());}
 			@Override public String getLabel() {return "x*";}
 			@Override public List<String> getKeys(Vokabel obj) { return getAllKeySubstrrings(obj,"BEGIN ", 3);}			
@@ -33,7 +24,7 @@ public class DictionarySearchStrategyFactory
 			@Override public boolean elementsAreEqual(Vokabel element1, Vokabel element2) {return element1.isSameVokabel(element2);}
 			});
 
-		res.add(new IDictionarySearchStrategy<Vokabel>() {					
+		res.add(new IDictionarySearchStrategy<>() {
 			@Override public String getLabel() {return "*x";}			
 			@Override public String getKey(Vokabel obj) { return getKey(obj.getWort());}
 			@Override public List<String> getKeys(Vokabel obj) { return getAllKeySubstrrings(obj,"END ", 3);}
@@ -42,7 +33,7 @@ public class DictionarySearchStrategyFactory
 			@Override public boolean matches(Vokabel obj, String str) {return reverse(obj.getUnifiedWort()).startsWith(reverse(StringUnifier.getUnifiedString(str)));}});
 		
 		
-		res.add(new IDictionarySearchStrategy<Vokabel>() {					
+		res.add(new IDictionarySearchStrategy<>() {
 			@Override public String getLabel() {return "*x*";}			
 			@Override public String getKey(Vokabel obj) { return getKey(obj.getWort());}
 			@Override public String getKey(String str) { return "* flatList *";}
@@ -51,7 +42,7 @@ public class DictionarySearchStrategyFactory
 			@Override public boolean matches(Vokabel obj, String str) {return obj.getUnifiedWort().contains(StringUnifier.getUnifiedString(str));}});
 		
 		// ist identisch benutzt den gleichen Index wie beginnt mit
-		res.add(new IDictionarySearchStrategy<Vokabel>() {					
+		res.add(new IDictionarySearchStrategy<>() {
 			@Override public boolean isUsingOwnIndex() {return false;}
 			@Override public String getLabel() {return "x";}			
 			@Override public String getKey(Vokabel obj) { return getKey(obj.getWort());}
@@ -59,16 +50,13 @@ public class DictionarySearchStrategyFactory
 			@Override public String getKey(String str) { return "BEGIN " + getFirst3Chars(StringUnifier.getUnifiedString(str));}	
 			@Override public boolean elementsAreEqual(Vokabel element1, Vokabel element2) {return element1.isSameVokabel(element2);}
 			@Override public boolean matches(Vokabel obj, String str) {return obj.getUnifiedWort().equals(StringUnifier.getUnifiedString(str));}});
-				
-		// res.add(new IndexSearchStrategy());		
-		
-		
-		directorySearcher = res;
+
+
 		return res;
 	}
 	
-	public static IDictionarySearchStrategy<Vokabel> getDirectorySearcher(String aktModus) {
-		return getDirectorySearcher()
+	public static IDictionarySearchStrategy<Vokabel> createDirectorySearcher(String aktModus) {
+		return createDirectorySearcher()
 				.stream()
 				.filter(x->x.getLabel().equals(aktModus))
 				.findAny().get();
@@ -86,10 +74,4 @@ public class DictionarySearchStrategyFactory
 			strb.append(getUnifiedWort.charAt(i));
 		return strb.toString();	
 	}
-
-	public static IDictionarySearchStrategy<Vokabel> defaultSearcher() {
-		return getDirectorySearcher().get(0);
-	}
-
-	
 }
