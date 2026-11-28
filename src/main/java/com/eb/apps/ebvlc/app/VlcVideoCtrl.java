@@ -1,9 +1,11 @@
 package com.eb.apps.ebvlc.app;
 
-import com.eb.base.gui.*;
-import com.eb.base.gui.decorator.GuiDecorator;
-import com.eb.base.gui.persist.ComponentPersisterFactory;
-import com.eb.base.gui.persist.IComponentPersister;
+import com.eb.baseswing.gui.IC;
+import com.eb.baseswing.gui.ICF;
+import com.eb.baseswing.gui.JListUtils;
+import com.eb.baseswing.gui.decorator.GuiDecorator;
+import com.eb.baseswing.gui.persist.ComponentPersisterFactory;
+import com.eb.baseswing.gui.persist.IComponentPersister;
 import com.eb.base.inifile.api.IniFile;
 import com.eb.base.inifile.api.IniFileProvider;
 import com.eb.base.io.FileUtil;

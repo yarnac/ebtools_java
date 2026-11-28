@@ -8,7 +8,7 @@
 
 package com.eb.inspector.domain.attributes;
 
-import com.eb.base.gui.decorator.GuiDecorator;
+import com.eb.baseswing.gui.decorator.GuiDecorator;
 import com.eb.base.inifile.api.IniFile;
 import com.eb.base.inifile.api.IniFileProvider;
 

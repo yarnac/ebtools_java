@@ -1,6 +1,6 @@
 package com.eb.apps.ebchat_client.domain.context.gui;
 
-import com.eb.base.gui.EbSplitPanel;
+import com.eb.baseswing.gui.EbSplitPanel;
 import lombok.Getter;
 
 import javax.swing.*;

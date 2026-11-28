@@ -1,4 +1,4 @@
-package com.eb.base.gui.adapter;
+package com.eb.baseswing.gui.adapter;
 
 import javax.swing.*;
 import javax.swing.text.BadLocationException;

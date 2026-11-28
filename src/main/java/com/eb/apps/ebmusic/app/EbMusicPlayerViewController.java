@@ -10,9 +10,9 @@ import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreeNode;
 
 import com.eb.base.EbAppContext;
-import com.eb.base.gui.decorator.GuiDecorator;
-import com.eb.base.gui.decorator.GuiPersister;
-import com.eb.base.gui.IC;
+import com.eb.baseswing.gui.decorator.GuiDecorator;
+import com.eb.baseswing.gui.decorator.GuiPersister;
+import com.eb.baseswing.gui.IC;
 import com.eb.base.inifile.api.IniFileProvider;
 import com.eb.base.inifile.api.IniFile;
 import com.eb.base.io.FileUtil;

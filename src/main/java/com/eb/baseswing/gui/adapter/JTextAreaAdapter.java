@@ -1,4 +1,4 @@
-package com.eb.base.gui.adapter;
+package com.eb.baseswing.gui.adapter;
 
 // Generiert von claude-haiku
 

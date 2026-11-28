@@ -14,10 +14,10 @@ import com.eb.apps.ebchat_client.domain.context.domain.ContextManager;
 import com.eb.apps.ebchat_client.domain.context.domain.ContextWithFiles;
 import com.eb.apps.ebchat_client.domain.context.gui.ContextEditDetailsPanel;
 import com.eb.apps.ebchat_client.domain.context.gui.ContextTreePanel;
-import com.eb.base.gui.decorator.GuiDecorator;
-import com.eb.base.gui.ICF;
-import com.eb.base.gui.decorator.GuiDecoratorMenuBars;
-import com.eb.base.gui.decorator.GuiDecoratorToolBars;
+import com.eb.baseswing.gui.decorator.GuiDecorator;
+import com.eb.baseswing.gui.ICF;
+import com.eb.baseswing.gui.decorator.GuiDecoratorMenuBars;
+import com.eb.baseswing.gui.decorator.GuiDecoratorToolBars;
 import com.eb.base.inifile.api.IniFile;
 import com.eb.base.inifile.api.IniFileProvider;
 

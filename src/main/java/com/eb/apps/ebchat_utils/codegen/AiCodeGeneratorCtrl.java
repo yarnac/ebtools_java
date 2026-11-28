@@ -1,10 +1,10 @@
 package com.eb.apps.ebchat_utils.codegen;
 
-import com.eb.base.gui.decorator.GuiDecorator;
-import com.eb.base.gui.ICF;
-import com.eb.base.gui.decorator.GuiDecoratorToolBars;
-import com.eb.base.gui.persist.ComponentPersisterFactory;
-import com.eb.base.gui.persist.IComponentPersister;
+import com.eb.baseswing.gui.decorator.GuiDecorator;
+import com.eb.baseswing.gui.ICF;
+import com.eb.baseswing.gui.decorator.GuiDecoratorToolBars;
+import com.eb.baseswing.gui.persist.ComponentPersisterFactory;
+import com.eb.baseswing.gui.persist.IComponentPersister;
 import com.eb.base.inifile.api.IniFile;
 import com.eb.base.inifile.api.IniFileProvider;
 

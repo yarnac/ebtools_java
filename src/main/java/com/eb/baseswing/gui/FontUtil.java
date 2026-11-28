@@ -1,4 +1,4 @@
-package com.eb.base.gui;
+package com.eb.baseswing.gui;
 
 import java.awt.*;
 import java.util.Arrays;

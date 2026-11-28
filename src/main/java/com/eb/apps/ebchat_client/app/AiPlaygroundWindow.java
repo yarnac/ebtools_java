@@ -4,15 +4,16 @@ import com.eb.apps.ebchat_client.domain.chat.GlobaleEinstellungen;
 import com.eb.apps.ebchat_client.domain.context.gui.ContextEditorPanel;
 import com.eb.apps.ebchat_client.domain.context.gui.ContextEditorPanelCtrl;
 import com.eb.base.extensions.StringExtensions;
-import com.eb.base.gui.*;
-import com.eb.base.gui.adapter.JTextAreaAdapter;
-import com.eb.base.gui.adapter.JTextPaneAdapter;
-import com.eb.base.gui.decorator.GuiDecorator;
-import com.eb.base.gui.persist.IComponentPersister;
+import com.eb.baseswing.gui.EbSplitPanel;
+import com.eb.baseswing.gui.FontUtil;
+import com.eb.baseswing.gui.IC;
+import com.eb.baseswing.gui.ICF;
+import com.eb.baseswing.gui.adapter.JTextPaneAdapter;
+import com.eb.baseswing.gui.decorator.GuiDecorator;
+import com.eb.baseswing.gui.persist.IComponentPersister;
 import com.eb.base.inifile.api.IniFile;
 import lombok.Getter;
 
-import java.util.List;
 import javax.swing.*;
 import java.awt.*;
 

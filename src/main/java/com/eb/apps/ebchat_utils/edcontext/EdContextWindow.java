@@ -2,7 +2,7 @@ package com.eb.apps.ebchat_utils.edcontext;
 
 import com.eb.apps.ebchat_client.domain.context.domain.ContextWithFiles;
 import com.eb.apps.ebchat_client.domain.chat.AiChatManager;
-import com.eb.base.gui.EbSplitPanel;
+import com.eb.baseswing.gui.EbSplitPanel;
 import lombok.Getter;
 
 import javax.swing.*;

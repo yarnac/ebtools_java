@@ -4,8 +4,8 @@ import com.eb.base.ai_service.llm_client.infrastructure.contentmapping.JsonFileA
 import com.eb.apps.ebchat_client.domain.chat.AiContextProvider;
 import com.eb.apps.ebchat_client.domain.context.domain.ContextManager;
 import com.eb.apps.ebchat_client.domain.context.domain.ContextWithFiles;
-import com.eb.base.gui.ICF;
-import com.eb.base.gui.decorator.GuiDecoratorToolBars;
+import com.eb.baseswing.gui.ICF;
+import com.eb.baseswing.gui.decorator.GuiDecoratorToolBars;
 import lombok.Setter;
 
 import javax.swing.*;

@@ -1,7 +1,7 @@
 package com.eb.apps.ebtools.tvplayer.view;
 
 import com.eb.apps.ebtools.tvplayer.domain.TvItem;
-import com.eb.base.gui.EbSplitPanel;
+import com.eb.baseswing.gui.EbSplitPanel;
 import lombok.Getter;
 
 import javax.swing.*;

@@ -131,9 +131,28 @@ public class FileUtil {
 		WriteText(encoding, fileName, strb.toString());
 	}
 
-	
-	
 	public static void open(String fname) {
+		String address = getRealFileName(fname);
+		try {
+			// Try different approaches to open the file
+			String os = System.getProperty("os.name").toLowerCase();
+
+			if (os.contains("win")) {
+				// Windows
+				Runtime.getRuntime().exec("cmd /c start \"\" \"" + address + "\"");
+			} else if (os.contains("mac")) {
+				// macOS
+				Runtime.getRuntime().exec("open \"" + address + "\"");
+			} else {
+				// Linux and other Unix-like systems
+				Runtime.getRuntime().exec("xdg-open \"" + address + "\"");
+			}
+		} catch (IOException e) {
+			out.println("Failed to open file: " + e.getLocalizedMessage());
+		}
+	}
+	
+	public static void opens(String fname) {
 		String address = getRealFileName(fname);
 		try {
 			Desktop.getDesktop().open(new File(address)); 			

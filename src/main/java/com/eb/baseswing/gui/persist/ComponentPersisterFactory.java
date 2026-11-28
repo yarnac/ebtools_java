@@ -1,4 +1,4 @@
-package com.eb.base.gui.persist;
+package com.eb.baseswing.gui.persist;
 
 import com.eb.base.inifile.api.IniFile;
 

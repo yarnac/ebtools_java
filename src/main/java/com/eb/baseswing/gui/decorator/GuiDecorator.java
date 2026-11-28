@@ -1,9 +1,8 @@
-package com.eb.base.gui.decorator;
+package com.eb.baseswing.gui.decorator;
 
-import com.eb.base.gui.IC;
+import com.eb.baseswing.gui.IC;
 import com.eb.base.inifile.api.IniFile;
 import com.eb.base.io.FileUtil;
-import lombok.Getter;
 import lombok.Setter;
 
 import javax.swing.*;
@@ -12,7 +11,6 @@ import java.awt.event.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.logging.Logger;
 
 
 public class GuiDecorator {

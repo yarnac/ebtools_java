@@ -1,6 +1,6 @@
 package com.eb.apps.snippets.gui;
 
-import com.eb.base.gui.EbSplitPanel;
+import com.eb.baseswing.gui.EbSplitPanel;
 
 import javax.swing.*;
 import java.awt.*;

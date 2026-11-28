@@ -1,6 +1,6 @@
 package com.eb.apps.ebchat_utils.codegen;
 
-import com.eb.base.gui.EbGridBagUtil;
+import com.eb.baseswing.gui.EbGridBagUtil;
 
 import javax.swing.*;
 import java.awt.*;

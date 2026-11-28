@@ -1,4 +1,4 @@
-package com.eb.base.gui.persist;
+package com.eb.baseswing.gui.persist;
 
 public interface IComponentPersister {
 

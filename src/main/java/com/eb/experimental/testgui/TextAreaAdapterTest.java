@@ -1,6 +1,6 @@
 package com.eb.experimental.testgui;
 
-import com.eb.base.gui.adapter.JTextAreaAdapter;
+import com.eb.baseswing.gui.adapter.JTextAreaAdapter;
 
 import javax.swing.*;
 

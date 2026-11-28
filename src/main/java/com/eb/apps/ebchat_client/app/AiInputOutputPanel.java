@@ -1,7 +1,7 @@
 package com.eb.apps.ebchat_client.app;
 
-import com.eb.base.gui.EbSplitPanel;
-import com.eb.base.gui.adapter.JTextPaneAdapter;
+import com.eb.baseswing.gui.EbSplitPanel;
+import com.eb.baseswing.gui.adapter.JTextPaneAdapter;
 import lombok.Getter;
 
 import javax.swing.*;

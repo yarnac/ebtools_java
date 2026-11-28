@@ -3,9 +3,9 @@ package com.eb.apps.ebchat_client.domain.edrequest;
 import com.eb.apps.ebchat_client.domain.edrequest.gui.RequestEditorPanel;
 import com.eb.base.ai_service.llm_client.api.LlmMessage;
 import com.eb.base.ai_service.llm_client.api.LlmRequest;
-import com.eb.base.gui.EbSplitPanel;
-import com.eb.base.gui.FontUtil;
-import com.eb.base.gui.adapter.JTextPaneAdapter;
+import com.eb.baseswing.gui.EbSplitPanel;
+import com.eb.baseswing.gui.FontUtil;
+import com.eb.baseswing.gui.adapter.JTextPaneAdapter;
 import lombok.Getter;
 
 import javax.swing.*;

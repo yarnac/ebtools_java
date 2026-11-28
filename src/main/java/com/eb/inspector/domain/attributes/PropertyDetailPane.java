@@ -9,7 +9,7 @@
 
 package com.eb.inspector.domain.attributes;
 
-import com.eb.base.gui.EbGridBagUtil;
+import com.eb.baseswing.gui.EbGridBagUtil;
 
 import javax.swing.*;
 import javax.swing.tree.TreePath;

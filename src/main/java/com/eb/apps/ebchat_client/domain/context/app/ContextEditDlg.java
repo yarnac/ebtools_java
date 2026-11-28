@@ -12,7 +12,7 @@ import com.eb.apps.ebchat_client.domain.context.gui.ContextEditDetailsPanel;
 import com.eb.apps.ebchat_client.domain.context.gui.ContextEditorPanel;
 import com.eb.apps.ebchat_client.domain.context.gui.ContextEditorPanelCtrl;
 import com.eb.apps.ebchat_client.domain.context.gui.ContextTreePanel;
-import com.eb.base.gui.decorator.GuiDecorator;
+import com.eb.baseswing.gui.decorator.GuiDecorator;
 import com.eb.base.inifile.api.IniFile;
 import com.eb.base.inifile.api.IniFileProvider;
 

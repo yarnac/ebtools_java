@@ -3,7 +3,7 @@ package com.eb.apps.ebmusic.gui;
 import com.eb.apps.ebmusic.tobj.MusicTreeNode;
 import com.eb.apps.ebmusic.gobj.EbMusicLib;
 import com.eb.apps.ebmusic.gobj.MusicFolder;
-import com.eb.base.gui.ICF;
+import com.eb.baseswing.gui.ICF;
 
 import javax.swing.*;
 import javax.swing.border.LineBorder;

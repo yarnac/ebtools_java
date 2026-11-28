@@ -2,8 +2,8 @@ package com.eb.apps.ebwoerterbuch.app;
 
 import com.eb.apps.ebwoerterbuch.gobj.*;
 import com.eb.apps.ebwoerterbuch.tobj.searcher.SearcherPair;
-import com.eb.base.gui.decorator.GuiDecorator;
-import com.eb.base.gui.IC;
+import com.eb.baseswing.gui.decorator.GuiDecorator;
+import com.eb.baseswing.gui.IC;
 import com.eb.base.io.FileUtil;
 import com.eb.apps.ebookreader.tobj.StringUtil;
 import com.eb.base.system.ClipboardAdapter;

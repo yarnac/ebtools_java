@@ -1,6 +1,6 @@
 package com.eb.apps.ebookreader.gui;
 
-import com.eb.base.gui.GuiUtil;
+import com.eb.baseswing.gui.GuiUtil;
 import com.eb.apps.ebookreader.app.EBReaderViewController;
 import com.eb.apps.ebookreader.tobj.IConsumePoint;
 import com.eb.apps.ebookreader.tobj.IShowUebersetzung;

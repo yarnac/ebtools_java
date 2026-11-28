@@ -1,4 +1,4 @@
-package com.eb.base.gui.persist;
+package com.eb.baseswing.gui.persist;
 
 import java.util.function.Consumer;
 import java.util.function.Supplier;

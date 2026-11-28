@@ -8,7 +8,7 @@
 
 package com.eb.inspector.domain.attributes;
 
-import com.eb.base.gui.EbSplitPanel;
+import com.eb.baseswing.gui.EbSplitPanel;
 import lombok.Getter;
 
 import javax.swing.*;

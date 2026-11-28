@@ -3,10 +3,10 @@ package com.eb.apps.ebchat_client.domain.edrequest;
 import com.eb.base.ai_service.llm_client.api.LlmMessage;
 import com.eb.base.ai_service.llm_client.api.LlmRequest;
 import com.eb.base.ai_service.llmreqstore.LlmRequestManager;
-import com.eb.base.gui.decorator.GuiDecorator;
-import com.eb.base.gui.ICF;
-import com.eb.base.gui.persist.ComponentPersisterFactory;
-import com.eb.base.gui.persist.IComponentPersister;
+import com.eb.baseswing.gui.decorator.GuiDecorator;
+import com.eb.baseswing.gui.ICF;
+import com.eb.baseswing.gui.persist.ComponentPersisterFactory;
+import com.eb.baseswing.gui.persist.IComponentPersister;
 import com.eb.base.inifile.api.IniFile;
 import com.eb.base.inifile.api.IniFileProvider;
 

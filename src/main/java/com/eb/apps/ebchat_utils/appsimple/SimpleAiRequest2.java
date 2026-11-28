@@ -3,7 +3,7 @@ package com.eb.apps.ebchat_utils.appsimple;
 import com.eb.base.ai_service.llm_client.api.LlmRequestService;
 import com.eb.base.ai_service.llm_client.api.LlmResponse;
 import com.eb.base.ai_service.llm_client.infrastructure.ollama.OllamaClient;
-import com.eb.base.gui.PitMessageBox;
+import com.eb.baseswing.gui.PitMessageBox;
 
 import java.awt.*;
 

@@ -15,7 +15,7 @@ import javax.swing.JToolBar;
 import javax.swing.border.EmptyBorder;
 import javax.swing.event.ListSelectionEvent;
 
-import com.eb.base.gui.decorator.GuiDecorator;
+import com.eb.baseswing.gui.decorator.GuiDecorator;
 import com.eb.base.system.ClipboardAdapter;
 import com.eb.apps.ebwoerterbuch.tobj.WordListDlgCtrl;
 

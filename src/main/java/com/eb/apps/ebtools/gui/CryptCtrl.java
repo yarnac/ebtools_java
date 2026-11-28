@@ -1,7 +1,7 @@
 package com.eb.apps.ebtools.gui;
 
 import com.eb.base.crypt.algorithmes.Twofish_Crypter;
-import com.eb.base.gui.decorator.GuiDecorator;
+import com.eb.baseswing.gui.decorator.GuiDecorator;
 import com.eb.base.inifile.api.IniFile;
 import com.eb.base.inifile.api.IniFileProvider;
 

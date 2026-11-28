@@ -10,9 +10,8 @@ package com.eb.apps.ebchat_client.domain.edrequest.gui;
 
 import com.eb.base.ai_service.llm_client.api.LlmMessage;
 import com.eb.base.ai_service.llm_client.api.LlmRequest;
-import com.eb.base.gui.EbGridBagUtil;
+import com.eb.baseswing.gui.EbGridBagUtil;
 import lombok.Getter;
-import lombok.Setter;
 
 import javax.swing.*;
 import java.awt.*;

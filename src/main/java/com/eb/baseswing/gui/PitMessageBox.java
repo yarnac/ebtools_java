@@ -1,7 +1,7 @@
-package com.eb.base.gui;
+package com.eb.baseswing.gui;
 
 
-import com.eb.base.gui.decorator.GuiDecorator;
+import com.eb.baseswing.gui.decorator.GuiDecorator;
 
 import javax.swing.*;
 import java.awt.*;

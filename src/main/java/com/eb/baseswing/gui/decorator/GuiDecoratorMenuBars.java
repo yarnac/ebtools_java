@@ -1,4 +1,4 @@
-package com.eb.base.gui.decorator;
+package com.eb.baseswing.gui.decorator;
 
 import lombok.Getter;
 import lombok.Setter;

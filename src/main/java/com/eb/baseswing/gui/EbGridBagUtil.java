@@ -1,4 +1,4 @@
-package com.eb.base.gui;
+package com.eb.baseswing.gui;
 
 import com.eb.apps.ebchat_client.domain.context.gui.ContextEditDetailsPanel;
 import lombok.Setter;

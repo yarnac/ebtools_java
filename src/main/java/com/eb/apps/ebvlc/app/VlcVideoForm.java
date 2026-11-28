@@ -1,8 +1,8 @@
 package com.eb.apps.ebvlc.app;
 
 import com.eb.apps.ebchat_client.domain.chat.GlobaleEinstellungen;
-import com.eb.base.gui.EbSplitPanel;
-import com.eb.base.gui.ICF;
+import com.eb.baseswing.gui.EbSplitPanel;
+import com.eb.baseswing.gui.ICF;
 import lombok.Getter;
 
 import javax.swing.*;

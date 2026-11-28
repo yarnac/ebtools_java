@@ -1,8 +1,8 @@
-package com.eb.base.gui.persist;
+package com.eb.baseswing.gui.persist;
 
 import com.eb.base.extensions.JsonExtensions;
 import com.eb.base.extensions.StringExtensions;
-import com.eb.base.gui.EbSplitPanel;
+import com.eb.baseswing.gui.EbSplitPanel;
 
 import javax.swing.*;
 import java.awt.*;

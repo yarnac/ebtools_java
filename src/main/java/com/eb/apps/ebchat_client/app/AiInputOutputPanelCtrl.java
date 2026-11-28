@@ -16,9 +16,9 @@ import com.eb.base.ai_service.llm_client.infrastructure.LlmModelProvider;
 import com.eb.base.ai_service.llm_client.infrastructure.ollama.OllamaClient;
 import com.eb.base.ai_service.llmreqstore.LlmRequestManager;
 import com.eb.base.extensions.StringExtensions;
-import com.eb.base.gui.IC;
-import com.eb.base.gui.ICF;
-import com.eb.base.gui.decorator.GuiDecorator;
+import com.eb.baseswing.gui.IC;
+import com.eb.baseswing.gui.ICF;
+import com.eb.baseswing.gui.decorator.GuiDecorator;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.Getter;
 

@@ -1,8 +1,5 @@
 package com.eb.apps.ebtools.gui;
 
-import com.eb.apps.ebchat_client.domain.chat.GlobaleEinstellungen;
-import com.eb.base.gui.ICF;
-
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionListener;

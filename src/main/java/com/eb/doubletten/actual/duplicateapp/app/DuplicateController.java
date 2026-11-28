@@ -1,7 +1,7 @@
 package com.eb.doubletten.actual.duplicateapp.app;
 
-import com.eb.base.gui.decorator.GuiDecorator;
-import com.eb.base.gui.IC;
+import com.eb.baseswing.gui.decorator.GuiDecorator;
+import com.eb.baseswing.gui.IC;
 import com.eb.base.inifile.api.IniFile;
 import com.eb.base.inifile.api.IniFileProvider;
 import com.eb.doubletten.actual.duplicates.api.IDuplicateScanService;

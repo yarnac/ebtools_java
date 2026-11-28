@@ -9,7 +9,7 @@
 package com.eb.apps.ebchat_client.domain.context.gui;
 
 import com.eb.apps.ebchat_client.domain.context.domain.ContextWithFiles;
-import com.eb.base.gui.EbGridBagUtil;
+import com.eb.baseswing.gui.EbGridBagUtil;
 import lombok.Getter;
 import lombok.Setter;
 

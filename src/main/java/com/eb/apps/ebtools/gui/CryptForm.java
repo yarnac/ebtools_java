@@ -1,7 +1,6 @@
 package com.eb.apps.ebtools.gui;
 
-import com.eb.base.gui.EbSplitPanel;
-import lombok.Getter;
+import com.eb.baseswing.gui.EbSplitPanel;
 
 import javax.swing.*;
 import java.awt.*;

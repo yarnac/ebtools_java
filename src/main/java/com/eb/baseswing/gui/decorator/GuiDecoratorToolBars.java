@@ -1,9 +1,9 @@
-package com.eb.base.gui.decorator;
+package com.eb.baseswing.gui.decorator;
 
-import com.eb.base.gui.BrowserLaunch;
-import com.eb.base.gui.GuiUtil;
-import com.eb.base.gui.IC;
-import com.eb.base.gui.ICF;
+import com.eb.baseswing.gui.BrowserLaunch;
+import com.eb.baseswing.gui.GuiUtil;
+import com.eb.baseswing.gui.IC;
+import com.eb.baseswing.gui.ICF;
 import lombok.Setter;
 
 import javax.swing.*;

@@ -1,6 +1,6 @@
 package com.eb.apps.ebookreader.gui;
 
-import com.eb.base.gui.ICF;
+import com.eb.baseswing.gui.ICF;
 
 import java.awt.*;
 import java.util.ArrayList;

@@ -14,7 +14,7 @@ import javax.swing.JTextField;
 import javax.swing.JToolBar;
 import javax.swing.border.LineBorder;
 
-import com.eb.base.gui.decorator.GuiDecorator;
+import com.eb.baseswing.gui.decorator.GuiDecorator;
 
 public class DoubleFinderPanel extends JPanel {
 	/**
