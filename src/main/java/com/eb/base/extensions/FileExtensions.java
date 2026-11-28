@@ -436,7 +436,7 @@ public class FileExtensions {
      * Gibt alle Dateien rekursiv zurück
      */
     public static List<String> ebGetAllFiles(String self) {
-        return ebGetAllFiles(self, "*.*");
+        return ebGetAllFiles(self, "*");
     }
 
     public static List<String> ebGetAllFiles(String self, String pattern) {

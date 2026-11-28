@@ -3,7 +3,8 @@ package com.eb.apps.ebookreader.gobj;
 import com.eb.apps.ebchat_client.domain.chat.GlobaleEinstellungen;
 
 public class BookReader {
-	
+
+	// session Name wird im Frontend sicher validiert
 	public static BookSession readBookSession(String sessionName)
 	{				
 		BookSession s = new BookSession(sessionName);

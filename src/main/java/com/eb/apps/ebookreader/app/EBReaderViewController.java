@@ -22,9 +22,9 @@ import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.io.IOException;
 import java.util.Enumeration;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
@@ -105,7 +105,7 @@ public class EBReaderViewController  {
 		decorator.toolBars().addTopMostButton(getView().getFrame());
 		decorator.addEditIniFileButton(getIniFile().getFileName());
 		decorator.toolBars().addToolbarButton("Edit Booksession", IC.TABLE, x->editSessionFile());
-		decorator.toolBars().addToolbarButton("Test Zipper", IC.HELP_BLUE, x->ShowHelp());
+		decorator.toolBars().addToolbarButton("Show Help", IC.HELP_BLUE, x-> showHelp());
 		
 		
 		decorator.toolBars().addToolbarButton("Reload", IC.REFRESHPAGE, x->getView() .resetText());
@@ -127,11 +127,6 @@ public class EBReaderViewController  {
 		decorator.toolBars().addToolbarSeparator();
 		
 		cbBuecher = decorator.toolBars().addToolbarComboBox("Bücher", iniFile.getSectionValues("BOOKS"), x->bookChanged(x));
-		
-		
-		
-		decorator.toolBars().addToolbarButton("Start eclipse", IC.BOX_FLOW, x->startEclipse());
-		decorator.toolBars().addToolbarButton("Test Zipper", IC.Calendar, x->testZipper());
 
 		getView().getFrame().setIconImage(decorator.getImage(IC.BookOpen));
 	}
@@ -139,10 +134,6 @@ public class EBReaderViewController  {
 	private Object startAnalyzer() {
 		//Analyzer analyzer = new Analyzer(view.getTextLeft(), view.getTextRight());
 		return null;
-	}
-
-	private void startEclipse() {
-		FileUtil.start("c:\\apps\\eclipse\\eclipse.exe");
 	}
 
 	private void editSessionFile() {
@@ -163,9 +154,11 @@ public class EBReaderViewController  {
 		iniFile.Write(); 
 	}
 	
-	int oldCount = 2;
-	
-	Map<String, BookSession> sessionsDict = new HashMap<>();
+	int oldCount = 0;
+
+	// Lesen ist enorm aufwendig, deshalb kein CleanUp von Sessions!
+	// Es gibt maximal so viele Sessions wie Bücher und die sind beschränkte.
+	Map<String, BookSession> sessionsDict = new ConcurrentHashMap<>();
 	public void loadLastBook()
 	{		
 		WoerterbuchManager.setWoerterbuchPfad(EbAppContext.getJavaDataFilename("Woerterbuch/"));
@@ -251,13 +244,15 @@ public class EBReaderViewController  {
 
 	@SuppressWarnings("unchecked")
 	private void testZipper() {
-		try {
-			ZipFile file = new ZipFile("~/Calibre-Bibliothek/Alexandre Dumas/Monte Kristo Kontu (173)/Monte Kristo Kontu - Alexandre Dumas.epub");
+		String userHome = System.getProperty("user.home");
+		String path = userHome + "/Calibre-Bibliothek/Alexandre Dumas/Monte Kristo Kontu (173)/Monte Kristo Kontu - Alexandre Dumas.epub";
+
+		try (ZipFile file = new ZipFile(path)){
+			// cast ist notwendig, ohne wird ein compile Fehler ausgewiesen
 			 for (Enumeration<ZipEntry> e = (Enumeration<ZipEntry>) file.entries(); e.hasMoreElements();) {
 				 ZipEntry o = e.nextElement();
 				 o.toString();
 			 }
-			 file.close();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -319,7 +314,7 @@ public class EBReaderViewController  {
 		if (bookSession!=null)
 			bookSession.setChapterNr(chapterNr);
 	}
-	public void ShowHelp() {
+	public void showHelp() {
 		FileUtil.open(BookReader.getReaderFilename("EbReaderInfo.txt"));
 		
 	}

@@ -18,6 +18,16 @@ public class AiCodeGenerator {
     private String namespace;
     private String targetDirectory;
 
+
+
+    public static void main(String ... args)
+    {
+
+    }
+
+
+
+
     private static final Logger LOGGER = Logger.getLogger(AiCodeGenerator.class.getName());
     // Thread-sicher und singleton-artig kacheln wir den ObjectMapper
     private static final ObjectMapper MAPPER = new ObjectMapper();

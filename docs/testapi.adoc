@@ -2,12 +2,12 @@
 
 == Übersicht: Das Paket com.eb.base.ai_service
 
-Das Paket `com.eb.base.ai_service` bildet das zentrale Rückgrat für die Integration, Steuerung und Abwicklung von Large Language Model (LLM) Aufrufen in der Anwendung. Es abstrahiert die Kommunikation zu verschiedenen KI-Anbietern (Ollama lokal, OpenAI Cloud, Anthropic Cloud) über ein einheitliches Interface und stellt einen flexiblen Builder-Frontend zur Verfügung. Die Architektur folgt dem Strategy-Pattern für Client-Implementierungen und nutzt einen Json-Mapper zur formatspezifischen Adaptierung der Nachrichteninhalte.
+Das Paket `com.eb.base.ai_service` bildet das zentrale Rückgrat für die Integration, Steuerung und Abwicklung von Large Language Model (LLM) Aufrufen in der Anwendung. Es abstrahiert die Kommunikation zu verschiedenen KI-Anbietern (Ollama lokal, OpenAI Cloud, Anthropic Cloud) über ein einheitliches Interface und stellt ein flexibles Builder-Frontend zur Verfügung. Die Architektur folgt dem Strategy-Pattern für Client-Implementierungen und nutzt einen Json-Mapper zur formatspezifischen Adaptierung der Nachrichteninhalte.
 
 * Singleton-basierte Konfiguration über INI-Dateien
 * Erweitertes Builder-Pattern für den sicheren Aufbau komplexer LLM-Anfragen
 * Trennung von API-Schnittstellen und infrastruktureller Implementierung
-* Automatische Token-Loggung und Netzwerkverfügbarkeitsprüfung
+* Automatisches Token-Logging und Netzwerkverfügbarkeitsprüfung
 * Unterstützung von Multimodalen Eingaben (Text, Bilder) und Dateimapping
 
 Die folgende Tabelle fasst die Hauptkomponenten des Pakets zusammen und definiert deren Kernverantwortung. Die Tabelle zeigt die Paket-Kernmodule, den Konfigurations-Manager und die LLM-API-Schicht mit ihren jeweiligen Zuständigkeiten.
@@ -31,7 +31,7 @@ Diese Schicht definiert die Schnittstellen und Datenstrukturen, die für den Auf
 * LlmRequest: Zentrales DTO, das Modellname, Nachrichtenliste, Parameter und Memo-Inhalte enthält. Verwendet Jackson-Annotationen für die JSON-Serialisierung und verwaltet Antwort-Historie sowie Request-IDs.
 * LlmResponse: Empfängt die Server-Antwort, berechnet Token-Raten und Sekunden-Dauer. Bietet Hilfsfunktionen zur Ausgabe von Kurznachrichten mit Detailinfo oder vollständigen Statistiken.
 * LlmMessage: Repräsentiert eine einzelne Kommunikationseinheit (System, User, Assistant). Unterstützt reine Text- und Multimodal-Eingaben (Bilder als Base64) und filtert Rollen logisch heraus.
-* LlmRequestBuilder: Implementiert das fluente Builder-Pattern über mehrere Interfaces (`LlmRequestBuilderModel`, `...UserMsg`, `...Finish`). Trennt System-, User- und Image-Nachrichten auf und liefert am Ende ein validiertes `LlmRequest`-Objekt zurück.
+* LlmRequestBuilder: Implementiert das fluent Builder-Pattern über mehrere Interfaces (`LlmRequestBuilderModel`, `...UserMsg`, `...Finish`). Trennt System-, User- und Image-Nachrichten auf und liefert am Ende ein validiertes `LlmRequest`-Objekt zurück.
 * CheckNetworkService: Prüft via HTTP-Async-Requests die Erreichbarkeit von Ollama-Hosts auf Port 11434. Stellt zudem Methoden zur IP-Validierung bereit.
 
 Die folgende Tabelle fasst die API-Klassen zusammen und listet ihre Kerneigenschaften sowie die zugehörigen Verantwortlichkeiten auf. Die Tabelle zeigt die Klassen LlmRequest, LlmResponse und LlmMessage mit ihren Hauptmerkmalen.
@@ -51,7 +51,7 @@ Diese Schicht implementiert die eigentliche HTTP-Kommunikation, verwaltet API-Ke
 * LlmModelProvider: Liest eine Tab-getrennte Datei (`Modelle.txt`) ein und hält Modellobjekte bereit. Prüft parameter-spezifische Erlaubnisse (z.B. Temperatur für OpenAI).
 * LlmClientFactory: Fabrikmethode zur Instantiierung der richtigen Client-Implementierung basierend auf dem `company`-Attribut des Modells. Lädt verschlüsselte API-Keys (Twofish) bei Bedarf nach.
 * TokenLogger: Schrifft strukturierte Log-Einträge mit Zeitstempel, Modellnamen, Input/Output-Tokens, Dauer und Tokens pro Sekunde in eine konfigurierte Datei an.
-* OllamaClient: Lokaler Client-Adapter. Konstanten für lokale Hosts (`macstudio`, `192.168.178.118`, etc.). Ruft via `/v1/chat/completions` die Daten ab und mappyt die Antwort in `LlmResponse`. Die `determineHost()`-Methode iteriert über die `HOSTS`-Liste, prüft die Erreichbarkeit asynchron und speichert den ersten verfügbaren Host statisch.
+* OllamaClient: Lokaler Client-Adapter. Konstanten für lokale Hosts (`macstudio`, `192.168.178.118`, etc.). Ruft via `/v1/chat/completions` die Daten ab und mapped die Antwort in `LlmResponse`. Die `determineHost()`-Methode iteriert über die `HOSTS`-Liste, prüft die Erreichbarkeit asynchron und speichert den ersten verfügbaren Host statisch.
 * OpenAiClient & AnthropicClient: Cloud-Adapter für respective Endpunkte (`/v1/responses`, `/v1/messages`). Verwenden spezifische Mappen-Klassen zur Anpassung des JSON-Bodys an API-Spezifikationen.
 
 Die folgende Tabelle beschreibt die Infrastrukturen und ihre Zuordnung zu den jeweiligen LLM-Providern sowie die zentralen Managerklassen. Die Tabelle zeigt die Klassen LlmClientFactory, TokenLogger, OllamaClient und die Cloud-Adapter mit ihren spezifischen Eigenschaften.

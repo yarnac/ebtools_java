@@ -89,7 +89,7 @@ public class EbReaderView {
 				
 				if (e.getKeyCode()==KeyEvent.VK_F1)
 				{
-					controller.ShowHelp();
+					controller.showHelp();
 					return;
 				}
 				
